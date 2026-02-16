@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pandas Cheat Sheet — Quick Reference for Data Analysis | DevToolbox</title>
+    <meta name="description" content="Pandas cheat sheet with essential commands for DataFrames, Series, data manipulation, filtering, grouping, merging, pivoting, and I/O operations. Quick reference for Python data analysis.">
+    <meta name="keywords" content="pandas cheat sheet, pandas reference, pandas dataframe, pandas python, pandas commands, pandas groupby, pandas merge, data analysis python">
+    <meta property="og:title" content="Pandas Cheat Sheet | DevToolbox">
+    <meta property="og:description" content="Quick reference for Python Pandas data analysis library">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/cheatsheets/pandas-cheatsheet">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/cs-pandas-cheatsheet.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Pandas Cheat Sheet | DevToolbox">
+    <meta name="twitter:description" content="Quick reference for Python Pandas data analysis">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/cheatsheets/pandas-cheatsheet">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "name": "Pandas Cheat Sheet — Quick Reference for Data Analysis",
+        "description": "Pandas cheat sheet with essential commands for DataFrames, Series, data manipulation, filtering, grouping, merging, pivoting, and I/O operations.",
+        "url": "https://devtoolbox.dedyn.io/cheatsheets/pandas-cheatsheet",
+        "author": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://devtoolbox.dedyn.io/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Cheat Sheets",
+                "item": "https://devtoolbox.dedyn.io/cheatsheets"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Pandas"
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "What is the difference between a Pandas DataFrame and a Series?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A Series is a one-dimensional labeled array that can hold any data type (integers, strings, floats, etc.). A DataFrame is a two-dimensional labeled data structure with columns that can be of different types — essentially a table or spreadsheet. A DataFrame is made up of multiple Series objects, one per column. You can extract a single column from a DataFrame as a Series using df['column_name']."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "When should I use loc vs iloc in Pandas?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Use loc for label-based indexing — it selects rows and columns by their names or boolean conditions (e.g., df.loc['row_label', 'col_name']). Use iloc for integer position-based indexing — it selects by numerical index positions starting from 0 (e.g., df.iloc[0, 2]). A simple rule: loc uses labels, iloc uses integers."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do I handle missing data (NaN) in Pandas?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Pandas provides several methods for handling missing data: df.isna() or df.isnull() detects missing values, df.dropna() removes rows or columns with missing values, and df.fillna(value) replaces NaN with a specified value. You can also use df.fillna(method='ffill') to forward-fill or df.interpolate() for numeric interpolation. Always check for missing data first with df.isna().sum() to understand the scope before choosing a strategy."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What is the difference between merge, join, and concat in Pandas?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "pd.concat() stacks DataFrames vertically (axis=0) or horizontally (axis=1) — use it to combine datasets with similar structures. df.merge() performs SQL-style joins on columns or indexes using keys (inner, left, right, outer joins). df.join() is a convenience method that merges on indexes by default. Use concat for simple stacking, merge for relational-style joins on specific columns, and join when combining on index values."
+            }
+        }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/cheatsheets/">Cheat Sheets</a><span class="separator">/</span><span class="current">Pandas</span></nav>
+
+    <main class="cheatsheet-page">
+        <h1>Pandas Cheat Sheet</h1>
+        <p class="description">Essential commands for Python Pandas: DataFrames, Series, data manipulation, filtering, grouping, merging, pivoting, and I/O operations. Quick reference for data analysis.</p>
+
+        <div class="search-box" style="margin-bottom:2rem;">
+            <input type="text" id="search" placeholder="Search commands (e.g., groupby, merge, fillna)..." autocomplete="off">
+        </div>
+
+        <!-- 1. Creating DataFrames -->
+        <h2 class="section-header">Creating DataFrames</h2>
+<pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# From a dictionary
+df = pd.DataFrame({
+    'name': ['Alice', 'Bob', 'Charlie'],
+    'age': [25, 30, 35],
+    'city': ['NYC', 'LA', 'Chicago']
+})
+
+# From a list of lists
+df = pd.DataFrame(
+    [['Alice', 25], ['Bob', 30]],
+    columns=['name', 'age']
+)
+
+# From a list of dicts
+df = pd.DataFrame([
+    {'name': 'Alice', 'age': 25},
+    {'name': 'Bob', 'age': 30}
+])
+
+# From a NumPy array
+df = pd.DataFrame(
+    np.random.randn(5, 3),
+    columns=['a', 'b', 'c']
+)
+
+# From files
+df = pd.read_csv('data.csv')
+df = pd.read_json('data.json')
+df = pd.read_excel('data.xlsx', sheet_name='Sheet1')
+df = pd.read_sql('SELECT * FROM users', connection)
+
+# Create a Series
+s = pd.Series([10, 20, 30], index=['a', 'b', 'c'], name='values')</code></pre>
+
+        <!-- 2. Inspecting Data -->
+        <h2 class="section-header">Inspecting Data</h2>
+        <table class="cheatsheet-table">
+            <tr><th style="width:45%">Command</th><th>Description</th></tr>
+            <tr><td><code>df.head(n)</code></td><td>First <code>n</code> rows (default 5)</td></tr>
+            <tr><td><code>df.tail(n)</code></td><td>Last <code>n</code> rows (default 5)</td></tr>
+            <tr><td><code>df.shape</code></td><td>Tuple of (rows, columns): <code>(100, 5)</code></td></tr>
+            <tr><td><code>df.info()</code></td><td>Column names, dtypes, non-null counts, memory usage</td></tr>
+            <tr><td><code>df.describe()</code></td><td>Summary statistics (count, mean, std, min, max, quartiles)</td></tr>
+            <tr><td><code>df.dtypes</code></td><td>Data type of each column</td></tr>
+            <tr><td><code>df.columns</code></td><td>Index of column names</td></tr>
+            <tr><td><code>df.index</code></td><td>Index (row labels)</td></tr>
+            <tr><td><code>df.values</code></td><td>Underlying NumPy array</td></tr>
+            <tr><td><code>df.nunique()</code></td><td>Number of unique values per column</td></tr>
+            <tr><td><code>df['col'].value_counts()</code></td><td>Frequency count of unique values</td></tr>
+            <tr><td><code>df.sample(n)</code></td><td>Random sample of <code>n</code> rows</td></tr>
+            <tr><td><code>df.memory_usage(deep=True)</code></td><td>Memory usage per column in bytes</td></tr>
+            <tr><td><code>len(df)</code></td><td>Number of rows</td></tr>
+        </table>
+
+        <!-- 3. Selecting Data -->
+        <h2 class="section-header">Selecting Data</h2>
+        <table class="cheatsheet-table">
+            <tr><th style="width:50%">Command</th><th>Description</th></tr>
+            <tr><td><code>df['col']</code></td><td>Select single column (returns Series)</td></tr>
+            <tr><td><code>df[['col1', 'col2']]</code></td><td>Select multiple columns (returns DataFrame)</td></tr>
+            <tr><td><code>df.loc[label]</code></td><td>Select row by label</td></tr>
+            <tr><td><code>df.loc[label, 'col']</code></td><td>Select specific value by row label and column name</td></tr>
+            <tr><td><code>df.loc['a':'c']</code></td><td>Slice rows by label (inclusive on both ends)</td></tr>
+            <tr><td><code>df.loc[:, 'col1':'col3']</code></td><td>Slice columns by label</td></tr>
+            <tr><td><code>df.iloc[0]</code></td><td>Select row by integer position</td></tr>
+            <tr><td><code>df.iloc[0:3]</code></td><td>Slice rows by position (exclusive end)</td></tr>
+            <tr><td><code>df.iloc[0, 2]</code></td><td>Select value by row and column position</td></tr>
+            <tr><td><code>df.iloc[:, 1:4]</code></td><td>Slice columns by position</td></tr>
+            <tr><td><code>df.at['row', 'col']</code></td><td>Fast scalar access by label</td></tr>
+            <tr><td><code>df.iat[0, 2]</code></td><td>Fast scalar access by position</td></tr>
+        </table>
+
+        <!-- 4. Filtering -->
+        <h2 class="section-header">Filtering</h2>
+<pre><code class="language-python"># Boolean condition
+df[df['age'] > 30]
+
+# Multiple conditions (use & for AND, | for OR, ~ for NOT)
+df[(df['age'] > 25) & (df['city'] == 'NYC')]
+df[(df['age'] < 20) | (df['age'] > 60)]
+df[~df['city'].isin(['LA', 'Chicago'])]
+
+# isin — match against a list
+df[df['city'].isin(['NYC', 'LA', 'Chicago'])]
+
+# between — inclusive range
+df[df['age'].between(25, 35)]
+
+# query — string expression (cleaner syntax)
+df.query('age > 25 and city == "NYC"')
+df.query('age in [25, 30, 35]')
+
+# String filtering
+df[df['name'].str.contains('ali', case=False)]
+df[df['name'].str.startswith('A')]
+df[df['email'].str.endswith('.com')]
+df[df['name'].str.match(r'^[A-C]')]   # regex match
+
+# Null filtering
+df[df['col'].isna()]        # rows where col is NaN
+df[df['col'].notna()]       # rows where col is not NaN
+
+# nlargest / nsmallest (filter + sort in one step)
+df.nlargest(10, 'salary')
+df.nsmallest(5, 'age')</code></pre>
+
+        <!-- 5. Modifying Data -->
+        <h2 class="section-header">Modifying Data</h2>
+<pre><code class="language-python"># Add a new column
+df['full_name'] = df['first'] + ' ' + df['last']
+df['tax'] = df['salary'] * 0.2
+
+# Conditional column (where / np.where)
+df['senior'] = np.where(df['age'] >= 60, True, False)
+
+# assign — returns a new DataFrame (chainable)
+df = df.assign(bonus=df['salary'] * 0.1, active=True)
+
+# Drop columns
+df = df.drop(columns=['temp_col', 'unused'])
+
+# Drop rows by index
+df = df.drop(index=[0, 5, 10])
+
+# Rename columns
+df = df.rename(columns={'old_name': 'new_name', 'col2': 'column_two'})
+df.columns = ['a', 'b', 'c']  # rename all at once
+
+# Replace values
+df['status'] = df['status'].replace({'Y': 'Yes', 'N': 'No'})
+
+# Fill missing values
+df['col'] = df['col'].fillna(0)
+df['col'] = df['col'].fillna(df['col'].mean())
+df = df.fillna(method='ffill')   # forward fill
+df = df.fillna(method='bfill')   # backward fill
+
+# Change data types
+df['age'] = df['age'].astype(int)
+df['price'] = pd.to_numeric(df['price'], errors='coerce')
+
+# Apply a function
+df['name'] = df['name'].apply(str.upper)
+df['category'] = df['score'].apply(lambda x: 'High' if x > 80 else 'Low')</code></pre>
+
+        <!-- 6. Sorting -->
+        <h2 class="section-header">Sorting</h2>
+        <table class="cheatsheet-table">
+            <tr><th style="width:55%">Command</th><th>Description</th></tr>
+            <tr><td><code>df.sort_values('col')</code></td><td>Sort by column ascending</td></tr>
+            <tr><td><code>df.sort_values('col', ascending=False)</code></td><td>Sort descending</td></tr>
+            <tr><td><code>df.sort_values(['a', 'b'], ascending=[True, False])</code></td><td>Multi-column sort</td></tr>
+            <tr><td><code>df.sort_index()</code></td><td>Sort by row index</td></tr>
+            <tr><td><code>df.sort_index(axis=1)</code></td><td>Sort columns alphabetically</td></tr>
+            <tr><td><code>df.nlargest(10, 'col')</code></td><td>Top 10 rows by column value</td></tr>
+            <tr><td><code>df.nsmallest(5, 'col')</code></td><td>Bottom 5 rows by column value</td></tr>
+            <tr><td><code>df.rank()</code></td><td>Rank values (1 = smallest by default)</td></tr>
+            <tr><td><code>df.rank(ascending=False, method='dense')</code></td><td>Dense rank descending (no gaps)</td></tr>
+        </table>
+
+        <!-- 7. Grouping & Aggregation -->
+        <h2 class="section-header">Grouping &amp; Aggregation</h2>
+<pre><code class="language-python"># Basic groupby
+df.groupby('city')['salary'].mean()
+df.groupby('dept')['salary'].agg(['mean', 'median', 'count'])
+
+# Multiple groupby columns
+df.groupby(['dept', 'role'])['salary'].sum()
+
+# Named aggregations (clean output)
+df.groupby('dept').agg(
+    avg_salary=('salary', 'mean'),
+    headcount=('name', 'count'),
+    max_age=('age', 'max')
+)
+
+# Custom aggregation functions
+df.groupby('dept')['salary'].agg(lambda x: x.max() - x.min())
+
+# transform — returns same-shaped result (for broadcasting)
+df['dept_avg'] = df.groupby('dept')['salary'].transform('mean')
+df['pct_of_dept'] = df['salary'] / df.groupby('dept')['salary'].transform('sum')
+
+# filter — keep groups matching a condition
+df.groupby('dept').filter(lambda g: g['salary'].mean() > 50000)
+
+# Pivot table
+pd.pivot_table(df,
+    values='salary',
+    index='dept',
+    columns='role',
+    aggfunc='mean',
+    fill_value=0
+)
+
+# Crosstab
+pd.crosstab(df['dept'], df['role'], margins=True)</code></pre>
+
+        <!-- 8. Merging & Joining -->
+        <h2 class="section-header">Merging &amp; Joining</h2>
+<pre><code class="language-python"># merge — SQL-style joins on columns
+pd.merge(df1, df2, on='id')                          # inner join
+pd.merge(df1, df2, on='id', how='left')               # left join
+pd.merge(df1, df2, on='id', how='outer')              # full outer join
+pd.merge(df1, df2, left_on='emp_id', right_on='id')  # different column names
+
+# join — merge on index
+df1.join(df2, how='left')
+df1.join(df2, on='key_col')  # join df2 index to df1 column
+
+# concat — stack DataFrames
+pd.concat([df1, df2])                        # vertical stack (axis=0)
+pd.concat([df1, df2], ignore_index=True)     # reset index after concat
+pd.concat([df1, df2], axis=1)                # horizontal stack (side by side)
+
+# Merge indicator — see where rows came from
+pd.merge(df1, df2, on='id', how='outer', indicator=True)
+# _merge column: 'left_only', 'right_only', 'both'</code></pre>
+
+        <!-- 9. String Operations -->
+        <h2 class="section-header">String Operations</h2>
+        <table class="cheatsheet-table">
+            <tr><th style="width:50%">Command</th><th>Description</th></tr>
+            <tr><td><code>df['col'].str.lower()</code></td><td>Convert to lowercase</td></tr>
+            <tr><td><code>df['col'].str.upper()</code></td><td>Convert to uppercase</td></tr>
+            <tr><td><code>df['col'].str.strip()</code></td><td>Remove leading/trailing whitespace</td></tr>
+            <tr><td><code>df['col'].str.replace('a', 'b')</code></td><td>Replace substring</td></tr>
+            <tr><td><code>df['col'].str.contains('pattern')</code></td><td>Boolean: contains substring/regex</td></tr>
+            <tr><td><code>df['col'].str.startswith('A')</code></td><td>Boolean: starts with prefix</td></tr>
+            <tr><td><code>df['col'].str.split(',', expand=True)</code></td><td>Split into separate columns</td></tr>
+            <tr><td><code>df['col'].str.extract(r'(\d+)')</code></td><td>Extract regex capture group</td></tr>
+            <tr><td><code>df['col'].str.len()</code></td><td>Length of each string</td></tr>
+            <tr><td><code>df['col'].str.slice(0, 5)</code></td><td>Substring by position</td></tr>
+            <tr><td><code>df['col'].str.cat(sep=', ')</code></td><td>Concatenate all values into one string</td></tr>
+            <tr><td><code>df['col'].str.pad(10, side='left')</code></td><td>Pad strings to a width</td></tr>
+            <tr><td><code>df['col'].str.get_dummies(sep=',')</code></td><td>One-hot encode delimited strings</td></tr>
+        </table>
+
+        <!-- 10. DateTime Operations -->
+        <h2 class="section-header">DateTime Operations</h2>
+<pre><code class="language-python"># Convert to datetime
+df['date'] = pd.to_datetime(df['date'])
+df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+
+# Extract components via dt accessor
+df['year']    = df['date'].dt.year
+df['month']   = df['date'].dt.month
+df['day']     = df['date'].dt.day
+df['weekday'] = df['date'].dt.day_name()     # 'Monday', 'Tuesday', ...
+df['hour']    = df['date'].dt.hour
+df['quarter'] = df['date'].dt.quarter
+
+# Date arithmetic
+df['days_ago'] = pd.Timestamp.now() - df['date']
+df['next_week'] = df['date'] + pd.Timedelta(days=7)
+
+# Filter by date range
+df[df['date'].between('2024-01-01', '2024-12-31')]
+
+# Resample time series (requires DatetimeIndex)
+df.set_index('date').resample('M').sum()     # monthly totals
+df.set_index('date').resample('W').mean()    # weekly averages
+
+# Rolling window
+df['7d_avg'] = df['value'].rolling(window=7).mean()
+
+# Date range generation
+dates = pd.date_range('2024-01-01', periods=12, freq='MS')  # month starts</code></pre>
+
+        <!-- 11. I/O Operations -->
+        <h2 class="section-header">I/O Operations</h2>
+        <table class="cheatsheet-table">
+            <tr><th style="width:55%">Command</th><th>Description</th></tr>
+            <tr><td><code>pd.read_csv('file.csv')</code></td><td>Read CSV file</td></tr>
+            <tr><td><code>pd.read_csv('f.csv', usecols=['a','b'])</code></td><td>Read only specific columns</td></tr>
+            <tr><td><code>pd.read_csv('f.csv', nrows=1000)</code></td><td>Read first 1000 rows</td></tr>
+            <tr><td><code>pd.read_csv('f.csv', dtype={'id': str})</code></td><td>Specify column dtypes</td></tr>
+            <tr><td><code>pd.read_csv('f.csv', parse_dates=['date'])</code></td><td>Parse date columns</td></tr>
+            <tr><td><code>df.to_csv('out.csv', index=False)</code></td><td>Write CSV (no index column)</td></tr>
+            <tr><td><code>pd.read_json('data.json')</code></td><td>Read JSON file</td></tr>
+            <tr><td><code>df.to_json('out.json', orient='records')</code></td><td>Write JSON as list of records</td></tr>
+            <tr><td><code>pd.read_excel('data.xlsx')</code></td><td>Read Excel file (needs openpyxl)</td></tr>
+            <tr><td><code>df.to_excel('out.xlsx', index=False)</code></td><td>Write Excel file</td></tr>
+            <tr><td><code>pd.read_parquet('data.parquet')</code></td><td>Read Parquet (fast columnar format)</td></tr>
+            <tr><td><code>df.to_parquet('out.parquet')</code></td><td>Write Parquet file</td></tr>
+            <tr><td><code>pd.read_clipboard()</code></td><td>Read data from system clipboard</td></tr>
+            <tr><td><code>pd.read_sql(query, connection)</code></td><td>Read from SQL database</td></tr>
+        </table>
+
+        <!-- 12. Common Patterns -->
+        <h2 class="section-header">Common Patterns</h2>
+<pre><code class="language-python"># Duplicates
+df.duplicated()                        # Boolean series
+df.drop_duplicates()                   # Remove all duplicate rows
+df.drop_duplicates(subset=['name'])    # Deduplicate by specific columns
+df.drop_duplicates(keep='last')        # Keep last occurrence
+
+# Missing data
+df.isna().sum()                 # Count NaN per column
+df.dropna()                     # Drop rows with any NaN
+df.dropna(subset=['age'])       # Drop rows where 'age' is NaN
+df.dropna(thresh=3)             # Keep rows with at least 3 non-NaN values
+
+# apply / map
+df['col'].apply(lambda x: x ** 2)              # Apply to each element
+df.apply(lambda row: row['a'] + row['b'], axis=1)  # Apply to each row
+df['grade'] = df['score'].map({90: 'A', 80: 'B', 70: 'C'})
+
+# Binning
+df['age_group'] = pd.cut(df['age'], bins=[0, 18, 35, 60, 100],
+                          labels=['Youth', 'Young Adult', 'Adult', 'Senior'])
+
+# One-hot encoding
+pd.get_dummies(df, columns=['city'], drop_first=True)
+
+# Reset and set index
+df = df.reset_index(drop=True)
+df = df.set_index('id')
+
+# Chaining operations
+result = (
+    df
+    .query('age > 25')
+    .assign(bonus=lambda x: x['salary'] * 0.1)
+    .groupby('dept')
+    .agg(total_bonus=('bonus', 'sum'))
+    .sort_values('total_bonus', ascending=False)
+)
+
+# Pipe — pass DataFrame to a function
+def clean_data(df):
+    return df.dropna().drop_duplicates()
+
+df = df.pipe(clean_data)</code></pre>
+
+        <!-- FAQ Section -->
+        <section class="faq-section" style="margin-top:2.5rem;">
+            <h2 class="section-header">Frequently Asked Questions</h2>
+
+            <details open>
+                <summary><strong>What is the difference between a Pandas DataFrame and a Series?</strong></summary>
+                <p>A <strong>Series</strong> is a one-dimensional labeled array that can hold any data type (integers, strings, floats, etc.). A <strong>DataFrame</strong> is a two-dimensional labeled data structure with columns that can be of different types -- essentially a table or spreadsheet. A DataFrame is made up of multiple Series objects, one per column. You can extract a single column from a DataFrame as a Series using <code>df['column_name']</code>.</p>
+            </details>
+
+            <details>
+                <summary><strong>When should I use loc vs iloc in Pandas?</strong></summary>
+                <p>Use <code>loc</code> for <strong>label-based</strong> indexing -- it selects rows and columns by their names or boolean conditions (e.g., <code>df.loc['row_label', 'col_name']</code>). Use <code>iloc</code> for <strong>integer position-based</strong> indexing -- it selects by numerical index positions starting from 0 (e.g., <code>df.iloc[0, 2]</code>). A simple rule: <code>loc</code> uses labels, <code>iloc</code> uses integers.</p>
+            </details>
+
+            <details>
+                <summary><strong>How do I handle missing data (NaN) in Pandas?</strong></summary>
+                <p>Pandas provides several methods: <code>df.isna()</code> or <code>df.isnull()</code> detects missing values, <code>df.dropna()</code> removes rows or columns with missing values, and <code>df.fillna(value)</code> replaces NaN with a specified value. You can also use <code>df.fillna(method='ffill')</code> to forward-fill or <code>df.interpolate()</code> for numeric interpolation. Always check with <code>df.isna().sum()</code> first to understand the scope.</p>
+            </details>
+
+            <details>
+                <summary><strong>What is the difference between merge, join, and concat in Pandas?</strong></summary>
+                <p><code>pd.concat()</code> stacks DataFrames vertically (axis=0) or horizontally (axis=1) -- use it to combine datasets with similar structures. <code>df.merge()</code> performs SQL-style joins on columns or indexes using keys (inner, left, right, outer joins). <code>df.join()</code> is a convenience method that merges on indexes by default. Use <strong>concat</strong> for simple stacking, <strong>merge</strong> for relational-style joins on specific columns, and <strong>join</strong> when combining on index values.</p>
+            </details>
+        </section>
+
+        <!-- Related Resources -->
+        <section class="related-tools">
+            <h3>Related Resources</h3>
+            <div class="grid">
+                <a href="/cheatsheets/python-string-methods" class="tool-card">
+                    <h3>Python String Methods</h3>
+                </a>
+                <a href="/tools/csv-viewer" class="tool-card">
+                    <h3>CSV Viewer</h3>
+                </a>
+                <a href="/tools/json-formatter" class="tool-card">
+                    <h3>JSON Formatter</h3>
+                </a>
+                <a href="/tools/csv-to-json" class="tool-card">
+                    <h3>CSV to JSON Converter</h3>
+                </a>
+                <a href="/blog/flask-web-framework-guide" class="tool-card">
+                    <h3>Flask Web Framework Guide</h3>
+                </a>
+            </div>
+        </section>
+
+    </main>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 DevToolbox. Free developer tools.</p>
+            <div class="footer-links">
+                <a href="/about">About</a>
+                <a href="/blog/">Blog</a>
+                <a href="/feed.xml">RSS</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+    document.getElementById('search').addEventListener('input',function(e){
+        const q=e.target.value.toLowerCase();
+        document.querySelectorAll('.cheatsheet-table tr').forEach(r=>{
+            if(r.querySelector('th')){r.style.display='';return;}
+            r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';
+        });
+        document.querySelectorAll('pre').forEach(p=>{
+            p.style.display=p.textContent.toLowerCase().includes(q)||q===''?'':'none';
+        });
+    });
+    </script>
+    <script src="/js/track.js" defer></script>
+    <script>
+    document.addEventListener('keydown',function(e){
+        if((e.ctrlKey||e.metaKey)&&e.key==='k'){
+            e.preventDefault();
+            var s=document.getElementById('search');
+            if(s){s.focus();s.select();}
+        }
+    });
+    </script>
+</body>
+</html>

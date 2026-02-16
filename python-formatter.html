@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Code Formatter - Format & Beautify Python Online | DevToolbox</title>
+    <meta name="description" content="Free online Python formatter and beautifier. Fix indentation, normalize whitespace, clean up blank lines, and format Python code to be readable. Runs entirely in your browser.">
+    <meta property="og:title" content="Python Code Formatter - Format & Beautify Python Online | DevToolbox">
+    <meta property="og:description" content="Format, beautify, and clean up Python code online">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/tools/python-formatter">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/tool-python-formatter.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Python Code Formatter - Format & Beautify Python Online | DevToolbox">
+    <meta name="twitter:description" content="Format, beautify, and clean up Python code online">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/tools/python-formatter">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Python Code Formatter",
+        "description": "Format, beautify, and clean up Python code online. Fix indentation, normalize whitespace, and enforce consistent style.",
+        "url": "https://devtoolbox.dedyn.io/tools/python-formatter",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+        },
+        "creator": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "What does this Python formatter do?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "This tool formats and beautifies Python code by fixing indentation to a consistent style, normalizing whitespace around operators, adding spaces after commas, cleaning up excessive blank lines, and optionally normalizing quote styles. It helps make messy Python code readable and consistent."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Is my Python code sent to a server?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. This Python formatter runs 100% in your browser using JavaScript. Your code never leaves your computer — nothing is uploaded or sent to any server. Your code stays completely private."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Does this tool fully comply with PEP 8?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "This is a best-effort formatter that handles common formatting tasks like indentation, operator spacing, and blank line cleanup. For full PEP 8 compliance including line length limits, import sorting, and complex expression formatting, we recommend using Black or autopep8 locally."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What indentation styles are supported?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The formatter supports 2 spaces, 4 spaces (PEP 8 standard), 8 spaces, or tab indentation. PEP 8 recommends 4 spaces, which is the default setting. The tool converts any existing indentation style to your chosen format."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Can I change quote styles in Python code?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The formatter can normalize string quotes to either single quotes or double quotes throughout your code. It intelligently handles strings that contain the opposite quote character to avoid syntax errors, and it leaves triple-quoted strings, f-strings, and raw strings unchanged."
+            }
+        }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links">
+                <a href="/tools/">Tools</a>
+                <a href="/cheatsheets/">Cheat Sheets</a>
+                <a href="/blog/">Blog</a>
+            </div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/tools/">Tools</a><span class="separator">/</span><span class="current">Python Formatter</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Tools",
+                        "item": "https://devtoolbox.dedyn.io/tools"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Python Formatter"
+                }
+        ]
+    }
+    </script>
+
+    <div class="embed-banner">
+        <details>
+            <summary>Embed this tool on your site</summary>
+            <pre><code>&lt;iframe src="https://devtoolbox.dedyn.io/tools/python-formatter" width="100%" height="700" frameborder="0" title="Python Code Formatter"&gt;&lt;/iframe&gt;</code></pre>
+        </details>
+    </div>
+
+    <main class="tool-page">
+        <h1>Python Code Formatter</h1>
+        <p class="description">Paste your Python code to format and beautify it. Fixes indentation, normalizes whitespace, and cleans up blank lines. Everything runs in your browser — your code stays private.</p>
+
+        <div class="tool-actions">
+            <button class="btn btn-primary" onclick="formatPython()">Format</button>
+            <button class="btn" onclick="copyOutput()">Copy Output</button>
+            <button class="btn" onclick="loadExample()">Load Example</button>
+            <button class="btn" onclick="clearAll()">Clear</button>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; align-items: center;">
+            <label style="color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                Indent:
+                <select id="indentSize" class="btn" style="min-width: auto; padding: 6px 10px;">
+                    <option value="2">2 spaces</option>
+                    <option value="4" selected>4 spaces</option>
+                    <option value="8">8 spaces</option>
+                    <option value="tab">Tabs</option>
+                </select>
+            </label>
+            <label style="color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                Quotes:
+                <select id="quoteStyle" class="btn" style="min-width: auto; padding: 6px 10px;">
+                    <option value="none">Don't change</option>
+                    <option value="single">Single quotes</option>
+                    <option value="double">Double quotes</option>
+                </select>
+            </label>
+            <label style="color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                <input type="checkbox" id="removeTrailing" checked style="margin: 0;">
+                Remove trailing whitespace
+            </label>
+        </div>
+
+        <div id="status" class="status-bar">&nbsp;</div>
+
+        <div class="tool-container">
+            <div class="tool-panel">
+                <label>Input Python Code</label>
+                <textarea id="input" placeholder="Paste your Python code here..." style="font-family: 'Courier New', Consolas, Monaco, monospace; font-size: 13px; tab-size: 4;"></textarea>
+            </div>
+            <div class="tool-panel">
+                <label>Formatted Output</label>
+                <div id="output" class="code-output" style="font-family: 'Courier New', Consolas, Monaco, monospace; font-size: 13px; white-space: pre; overflow-x: auto; tab-size: 4; position: relative;">Formatted Python code will appear here...</div>
+            </div>
+        </div>
+
+        <div id="diffSummary" style="display: none; margin-top: 12px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: var(--text-muted); font-size: 14px;"></div>
+
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 13px; line-height: 1.6;">
+            <strong>Note:</strong> This is a best-effort formatter that handles indentation, whitespace, and quote normalization. For full PEP 8 compliance (line length, import sorting, complex expressions), use <a href="https://black.readthedocs.io/" rel="noopener noreferrer" target="_blank" style="color: #3b82f6;">Black</a> or <a href="https://pypi.org/project/autopep8/" rel="noopener noreferrer" target="_blank" style="color: #3b82f6;">autopep8</a> locally.
+        </p>
+
+        <section style="margin-top: 3rem;">
+            <h2>About Python Code Formatting</h2>
+            <p style="color: var(--text-muted); line-height: 1.8; margin-bottom: 1rem;">Python relies on indentation for code structure, making consistent formatting especially important. PEP 8, the official Python style guide, recommends 4-space indentation, spaces around operators, and consistent quote usage throughout a project.</p>
+            <p style="color: var(--text-muted); line-height: 1.8; margin-bottom: 1rem;">This tool handles the most common formatting tasks: converting mixed indentation to a consistent style, adding spaces around operators (<code>=</code>, <code>+=</code>, <code>==</code>, etc.), cleaning up excessive blank lines, and normalizing string quotes. It processes everything in your browser so your code remains private.</p>
+            <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Features</h3>
+            <ul style="color: var(--text-muted); padding-left: 1.5rem; line-height: 2;">
+                <li>Fix indentation to consistent 2, 4, 8 spaces, or tabs</li>
+                <li>Normalize whitespace around operators and after commas</li>
+                <li>Clean up excessive blank lines (2 between top-level definitions)</li>
+                <li>Normalize quote style (single or double quotes)</li>
+                <li>Remove trailing whitespace from every line</li>
+                <li>Line-numbered, syntax-highlighted output</li>
+                <li>Before/after diff summary showing changes made</li>
+                <li>100% client-side — your code never leaves your browser</li>
+            </ul>
+        </section>
+
+        <section style="margin-top: 2rem;">
+            <h3>Learn More</h3>
+            <ul style="color: var(--text-muted); padding-left: 1.5rem; line-height: 2.2;">
+                <li><a href="/cheatsheets/python-string-methods" style="color: #3b82f6;">Python String Methods Cheat Sheet</a> — Quick reference for all Python string operations</li>
+                <li><a href="https://peps.python.org/pep-0008/" target="_blank" rel="noopener noreferrer" style="color: #3b82f6;">PEP 8 Style Guide</a> — The official Python style guide</li>
+                <li><a href="https://black.readthedocs.io/" target="_blank" rel="noopener noreferrer" style="color: #3b82f6;">Black: The Uncompromising Formatter</a> — Popular opinionated Python formatter</li>
+            </ul>
+        </section>
+
+        <section class="related-tools">
+            <h3>Related Tools</h3>
+            <div class="grid">
+                <a href="/tools/json-formatter" class="tool-card"><div class="tool-icon">{ }</div><h3>JSON Formatter</h3><p>Format and validate JSON data</p></a>
+                <a href="/tools/diff-checker" class="tool-card"><div class="tool-icon">&plusmn;</div><h3>Diff Checker</h3><p>Compare two texts side by side</p></a>
+                <a href="/tools/regex-tester" class="tool-card"><div class="tool-icon">.*</div><h3>Regex Tester</h3><p>Test regular expressions</p></a>
+                <a href="/tools/base64" class="tool-card"><div class="tool-icon">B64</div><h3>Base64 Encode/Decode</h3><p>Encode and decode Base64</p></a>
+            </div>
+        </section>
+    </main>
+
+
+    <section class="faq-section" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1.5rem;">Frequently Asked Questions</h2>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">What does this Python formatter do?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">This tool formats and beautifies Python code by fixing indentation to a consistent style, normalizing whitespace around operators, adding spaces after commas, cleaning up excessive blank lines, and optionally normalizing quote styles. It helps make messy Python code readable and consistent.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">Is my Python code sent to a server?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">No. This Python formatter runs 100% in your browser using JavaScript. Your code never leaves your computer — nothing is uploaded or sent to any server. Your code stays completely private.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">Does this tool fully comply with PEP 8?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">This is a best-effort formatter that handles common formatting tasks like indentation, operator spacing, and blank line cleanup. For full PEP 8 compliance including line length limits, import sorting, and complex expression formatting, we recommend using Black or autopep8 locally.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">What indentation styles are supported?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">The formatter supports 2 spaces, 4 spaces (PEP 8 standard), 8 spaces, or tab indentation. PEP 8 recommends 4 spaces, which is the default setting. The tool converts any existing indentation style to your chosen format.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">Can I change quote styles in Python code?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">Yes. The formatter can normalize string quotes to either single quotes or double quotes throughout your code. It intelligently handles strings that contain the opposite quote character to avoid syntax errors, and it leaves triple-quoted strings, f-strings, and raw strings unchanged.</div>
+        </details>
+    </section>
+    <footer>
+        <p>DevToolbox &mdash; Free developer tools, no strings attached.</p>
+    </footer>
+
+    <script>
+    // ==============================
+    // Python Code Formatter Engine
+    // ==============================
+
+    const EXAMPLE_CODE = `import os,sys
+from collections import defaultdict
+import json
+
+def calculate_stats(data,threshold=10):
+    result=defaultdict(list)
+    total=0
+    for item in data:
+        value=item['score']
+        if value>=threshold:
+            result['high'].append(value)
+            total+=value
+        elif value>0:
+            result['low'].append(value)
+        else:
+            result['zero'].append(value)
+    avg=total/len(result['high']) if result['high'] else 0
+    return {'results':result,'average':avg,'total':total}
+
+
+
+class DataProcessor:
+    def __init__(self,name,config=None):
+        self.name=name
+        self.config=config or {}
+        self.data=[]
+        self._cache={}
+
+    def load_data(self,filepath):
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"File not found: {filepath}")
+        with open(filepath,'r') as f:
+            self.data=json.load(f)
+        return self
+
+
+    def process(self,filters=None,sort_key=None):
+        result=self.data[:]
+        if filters:
+            for key,value in filters.items():
+                result=[item for item in result if item.get(key)==value]
+        if sort_key:
+            result.sort(key=lambda x:x.get(sort_key,0))
+        return result
+    def summarize(self):
+        stats=calculate_stats(self.data)
+        print(f"Processor: {self.name}")
+        print(f"Total items: {len(self.data)}")
+        print(f"Average: {stats['average']:.2f}")
+
+def main():
+    processor=DataProcessor('test',{'verbose':True})
+    processor.load_data('data.json')
+    results=processor.process(filters={'status':'active'},sort_key='score')
+    for item in results:
+        print(f"{item['name']}: {item['score']}")
+    processor.summarize()
+
+if __name__=='__main__':
+    main()`;
+
+    function getIndentUnit() {
+        const val = document.getElementById('indentSize').value;
+        if (val === 'tab') return '\t';
+        return ' '.repeat(parseInt(val));
+    }
+
+    // Detect original indent unit size (smallest non-zero indent)
+    function detectIndentSize(lines) {
+        let minIndent = Infinity;
+        for (const line of lines) {
+            if (line.trim() === '') continue;
+            const match = line.match(/^(\s+)/);
+            if (match) {
+                const raw = match[1];
+                let size;
+                if (raw.includes('\t')) {
+                    size = 1; // tab-based
+                } else {
+                    size = raw.length;
+                }
+                if (size > 0 && size < minIndent) {
+                    minIndent = size;
+                }
+            }
+        }
+        return minIndent === Infinity ? 4 : minIndent;
+    }
+
+    // Count leading whitespace as indent level
+    function getIndentLevel(line, origUnit) {
+        if (line.trim() === '') return 0;
+        const match = line.match(/^(\s+)/);
+        if (!match) return 0;
+        const ws = match[1];
+        if (ws.includes('\t')) {
+            // Count tabs
+            let tabs = 0;
+            for (const ch of ws) {
+                if (ch === '\t') tabs++;
+            }
+            return tabs;
+        }
+        return Math.round(ws.length / origUnit);
+    }
+
+    // Normalize whitespace around operators in a line (outside strings)
+    function normalizeOperators(line) {
+        // Tokenize to avoid modifying strings
+        const tokens = tokenizeLine(line);
+        let result = '';
+        for (const token of tokens) {
+            if (token.type === 'string' || token.type === 'comment') {
+                result += token.value;
+            } else {
+                let code = token.value;
+
+                // Compound assignment operators first (before = handling)
+                code = code.replace(/\s*(\/\/=|>>=|<<=|\*\*=)\s*/g, ' $1 ');
+                code = code.replace(/\s*([+\-*/%&|^])=\s*/g, ' $1= ');
+
+                // Comparison operators
+                code = code.replace(/\s*(==|!=|<=|>=)\s*/g, ' $1 ');
+
+                // Arrows and shifts
+                code = code.replace(/\s*(<<|>>|->)\s*/g, ' $1 ');
+
+                // Power operator **
+                code = code.replace(/\s*\*\*\s*/g, '**');
+
+                // Single = (assignment) but not ==, !=, <=, >=, :=
+                code = code.replace(/(?<![=!<>:+\-*/%&|^])=(?!=)/g, ' = ');
+                // Clean up multiple spaces around =
+                code = code.replace(/\s+=\s+/g, ' = ');
+
+                // Walrus operator :=
+                code = code.replace(/\s*:=\s*/g, ' := ');
+
+                // < > but not <= >= << >> ->
+                code = code.replace(/(?<!<)\s*<\s*(?!=|<)/g, ' < ');
+                code = code.replace(/(?<![->=])\s*>\s*(?!=|>)/g, ' > ');
+
+                // Spaces after commas (but not before)
+                code = code.replace(/\s*,\s*/g, ', ');
+
+                // Spaces after colons in dicts/slices — only add space after if followed by non-space content
+                // Skip colons at end of line (block colons)
+                code = code.replace(/\s*:\s*(?=\S)/g, ': ');
+
+                // Fix any double spaces created
+                code = code.replace(/  +/g, ' ');
+
+                // Fix keyword argument / default value spaces: fn(a = 1) -> fn(a=1)
+                // But only inside parentheses for function args
+                code = fixKeywordArgs(code);
+
+                result += code;
+            }
+        }
+        return result;
+    }
+
+    // Fix keyword arguments: remove spaces around = inside function call/def parens
+    function fixKeywordArgs(code) {
+        // Find content inside parentheses and remove spaces around = for keyword args
+        // This is a simplified approach
+        let result = '';
+        let depth = 0;
+        let i = 0;
+        while (i < code.length) {
+            if (code[i] === '(') {
+                depth++;
+                result += code[i];
+                i++;
+                // Inside parens, fix keyword args
+                let parenContent = '';
+                let innerDepth = 1;
+                while (i < code.length && innerDepth > 0) {
+                    if (code[i] === '(') innerDepth++;
+                    if (code[i] === ')') innerDepth--;
+                    if (innerDepth > 0) {
+                        parenContent += code[i];
+                    } else {
+                        // Process paren content: remove spaces around = for keyword args
+                        // But keep spaces for comparisons ==, !=, <=, >=
+                        parenContent = fixKwargEquals(parenContent);
+                        result += parenContent + ')';
+                    }
+                    i++;
+                }
+                depth--;
+            } else {
+                result += code[i];
+                i++;
+            }
+        }
+        return result;
+    }
+
+    function fixKwargEquals(content) {
+        // Split by commas at top level, then fix each arg
+        const args = splitTopLevelCommas(content);
+        return args.map(arg => {
+            // Match pattern: identifier = value (keyword arg)
+            // But not ==, !=, <=, >=
+            return arg.replace(/^(\s*\w+)\s*=\s*(?!=)/gm, '$1=');
+        }).join(', ');
+    }
+
+    function splitTopLevelCommas(s) {
+        const parts = [];
+        let current = '';
+        let depth = 0;
+        for (let i = 0; i < s.length; i++) {
+            if (s[i] === '(' || s[i] === '[' || s[i] === '{') depth++;
+            if (s[i] === ')' || s[i] === ']' || s[i] === '}') depth--;
+            if (s[i] === ',' && depth === 0) {
+                parts.push(current);
+                current = '';
+            } else {
+                current += s[i];
+            }
+        }
+        if (current) parts.push(current);
+        return parts;
+    }
+
+    // Simple tokenizer: splits a line into code segments and string/comment tokens
+    function tokenizeLine(line) {
+        const tokens = [];
+        let i = 0;
+        let current = '';
+
+        while (i < line.length) {
+            // Check for comment
+            if (line[i] === '#') {
+                if (current) tokens.push({ type: 'code', value: current });
+                tokens.push({ type: 'comment', value: line.slice(i) });
+                return tokens;
+            }
+
+            // Check for triple-quoted strings
+            if ((line[i] === '"' && line.slice(i, i + 3) === '"""') ||
+                (line[i] === "'" && line.slice(i, i + 3) === "'''")) {
+                if (current) tokens.push({ type: 'code', value: current });
+                const quote = line.slice(i, i + 3);
+                let j = i + 3;
+                while (j < line.length) {
+                    if (line[j] === '\\') { j += 2; continue; }
+                    if (line.slice(j, j + 3) === quote) { j += 3; break; }
+                    j++;
+                }
+                tokens.push({ type: 'string', value: line.slice(i, j) });
+                current = '';
+                i = j;
+                continue;
+            }
+
+            // Check for f-strings, r-strings, b-strings, etc.
+            let prefix = '';
+            let qi = i;
+            if (i < line.length && 'fFrRbBuU'.includes(line[i])) {
+                if ((line[i + 1] === '"' || line[i + 1] === "'") ||
+                    ('fFrRbBuU'.includes(line[i + 1]) && (line[i + 2] === '"' || line[i + 2] === "'"))) {
+                    prefix = line[i];
+                    qi = i + 1;
+                    if ('fFrRbBuU'.includes(line[qi])) {
+                        prefix += line[qi];
+                        qi++;
+                    }
+                }
+            }
+
+            // Check for single/double quoted strings
+            if (line[qi] === '"' || line[qi] === "'") {
+                if (current) tokens.push({ type: 'code', value: current });
+                const quoteChar = line[qi];
+                let j = qi + 1;
+                while (j < line.length) {
+                    if (line[j] === '\\') { j += 2; continue; }
+                    if (line[j] === quoteChar) { j++; break; }
+                    j++;
+                }
+                tokens.push({ type: 'string', value: line.slice(i, j) });
+                current = '';
+                i = j;
+                continue;
+            }
+
+            current += line[i];
+            i++;
+        }
+
+        if (current) tokens.push({ type: 'code', value: current });
+        return tokens;
+    }
+
+    // Normalize quotes in a line
+    function normalizeQuotes(line, style) {
+        if (style === 'none') return line;
+        const targetQuote = style === 'single' ? "'" : '"';
+        const otherQuote = style === 'single' ? '"' : "'";
+
+        const tokens = tokenizeLine(line);
+        let result = '';
+        for (const token of tokens) {
+            if (token.type === 'string') {
+                const val = token.value;
+                // Skip triple-quoted strings
+                if (val.startsWith('"""') || val.startsWith("'''") ||
+                    val.startsWith('f"""') || val.startsWith("f'''") ||
+                    val.startsWith('r"""') || val.startsWith("r'''") ||
+                    val.startsWith('b"""') || val.startsWith("b'''")) {
+                    result += val;
+                    continue;
+                }
+
+                // Determine prefix and actual string
+                let prefix = '';
+                let strPart = val;
+                const prefixMatch = val.match(/^([fFrRbBuU]{1,2})/);
+                if (prefixMatch) {
+                    prefix = prefixMatch[1];
+                    strPart = val.slice(prefix.length);
+                }
+
+                // Skip raw strings — changing quotes could break escapes
+                if (prefix.toLowerCase().includes('r')) {
+                    result += val;
+                    continue;
+                }
+
+                if (strPart.length >= 2) {
+                    const currentQuote = strPart[0];
+                    const content = strPart.slice(1, -1);
+
+                    // Only change if using the other quote and content doesn't contain target quote
+                    if (currentQuote === otherQuote && !content.includes(targetQuote)) {
+                        result += prefix + targetQuote + content + targetQuote;
+                        continue;
+                    }
+                }
+                result += val;
+            } else {
+                result += token.value;
+            }
+        }
+        return result;
+    }
+
+    // Check if a line is a top-level definition (class, def, decorator at indent 0)
+    function isTopLevelDef(line) {
+        const trimmed = line.trim();
+        if (trimmed === '') return false;
+        const indent = line.length - line.trimStart().length;
+        if (indent > 0) return false;
+        return /^(class |def |@|async def )/.test(trimmed);
+    }
+
+    // Check if line is a decorator
+    function isDecorator(line) {
+        return /^\s*@/.test(line);
+    }
+
+    // Clean up blank lines: max 2 between top-level defs, max 1 elsewhere, remove trailing
+    function cleanBlankLines(lines) {
+        const result = [];
+        let prevNonBlank = -1;
+
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].trim() === '') {
+                result.push('');
+                continue;
+            }
+
+            // Count blank lines before this non-blank line
+            let blankCount = 0;
+            for (let j = result.length - 1; j >= 0; j--) {
+                if (result[j] === '') blankCount++;
+                else break;
+            }
+
+            // Determine if we need 2 blank lines (between top-level defs)
+            if (prevNonBlank >= 0 && isTopLevelDef(lines[i])) {
+                // Ensure exactly 2 blank lines before top-level def
+                // (unless it's the first thing in the file or a decorator following another decorator)
+                const prevLine = prevNonBlank >= 0 ? lines[prevNonBlank] : '';
+                const isAfterDecorator = isDecorator(prevLine) && (isDecorator(lines[i]) || /^(class |def |async def )/.test(lines[i].trim()));
+
+                if (!isAfterDecorator) {
+                    // Remove excess blanks, set to 2
+                    while (result.length > 0 && result[result.length - 1] === '') result.pop();
+                    result.push('');
+                    result.push('');
+                } else {
+                    // Decorator group: no blank lines between decorators and def/class
+                    while (result.length > 0 && result[result.length - 1] === '') result.pop();
+                }
+            } else if (blankCount > 1) {
+                // Max 1 blank line inside blocks
+                while (result.length > 0 && result[result.length - 1] === '') result.pop();
+                result.push('');
+            }
+
+            result.push(lines[i]);
+            prevNonBlank = i;
+        }
+
+        // Remove trailing blank lines
+        while (result.length > 0 && result[result.length - 1].trim() === '') result.pop();
+
+        // Ensure file ends with newline
+        result.push('');
+
+        return result;
+    }
+
+    // Main formatting function
+    function formatPython() {
+        const input = document.getElementById('input').value;
+        const outputEl = document.getElementById('output');
+        const statusEl = document.getElementById('status');
+        const diffEl = document.getElementById('diffSummary');
+
+        if (!input.trim()) {
+            outputEl.innerHTML = '<span style="color: var(--text-muted);">Formatted Python code will appear here...</span>';
+            statusEl.innerHTML = '&nbsp;';
+            diffEl.style.display = 'none';
+            return;
+        }
+
+        try {
+            const indentUnit = getIndentUnit();
+            const quoteStyle = document.getElementById('quoteStyle').value;
+            const removeTrailing = document.getElementById('removeTrailing').checked;
+
+            let lines = input.split('\n');
+            const origLines = [...lines];
+
+            // Detect original indent
+            const origIndentSize = detectIndentSize(lines);
+            const useTabs = lines.some(l => l.match(/^\t/));
+
+            // Track if we're inside a multi-line string
+            let inTripleQuote = false;
+            let tripleQuoteChar = '';
+
+            const formatted = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+
+                // Handle multi-line strings — don't modify content inside them
+                if (inTripleQuote) {
+                    // Check if this line ends the triple quote
+                    const endIdx = line.indexOf(tripleQuoteChar);
+                    if (endIdx !== -1) {
+                        // Check it's not escaped
+                        let escaped = false;
+                        let bs = endIdx - 1;
+                        while (bs >= 0 && line[bs] === '\\') { escaped = !escaped; bs--; }
+                        if (!escaped) {
+                            inTripleQuote = false;
+                        }
+                    }
+                    if (removeTrailing) line = line.replace(/\s+$/, '');
+                    formatted.push(line);
+                    continue;
+                }
+
+                // Check if this line starts a triple-quoted string
+                const tripleMatch = line.match(/(?:^|[^\\])(?:""")|(?:^|[^\\])(?:''')/);
+                if (tripleMatch) {
+                    const q3 = line.includes('"""') ? '"""' : "'''";
+                    // Count occurrences to see if it opens and closes on same line
+                    const occurrences = line.split(q3).length - 1;
+                    if (occurrences % 2 === 1) {
+                        // Odd count means we're entering a multi-line string
+                        inTripleQuote = true;
+                        tripleQuoteChar = q3;
+                    }
+                }
+
+                // Compute indent level
+                const level = useTabs
+                    ? getIndentLevel(line, 1)
+                    : getIndentLevel(line, origIndentSize);
+                const trimmed = line.trim();
+
+                if (trimmed === '') {
+                    formatted.push('');
+                    continue;
+                }
+
+                // Apply new indentation
+                const newIndent = indentUnit.repeat(level);
+
+                // Normalize operators (only on code lines, not comments or pure strings)
+                let processedContent = trimmed;
+                if (!trimmed.startsWith('#')) {
+                    processedContent = normalizeOperators(trimmed);
+                }
+
+                // Normalize quotes
+                if (quoteStyle !== 'none' && !trimmed.startsWith('#')) {
+                    processedContent = normalizeQuotes(processedContent, quoteStyle);
+                }
+
+                // Reconstruct line
+                line = newIndent + processedContent;
+
+                // Remove trailing whitespace
+                if (removeTrailing) {
+                    line = line.replace(/\s+$/, '');
+                }
+
+                formatted.push(line);
+            }
+
+            // Clean up blank lines
+            const cleaned = cleanBlankLines(formatted);
+
+            // Remove the final empty line we added if the last line is already empty
+            const outputText = cleaned.join('\n').replace(/\n+$/, '\n');
+
+            // Generate line-numbered, syntax-highlighted output
+            const outputLines = outputText.split('\n');
+            const lineNumWidth = String(outputLines.length).length;
+
+            let html = '';
+            for (let i = 0; i < outputLines.length; i++) {
+                const num = String(i + 1).padStart(lineNumWidth, ' ');
+                const highlighted = syntaxHighlight(escapeHtml(outputLines[i]));
+                html += `<span style="color: #555; user-select: none;">${num} | </span>${highlighted}\n`;
+            }
+            outputEl.innerHTML = html;
+
+            // Diff summary
+            const origText = input;
+            const newText = outputText;
+            const origLineCount = origText.split('\n').length;
+            const newLineCount = outputLines.length;
+            let changedLines = 0;
+            const maxLen = Math.max(origLines.length, outputLines.length);
+            for (let i = 0; i < maxLen; i++) {
+                const a = origLines[i] || '';
+                const b = outputLines[i] || '';
+                if (a !== b) changedLines++;
+            }
+
+            statusEl.textContent = `Formatted successfully - ${outputLines.length} lines, ${outputText.length} characters`;
+            statusEl.className = 'status-bar success';
+
+            if (changedLines === 0) {
+                diffEl.innerHTML = 'No changes needed — code was already well-formatted.';
+            } else {
+                diffEl.innerHTML = `<strong>Changes:</strong> ${changedLines} line${changedLines !== 1 ? 's' : ''} modified | Lines: ${origLineCount} &rarr; ${newLineCount} | Characters: ${origText.length} &rarr; ${outputText.length}`;
+            }
+            diffEl.style.display = 'block';
+
+        } catch (e) {
+            statusEl.textContent = 'Error: ' + e.message;
+            statusEl.className = 'status-bar error';
+        }
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Basic Python syntax highlighting (on already-escaped HTML)
+    function syntaxHighlight(line) {
+        // Highlight comments
+        // We need to be careful with # inside strings
+        // Simple approach: find # not inside a string
+        let result = line;
+
+        // Keywords
+        const keywords = ['def', 'class', 'if', 'elif', 'else', 'for', 'while', 'try', 'except', 'finally',
+            'with', 'as', 'import', 'from', 'return', 'yield', 'raise', 'pass', 'break', 'continue',
+            'and', 'or', 'not', 'in', 'is', 'lambda', 'global', 'nonlocal', 'assert', 'del',
+            'True', 'False', 'None', 'async', 'await'];
+
+        // Built-in functions
+        const builtins = ['print', 'len', 'range', 'type', 'int', 'str', 'float', 'list', 'dict',
+            'set', 'tuple', 'bool', 'open', 'input', 'map', 'filter', 'zip', 'enumerate',
+            'sorted', 'reversed', 'isinstance', 'issubclass', 'hasattr', 'getattr', 'setattr',
+            'super', 'property', 'staticmethod', 'classmethod', 'abs', 'max', 'min', 'sum',
+            'round', 'format', 'repr', 'id', 'hash', 'any', 'all', 'hex', 'oct', 'bin',
+            'chr', 'ord', 'iter', 'next', 'vars', 'dir', 'help', 'callable'];
+
+        // Highlight strings first (preserve them)
+        const stringPlaceholders = [];
+        let idx = 0;
+
+        // Replace strings with placeholders to avoid highlighting inside them
+        result = result.replace(/((?:[fFrRbBuU]{0,2})(?:&quot;{3}[\s\S]*?&quot;{3}|'{3}[\s\S]*?'{3}|&quot;(?:[^&]|&(?!quot;))*?&quot;|'[^']*?'))/g, (match) => {
+            const placeholder = `__STR${idx}__`;
+            stringPlaceholders.push({ placeholder, value: `<span style="color: #98c379;">${match}</span>` });
+            idx++;
+            return placeholder;
+        });
+
+        // Highlight comments
+        const commentIdx = result.indexOf('#');
+        if (commentIdx !== -1) {
+            // Make sure it's not inside a placeholder
+            let inPlaceholder = false;
+            for (const sp of stringPlaceholders) {
+                if (result.indexOf(sp.placeholder) < commentIdx &&
+                    result.indexOf(sp.placeholder) + sp.placeholder.length > commentIdx) {
+                    inPlaceholder = true;
+                    break;
+                }
+            }
+            if (!inPlaceholder) {
+                const before = result.slice(0, commentIdx);
+                const comment = result.slice(commentIdx);
+                result = before + `<span style="color: #5c6370; font-style: italic;">${comment}</span>`;
+            }
+        }
+
+        // Highlight decorators
+        result = result.replace(/^(\s*)(@\w+)/g, '$1<span style="color: #c678dd;">$2</span>');
+
+        // Highlight keywords (whole word match)
+        for (const kw of keywords) {
+            const re = new RegExp(`\\b(${kw})\\b(?![_\\w])`, 'g');
+            result = result.replace(re, '<span style="color: #c678dd;">$1</span>');
+        }
+
+        // Highlight builtins
+        for (const bi of builtins) {
+            const re = new RegExp(`\\b(${bi})\\b(?=\\s*\\()`, 'g');
+            result = result.replace(re, '<span style="color: #61afef;">$1</span>');
+        }
+
+        // Highlight numbers
+        result = result.replace(/\b(\d+\.?\d*(?:e[+-]?\d+)?)\b/gi, '<span style="color: #d19a66;">$1</span>');
+
+        // Highlight self
+        result = result.replace(/\b(self)\b/g, '<span style="color: #e06c75;">$1</span>');
+
+        // Restore string placeholders
+        for (const sp of stringPlaceholders) {
+            result = result.replace(sp.placeholder, sp.value);
+        }
+
+        return result;
+    }
+
+    function copyOutput() {
+        const outputEl = document.getElementById('output');
+        // Extract plain text (without line numbers)
+        const lines = outputEl.innerText.split('\n');
+        const cleanLines = lines.map(line => {
+            // Remove line number prefix "  1 | "
+            return line.replace(/^\s*\d+\s*\|\s?/, '');
+        });
+        const text = cleanLines.join('\n');
+        if (text.trim()) {
+            navigator.clipboard.writeText(text);
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = 'Copied to clipboard!';
+            statusEl.className = 'status-bar success';
+        }
+    }
+
+    function loadExample() {
+        document.getElementById('input').value = EXAMPLE_CODE;
+        formatPython();
+    }
+
+    function clearAll() {
+        document.getElementById('input').value = '';
+        document.getElementById('output').innerHTML = '<span style="color: var(--text-muted);">Formatted Python code will appear here...</span>';
+        document.getElementById('status').innerHTML = '&nbsp;';
+        document.getElementById('diffSummary').style.display = 'none';
+    }
+    </script>
+
+    <!-- Keyboard shortcuts -->
+    <div id="kbd-toast" style="display:none;position:fixed;bottom:20px;right:20px;background:#3b82f6;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:opacity 0.3s;"></div>
+    <div id="kbd-help" style="position:fixed;bottom:20px;left:20px;z-index:9998;">
+        <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#a0a0a0;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;" title="Keyboard shortcuts">&#9000; Shortcuts</button>
+        <div style="display:none;position:absolute;bottom:40px;left:0;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:12px 16px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+            <div style="font-weight:600;margin-bottom:8px;color:#e0e0e0;font-size:13px;">Keyboard Shortcuts</div>
+            <div style="color:#a0a0a0;font-size:12px;line-height:2;">
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Ctrl</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Enter</kbd> Format code<br>
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Ctrl</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Shift</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">C</kbd> Copy output<br>
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Ctrl</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">L</kbd> Clear
+            </div>
+        </div>
+    </div>
+    <script>
+    (function(){
+        function showToast(msg){var t=document.getElementById('kbd-toast');if(!t)return;t.textContent=msg;t.style.display='block';t.style.opacity='1';setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.style.display='none';},300);},1500);}
+        document.addEventListener('keydown',function(e){
+            if(e.ctrlKey&&e.key==='Enter'){
+                e.preventDefault();
+                var btn=document.querySelector('.btn-primary')||document.querySelector('button[onclick*="format"]')||document.querySelector('button[onclick*="generate"]')||document.querySelector('button[onclick*="convert"]')||document.querySelector('button[onclick*="encode"]')||document.querySelector('button[onclick*="decode"]')||document.querySelector('button[onclick*="validate"]')||document.querySelector('button[onclick*="check"]')||document.querySelector('button[onclick*="send"]');
+                if(btn){btn.click();showToast('Formatted!');}
+            }
+            if(e.ctrlKey&&e.shiftKey&&e.key==='C'){
+                e.preventDefault();
+                copyOutput();
+                showToast('Copied to clipboard!');
+            }
+            if(e.ctrlKey&&e.key==='l'&&!e.shiftKey){
+                e.preventDefault();
+                clearAll();
+                showToast('Cleared!');
+            }
+        });
+    })();
+    </script>
+
+<script src="/js/track.js" defer></script>
+</body>
+</html>

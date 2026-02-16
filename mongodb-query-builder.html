@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Query Builder — Visual Query Generator | DevToolbox</title>
+    <meta name="description" content="Free online MongoDB query builder. Visually construct find, aggregate, update, and delete queries. Generate MongoDB shell commands and driver code for Node.js and Python.">
+    <meta name="keywords" content="mongodb query builder, mongodb query generator, mongodb find query, mongodb aggregate, mongodb update query, mongodb visual builder">
+    <meta property="og:title" content="MongoDB Query Builder | DevToolbox">
+    <meta property="og:description" content="Visual MongoDB query builder and generator">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/tools/mongodb-query-builder">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/tool-mongodb-query-builder.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="MongoDB Query Builder | DevToolbox">
+    <meta name="twitter:description" content="Visual MongoDB query builder and generator">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/tools/mongodb-query-builder">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "MongoDB Query Builder",
+        "description": "Visual MongoDB query builder and generator for find, aggregate, update, delete, and insert operations",
+        "url": "https://devtoolbox.dedyn.io/tools/mongodb-query-builder",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+        },
+        "creator": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "How do I build a MongoDB find query with multiple conditions?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Use the Find query type and add multiple filter conditions. Each condition specifies a field name, an operator like $eq, $gt, $lt, $in, or $regex, and a value. Multiple conditions are combined with an implicit AND. The tool generates the proper nested JSON filter object automatically."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What is a MongoDB aggregation pipeline?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A MongoDB aggregation pipeline is a sequence of stages that process documents. Common stages include $match (filter), $group (aggregate values), $sort, $project (reshape), $lookup (join), and $unwind (flatten arrays). Each stage transforms the data and passes results to the next stage."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do I use $lookup to join collections in MongoDB?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "$lookup performs a left outer join between two collections. It requires four fields: 'from' (the collection to join), 'localField' (field from the input documents), 'foreignField' (field from the 'from' collection), and 'as' (the output array field name). Use the Aggregate query type and add a $lookup stage in this tool."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Is my data safe when using this MongoDB query builder?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. This tool runs entirely in your browser using client-side JavaScript. No data is sent to any server. Your collection names, field names, and query parameters never leave your computer."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Can I generate MongoDB driver code for Node.js and Python?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The tool generates output in three formats: MongoDB Shell syntax (mongosh), Node.js code using the official mongodb driver, and Python code using pymongo. Switch between formats using the output tabs and copy the code directly into your project."
+            }
+        }
+        ]
+    }
+    </script>
+    <style>
+    .query-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem}
+    .query-tabs button{padding:8px 16px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#a0a0a0;border-radius:6px 6px 0 0;cursor:pointer;font-size:13px;transition:all .2s}
+    .query-tabs button.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+    .query-tabs button:hover:not(.active){background:rgba(255,255,255,0.08);color:#e0e0e0}
+    .builder-section{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:1rem;margin-bottom:1rem}
+    .builder-section h3{margin:0 0 .75rem;font-size:14px;color:#93c5fd;font-weight:600}
+    .condition-row,.stage-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+    .condition-row input,.condition-row select,.stage-row input,.stage-row select{padding:6px 10px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#e0e0e0;border-radius:4px;font-size:13px;font-family:inherit}
+    .condition-row input{flex:1;min-width:80px}
+    .condition-row select{min-width:90px}
+    .stage-row select{min-width:110px}
+    .stage-row input{flex:1;min-width:100px}
+    .btn-sm{padding:5px 10px;font-size:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#a0a0a0;border-radius:4px;cursor:pointer;transition:all .2s}
+    .btn-sm:hover{background:rgba(255,255,255,0.12);color:#e0e0e0}
+    .btn-add{color:#3b82f6;border-color:rgba(59,130,246,0.3)}
+    .btn-add:hover{background:rgba(59,130,246,0.15)}
+    .btn-remove{color:#ef4444;border-color:rgba(239,68,68,0.3);padding:5px 8px}
+    .btn-remove:hover{background:rgba(239,68,68,0.15)}
+    .btn-move{color:#a0a0a0;padding:5px 7px}
+    .output-tabs{display:flex;gap:4px;margin-bottom:0}
+    .output-tabs button{padding:6px 14px;border:1px solid rgba(255,255,255,0.1);border-bottom:none;background:rgba(255,255,255,0.03);color:#a0a0a0;border-radius:6px 6px 0 0;cursor:pointer;font-size:12px;transition:all .2s}
+    .output-tabs button.active{background:rgba(0,0,0,0.4);color:#10b981;border-color:rgba(255,255,255,0.15)}
+    .output-code{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:0 0 8px 8px;padding:1rem;font-family:'Courier New',monospace;font-size:13px;color:#e0e0e0;white-space:pre-wrap;word-break:break-all;min-height:120px;max-height:400px;overflow:auto;line-height:1.6}
+    .inline-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+    .inline-row label{font-size:13px;color:#a0a0a0;min-width:70px}
+    .inline-row input{padding:6px 10px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#e0e0e0;border-radius:4px;font-size:13px;font-family:inherit;width:120px}
+    .proj-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+    .proj-row input{flex:1;padding:6px 10px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#e0e0e0;border-radius:4px;font-size:13px}
+    .proj-row select{padding:6px 10px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#e0e0e0;border-radius:4px;font-size:13px}
+    .sort-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+    .sort-row input{flex:1;padding:6px 10px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#e0e0e0;border-radius:4px;font-size:13px}
+    .sort-row select{padding:6px 10px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#e0e0e0;border-radius:4px;font-size:13px}
+    .stage-config{margin:8px 0 8px 20px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:6px;border-left:2px solid #3b82f6}
+    .stage-config .inline-row{margin-bottom:6px}
+    .stage-config input{width:auto;flex:1}
+    #insert-editor{width:100%;min-height:100px;padding:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#e0e0e0;border-radius:4px;font-family:'Courier New',monospace;font-size:13px;resize:vertical}
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links">
+                <a href="/tools/">Tools</a>
+                <a href="/cheatsheets/">Cheat Sheets</a>
+                <a href="/blog/">Blog</a>
+            </div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/tools/">Tools</a><span class="separator">/</span><span class="current">MongoDB Query Builder</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Tools",
+                        "item": "https://devtoolbox.dedyn.io/tools"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "MongoDB Query Builder"
+                }
+        ]
+    }
+    </script>
+
+    <div class="embed-banner">
+        <details>
+            <summary>Embed this tool on your site</summary>
+            <pre><code>&lt;iframe src="https://devtoolbox.dedyn.io/tools/mongodb-query-builder" width="100%" height="700" frameborder="0" title="MongoDB Query Builder"&gt;&lt;/iframe&gt;</code></pre>
+        </details>
+    </div>
+
+    <main class="tool-page">
+        <h1>MongoDB Query Builder</h1>
+        <p class="description">Visually build MongoDB queries and get shell, Node.js, and Python code. Everything runs in your browser &mdash; your data stays private.</p>
+
+        <div class="inline-row" style="margin-bottom:1rem">
+            <label for="collName">Collection:</label>
+            <input type="text" id="collName" value="users" placeholder="collection name" oninput="generate()">
+        </div>
+
+        <div class="query-tabs" id="queryTabs">
+            <button class="active" onclick="setType('find')">Find</button>
+            <button onclick="setType('aggregate')">Aggregate</button>
+            <button onclick="setType('update')">Update</button>
+            <button onclick="setType('delete')">Delete</button>
+            <button onclick="setType('insert')">Insert</button>
+        </div>
+
+        <!-- Find Builder -->
+        <div id="panel-find">
+            <div class="builder-section">
+                <h3>Filter Conditions</h3>
+                <div id="findFilters"></div>
+                <button class="btn-sm btn-add" onclick="addFindFilter()">+ Add Condition</button>
+            </div>
+            <div class="builder-section">
+                <h3>Projection (fields to include/exclude)</h3>
+                <div id="findProjection"></div>
+                <button class="btn-sm btn-add" onclick="addProjection()">+ Add Field</button>
+            </div>
+            <div class="builder-section">
+                <h3>Sort</h3>
+                <div id="findSort"></div>
+                <button class="btn-sm btn-add" onclick="addSort()">+ Add Sort Field</button>
+            </div>
+            <div class="builder-section">
+                <div class="inline-row">
+                    <label for="findLimit">Limit:</label>
+                    <input type="number" id="findLimit" min="0" placeholder="0" oninput="generate()">
+                    <label for="findSkip" style="margin-left:12px">Skip:</label>
+                    <input type="number" id="findSkip" min="0" placeholder="0" oninput="generate()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Aggregate Builder -->
+        <div id="panel-aggregate" style="display:none">
+            <div class="builder-section">
+                <h3>Pipeline Stages</h3>
+                <div id="aggStages"></div>
+                <button class="btn-sm btn-add" onclick="addAggStage()">+ Add Stage</button>
+            </div>
+        </div>
+
+        <!-- Update Builder -->
+        <div id="panel-update" style="display:none">
+            <div class="builder-section">
+                <h3>Filter (which documents to update)</h3>
+                <div id="updateFilters"></div>
+                <button class="btn-sm btn-add" onclick="addUpdateFilter()">+ Add Condition</button>
+            </div>
+            <div class="builder-section">
+                <h3>Update Operations</h3>
+                <div id="updateOps"></div>
+                <button class="btn-sm btn-add" onclick="addUpdateOp()">+ Add Field</button>
+            </div>
+        </div>
+
+        <!-- Delete Builder -->
+        <div id="panel-delete" style="display:none">
+            <div class="builder-section">
+                <h3>Filter (which documents to delete)</h3>
+                <div id="deleteFilters"></div>
+                <button class="btn-sm btn-add" onclick="addDeleteFilter()">+ Add Condition</button>
+            </div>
+        </div>
+
+        <!-- Insert Builder -->
+        <div id="panel-insert" style="display:none">
+            <div class="builder-section">
+                <h3>Document JSON</h3>
+                <textarea id="insert-editor" oninput="generate()" placeholder='{ "name": "Alice", "age": 30, "email": "alice@example.com" }'>{ "name": "Alice", "age": 30, "email": "alice@example.com" }</textarea>
+            </div>
+        </div>
+
+        <div class="tool-actions" style="margin:1rem 0">
+            <button class="btn btn-primary" onclick="copyOutput()">Copy Output</button>
+            <button class="btn" onclick="clearAll()">Clear / Reset</button>
+        </div>
+
+        <div class="output-tabs" id="outputTabs">
+            <button class="active" onclick="setFormat('shell')">Shell</button>
+            <button onclick="setFormat('nodejs')">Node.js</button>
+            <button onclick="setFormat('python')">Python</button>
+        </div>
+        <div class="output-code" id="output">Query output will appear here...</div>
+
+        <section class="related-tools" style="margin-top:2rem">
+            <h3>Related Tools &amp; Guides</h3>
+            <div class="grid">
+                <a href="/tools/json-formatter" class="tool-card"><div class="tool-icon">{ }</div><h3>JSON Formatter</h3><p>Format and validate JSON data</p></a>
+                <a href="/tools/json-validator" class="tool-card"><div class="tool-icon">&#10003;</div><h3>JSON Validator</h3><p>Validate JSON syntax and structure</p></a>
+                <a href="/blog/json-complete-guide" class="tool-card"><div class="tool-icon">&#128218;</div><h3>JSON Complete Guide</h3><p>Everything about JSON format</p></a>
+            </div>
+        </section>
+    </main>
+
+    <section class="faq-section" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1.5rem;">Frequently Asked Questions</h2>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">How do I build a MongoDB find query with multiple conditions?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">Use the Find query type and add multiple filter conditions. Each condition specifies a field name, an operator like $eq, $gt, $lt, $in, or $regex, and a value. Multiple conditions are combined with an implicit AND. The tool generates the proper nested JSON filter object automatically.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">What is a MongoDB aggregation pipeline?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">A MongoDB aggregation pipeline is a sequence of stages that process documents. Common stages include $match (filter), $group (aggregate values), $sort, $project (reshape), $lookup (join), and $unwind (flatten arrays). Each stage transforms the data and passes results to the next stage.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">How do I use $lookup to join collections in MongoDB?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">$lookup performs a left outer join between two collections. It requires four fields: 'from' (the collection to join), 'localField' (field from the input documents), 'foreignField' (field from the 'from' collection), and 'as' (the output array field name). Use the Aggregate query type and add a $lookup stage in this tool.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">Is my data safe when using this MongoDB query builder?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">Yes. This tool runs entirely in your browser using client-side JavaScript. No data is sent to any server. Your collection names, field names, and query parameters never leave your computer.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">Can I generate MongoDB driver code for Node.js and Python?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">Yes. The tool generates output in three formats: MongoDB Shell syntax (mongosh), Node.js code using the official mongodb driver, and Python code using pymongo. Switch between formats using the output tabs and copy the code directly into your project.</div>
+        </details>
+    </section>
+
+    <footer>
+        <p>DevToolbox &mdash; Free developer tools, no strings attached.</p>
+        <div style="margin-top:0.5rem;font-size:13px;color:#666;">
+            <a href="/about" style="color:#888;margin:0 8px;">About</a>
+            <a href="/blog/" style="color:#888;margin:0 8px;">Blog</a>
+            <a href="/feed.xml" style="color:#888;margin:0 8px;">RSS</a>
+        </div>
+    </footer>
+
+    <script>
+    var queryType = 'find';
+    var outputFormat = 'shell';
+    var OPS = ['$eq','$ne','$gt','$gte','$lt','$lte','$in','$nin','$exists','$regex'];
+    var AGG_STAGES = ['$match','$group','$sort','$project','$limit','$skip','$unwind','$lookup'];
+
+    function setType(t) {
+        queryType = t;
+        var btns = document.getElementById('queryTabs').children;
+        for (var i = 0; i < btns.length; i++) btns[i].className = '';
+        var map = {find:0,aggregate:1,update:2,delete:3,insert:4};
+        btns[map[t]].className = 'active';
+        var panels = ['find','aggregate','update','delete','insert'];
+        for (var i = 0; i < panels.length; i++)
+            document.getElementById('panel-' + panels[i]).style.display = panels[i] === t ? '' : 'none';
+        generate();
+    }
+
+    function setFormat(f) {
+        outputFormat = f;
+        var btns = document.getElementById('outputTabs').children;
+        for (var i = 0; i < btns.length; i++) btns[i].className = '';
+        var map = {shell:0,nodejs:1,python:2};
+        btns[map[f]].className = 'active';
+        generate();
+    }
+
+    // --- Filter row builder (reusable) ---
+    function buildFilterRow(containerId, onChange) {
+        var div = document.createElement('div');
+        div.className = 'condition-row';
+        div.innerHTML = '<input type="text" placeholder="field" oninput="generate()">' +
+            '<select onchange="generate()">' + OPS.map(function(o){return '<option value="'+o+'">'+o+'</option>';}).join('') + '</select>' +
+            '<input type="text" placeholder="value" oninput="generate()">' +
+            '<button class="btn-sm btn-remove" onclick="this.parentNode.remove();generate()">&#10005;</button>';
+        document.getElementById(containerId).appendChild(div);
+        generate();
+    }
+
+    function addFindFilter() { buildFilterRow('findFilters'); }
+    function addUpdateFilter() { buildFilterRow('updateFilters'); }
+    function addDeleteFilter() { buildFilterRow('deleteFilters'); }
+
+    function addProjection() {
+        var div = document.createElement('div');
+        div.className = 'proj-row';
+        div.innerHTML = '<input type="text" placeholder="field name" oninput="generate()">' +
+            '<select onchange="generate()"><option value="1">Include (1)</option><option value="0">Exclude (0)</option></select>' +
+            '<button class="btn-sm btn-remove" onclick="this.parentNode.remove();generate()">&#10005;</button>';
+        document.getElementById('findProjection').appendChild(div);
+        generate();
+    }
+
+    function addSort() {
+        var div = document.createElement('div');
+        div.className = 'sort-row';
+        div.innerHTML = '<input type="text" placeholder="field name" oninput="generate()">' +
+            '<select onchange="generate()"><option value="1">ASC (1)</option><option value="-1">DESC (-1)</option></select>' +
+            '<button class="btn-sm btn-remove" onclick="this.parentNode.remove();generate()">&#10005;</button>';
+        document.getElementById('findSort').appendChild(div);
+        generate();
+    }
+
+    function addUpdateOp() {
+        var div = document.createElement('div');
+        div.className = 'condition-row';
+        div.innerHTML = '<select onchange="generate()"><option value="$set">$set</option><option value="$unset">$unset</option><option value="$inc">$inc</option><option value="$push">$push</option><option value="$pull">$pull</option><option value="$rename">$rename</option><option value="$min">$min</option><option value="$max">$max</option><option value="$mul">$mul</option></select>' +
+            '<input type="text" placeholder="field" oninput="generate()">' +
+            '<input type="text" placeholder="value" oninput="generate()">' +
+            '<button class="btn-sm btn-remove" onclick="this.parentNode.remove();generate()">&#10005;</button>';
+        document.getElementById('updateOps').appendChild(div);
+        generate();
+    }
+
+    // --- Aggregate stage builder ---
+    function addAggStage(type) {
+        type = type || '$match';
+        var container = document.getElementById('aggStages');
+        var div = document.createElement('div');
+        div.className = 'builder-section';
+        div.style.marginBottom = '8px';
+        var idx = container.children.length;
+        var header = '<div class="stage-row">' +
+            '<select class="stage-type" onchange="updateStageConfig(this);generate()">' +
+            AGG_STAGES.map(function(s){return '<option value="'+s+'"'+(s===type?' selected':'')+'>'+s+'</option>';}).join('') +
+            '</select>' +
+            '<button class="btn-sm btn-move" onclick="moveStage(this,-1)" title="Move up">&#9650;</button>' +
+            '<button class="btn-sm btn-move" onclick="moveStage(this,1)" title="Move down">&#9660;</button>' +
+            '<button class="btn-sm btn-remove" onclick="this.closest(\'.builder-section\').remove();generate()">&#10005;</button>' +
+            '</div>';
+        div.innerHTML = header + '<div class="stage-config"></div>';
+        container.appendChild(div);
+        updateStageConfig(div.querySelector('.stage-type'));
+        generate();
+    }
+
+    function updateStageConfig(sel) {
+        var cfg = sel.closest('.builder-section').querySelector('.stage-config');
+        var t = sel.value;
+        var h = '';
+        if (t === '$match') {
+            h = '<div class="match-filters"></div><button class="btn-sm btn-add" onclick="addStageFilter(this)">+ Condition</button>';
+        } else if (t === '$group') {
+            h = '<div class="inline-row"><label>_id field:</label><input type="text" placeholder="$field or null" oninput="generate()"></div>' +
+                '<div class="group-accums"></div><button class="btn-sm btn-add" onclick="addGroupAccum(this)">+ Accumulator</button>';
+        } else if (t === '$sort') {
+            h = '<div class="sort-fields"></div><button class="btn-sm btn-add" onclick="addStageSort(this)">+ Sort Field</button>';
+        } else if (t === '$project') {
+            h = '<div class="proj-fields"></div><button class="btn-sm btn-add" onclick="addStageProj(this)">+ Field</button>';
+        } else if (t === '$limit' || t === '$skip') {
+            h = '<div class="inline-row"><label>Value:</label><input type="number" min="0" value="10" oninput="generate()"></div>';
+        } else if (t === '$unwind') {
+            h = '<div class="inline-row"><label>Path:</label><input type="text" placeholder="$arrayField" oninput="generate()"></div>';
+        } else if (t === '$lookup') {
+            h = '<div class="inline-row"><label>From:</label><input type="text" placeholder="other_collection" oninput="generate()"></div>' +
+                '<div class="inline-row"><label>Local field:</label><input type="text" placeholder="localField" oninput="generate()"></div>' +
+                '<div class="inline-row"><label>Foreign field:</label><input type="text" placeholder="foreignField" oninput="generate()"></div>' +
+                '<div class="inline-row"><label>As:</label><input type="text" placeholder="outputArray" oninput="generate()"></div>';
+        }
+        cfg.innerHTML = h;
+        generate();
+    }
+
+    function addStageFilter(btn) {
+        var container = btn.previousElementSibling;
+        var div = document.createElement('div');
+        div.className = 'condition-row';
+        div.innerHTML = '<input type="text" placeholder="field" oninput="generate()">' +
+            '<select onchange="generate()">' + OPS.map(function(o){return '<option value="'+o+'">'+o+'</option>';}).join('') + '</select>' +
+            '<input type="text" placeholder="value" oninput="generate()">' +
+            '<button class="btn-sm btn-remove" onclick="this.parentNode.remove();generate()">&#10005;</button>';
+        container.appendChild(div);
+        generate();
+    }
+
+    function addGroupAccum(btn) {
+        var container = btn.previousElementSibling;
+        var div = document.createElement('div');
+        div.className = 'condition-row';
+        div.innerHTML = '<input type="text" placeholder="output field" oninput="generate()">' +
+            '<select onchange="generate()"><option value="$sum">$sum</option><option value="$avg">$avg</option><option value="$min">$min</option><option value="$max">$max</option><option value="$first">$first</option><option value="$last">$last</option><option value="$push">$push</option><option value="$addToSet">$addToSet</option><option value="$count">$count</option></select>' +
+            '<input type="text" placeholder="$field or 1" oninput="generate()">' +
+            '<button class="btn-sm btn-remove" onclick="this.parentNode.remove();generate()">&#10005;</button>';
+        container.appendChild(div);
+        generate();
+    }
+
+    function addStageSort(btn) {
+        var container = btn.previousElementSibling;
+        var div = document.createElement('div');
+        div.className = 'sort-row';
+        div.innerHTML = '<input type="text" placeholder="field" oninput="generate()">' +
+            '<select onchange="generate()"><option value="1">ASC (1)</option><option value="-1">DESC (-1)</option></select>' +
+            '<button class="btn-sm btn-remove" onclick="this.parentNode.remove();generate()">&#10005;</button>';
+        container.appendChild(div);
+        generate();
+    }
+
+    function addStageProj(btn) {
+        var container = btn.previousElementSibling;
+        var div = document.createElement('div');
+        div.className = 'proj-row';
+        div.innerHTML = '<input type="text" placeholder="field" oninput="generate()">' +
+            '<select onchange="generate()"><option value="1">Include (1)</option><option value="0">Exclude (0)</option></select>' +
+            '<button class="btn-sm btn-remove" onclick="this.parentNode.remove();generate()">&#10005;</button>';
+        container.appendChild(div);
+        generate();
+    }
+
+    function moveStage(btn, dir) {
+        var stage = btn.closest('.builder-section');
+        var parent = stage.parentNode;
+        if (dir === -1 && stage.previousElementSibling) {
+            parent.insertBefore(stage, stage.previousElementSibling);
+        } else if (dir === 1 && stage.nextElementSibling) {
+            parent.insertBefore(stage.nextElementSibling, stage);
+        }
+        generate();
+    }
+
+    // --- Value parsing ---
+    function parseVal(v) {
+        v = v.trim();
+        if (v === '' || v === 'null') return null;
+        if (v === 'true') return true;
+        if (v === 'false') return false;
+        if (/^-?\d+$/.test(v)) return parseInt(v, 10);
+        if (/^-?\d+\.\d+$/.test(v)) return parseFloat(v);
+        if (/^\[.*\]$/.test(v)) { try { return JSON.parse(v); } catch(e) {} }
+        if (/^\{.*\}$/.test(v)) { try { return JSON.parse(v); } catch(e) {} }
+        return v;
+    }
+
+    // --- Collect filters from a container ---
+    function collectFilters(containerId) {
+        var filter = {};
+        var rows = document.getElementById(containerId).querySelectorAll('.condition-row');
+        rows.forEach(function(row) {
+            var inputs = row.querySelectorAll('input');
+            var sel = row.querySelector('select');
+            var field = inputs[0].value.trim();
+            var op = sel.value;
+            var val = inputs[1].value.trim();
+            if (!field) return;
+            var pv = parseVal(val);
+            if (op === '$exists') pv = (val === 'false' || val === '0') ? false : true;
+            if (op === '$in' || op === '$nin') {
+                if (!Array.isArray(pv)) {
+                    pv = val.split(',').map(function(s) { return parseVal(s.trim()); });
+                }
+            }
+            if (op === '$eq') {
+                filter[field] = pv;
+            } else {
+                if (!filter[field]) filter[field] = {};
+                filter[field][op] = pv;
+            }
+        });
+        return filter;
+    }
+
+    function collectProjection() {
+        var proj = {};
+        var rows = document.getElementById('findProjection').querySelectorAll('.proj-row');
+        rows.forEach(function(row) {
+            var field = row.querySelector('input').value.trim();
+            var val = parseInt(row.querySelector('select').value);
+            if (field) proj[field] = val;
+        });
+        return proj;
+    }
+
+    function collectSortFromEl(container) {
+        var sort = {};
+        var rows = container.querySelectorAll('.sort-row');
+        rows.forEach(function(row) {
+            var field = row.querySelector('input').value.trim();
+            var val = parseInt(row.querySelector('select').value);
+            if (field) sort[field] = val;
+        });
+        return sort;
+    }
+
+    function collectSort() { return collectSortFromEl(document.getElementById('findSort')); }
+
+    function js(obj, indent) {
+        return JSON.stringify(obj, null, indent || 2);
+    }
+
+    // --- Generate output ---
+    function generate() {
+        var coll = document.getElementById('collName').value.trim() || 'collection';
+        var out = '';
+        if (queryType === 'find') out = genFind(coll);
+        else if (queryType === 'aggregate') out = genAggregate(coll);
+        else if (queryType === 'update') out = genUpdate(coll);
+        else if (queryType === 'delete') out = genDelete(coll);
+        else if (queryType === 'insert') out = genInsert(coll);
+        document.getElementById('output').textContent = out;
+    }
+
+    function genFind(c) {
+        var filter = collectFilters('findFilters');
+        var proj = collectProjection();
+        var sort = collectSort();
+        var limit = parseInt(document.getElementById('findLimit').value) || 0;
+        var skip = parseInt(document.getElementById('findSkip').value) || 0;
+        var hasProj = Object.keys(proj).length > 0;
+        var hasSort = Object.keys(sort).length > 0;
+        if (outputFormat === 'shell') {
+            var q = 'db.' + c + '.find(\n  ' + js(filter);
+            if (hasProj) q += ',\n  ' + js(proj);
+            q += '\n)';
+            if (hasSort) q += '\n  .sort(' + js(sort) + ')';
+            if (skip) q += '\n  .skip(' + skip + ')';
+            if (limit) q += '\n  .limit(' + limit + ')';
+            return q;
+        }
+        if (outputFormat === 'nodejs') {
+            var lines = ['const { MongoClient } = require("mongodb");','','async function run() {','  const client = new MongoClient("mongodb://localhost:27017");','  await client.connect();','  const db = client.db("mydb");',''];
+            var chain = '  const results = await db.collection("' + c + '")\n    .find(' + js(filter) + ')';
+            if (hasProj) chain += '\n    .project(' + js(proj) + ')';
+            if (hasSort) chain += '\n    .sort(' + js(sort) + ')';
+            if (skip) chain += '\n    .skip(' + skip + ')';
+            if (limit) chain += '\n    .limit(' + limit + ')';
+            chain += '\n    .toArray();';
+            lines.push(chain, '', '  console.log(results);', '  await client.close();', '}', '', 'run().catch(console.error);');
+            return lines.join('\n');
+        }
+        // python
+        var lines = ['from pymongo import MongoClient','','client = MongoClient("mongodb://localhost:27017")','db = client["mydb"]',''];
+        var q = 'results = db["' + c + '"].find(\n    ' + pyObj(filter);
+        if (hasProj) q += ',\n    ' + pyObj(proj);
+        q += '\n)';
+        if (hasSort) {
+            var sortList = Object.keys(sort).map(function(k){return '("'+k+'", '+sort[k]+')';});
+            q += '.sort([' + sortList.join(', ') + '])';
+        }
+        if (skip) q += '.skip(' + skip + ')';
+        if (limit) q += '.limit(' + limit + ')';
+        lines.push(q, '', 'for doc in results:', '    print(doc)');
+        return lines.join('\n');
+    }
+
+    function genAggregate(c) {
+        var pipeline = [];
+        var stages = document.getElementById('aggStages').querySelectorAll('.builder-section');
+        stages.forEach(function(stageEl) {
+            var type = stageEl.querySelector('.stage-type').value;
+            var cfg = stageEl.querySelector('.stage-config');
+            var stageObj = {};
+            if (type === '$match') {
+                var filter = {};
+                cfg.querySelectorAll('.condition-row').forEach(function(row) {
+                    var inputs = row.querySelectorAll('input');
+                    var sel = row.querySelector('select');
+                    var field = inputs[0].value.trim(), op = sel.value, val = inputs[1].value.trim();
+                    if (!field) return;
+                    var pv = parseVal(val);
+                    if (op === '$exists') pv = (val === 'false' || val === '0') ? false : true;
+                    if (op === '$in' || op === '$nin') { if (!Array.isArray(pv)) pv = val.split(',').map(function(s){return parseVal(s.trim());}); }
+                    if (op === '$eq') filter[field] = pv; else { if (!filter[field]) filter[field] = {}; filter[field][op] = pv; }
+                });
+                stageObj[type] = filter;
+            } else if (type === '$group') {
+                var idInput = cfg.querySelector('input');
+                var idVal = idInput ? idInput.value.trim() : null;
+                var group = { _id: idVal === 'null' || idVal === '' ? null : (idVal.startsWith('$') ? idVal : '$' + idVal) };
+                cfg.querySelectorAll('.condition-row').forEach(function(row) {
+                    var inputs = row.querySelectorAll('input');
+                    var sel = row.querySelector('select');
+                    var outField = inputs[0].value.trim(), accum = sel.value, expr = inputs[1].value.trim();
+                    if (!outField) return;
+                    var pv = parseVal(expr);
+                    if (accum === '$count') group[outField] = { $count: {} };
+                    else group[outField] = {};
+                    if (accum !== '$count') group[outField][accum] = pv;
+                });
+                stageObj[type] = group;
+            } else if (type === '$sort') {
+                stageObj[type] = collectSortFromEl(cfg);
+            } else if (type === '$project') {
+                var proj = {};
+                cfg.querySelectorAll('.proj-row').forEach(function(row) {
+                    var f = row.querySelector('input').value.trim();
+                    var v = parseInt(row.querySelector('select').value);
+                    if (f) proj[f] = v;
+                });
+                stageObj[type] = proj;
+            } else if (type === '$limit' || type === '$skip') {
+                var numInput = cfg.querySelector('input[type="number"]');
+                stageObj[type] = numInput ? parseInt(numInput.value) || 0 : 0;
+            } else if (type === '$unwind') {
+                var pathInput = cfg.querySelector('input');
+                stageObj[type] = pathInput ? pathInput.value.trim() : '';
+            } else if (type === '$lookup') {
+                var inputs = cfg.querySelectorAll('input');
+                stageObj[type] = {
+                    from: inputs[0] ? inputs[0].value.trim() : '',
+                    localField: inputs[1] ? inputs[1].value.trim() : '',
+                    foreignField: inputs[2] ? inputs[2].value.trim() : '',
+                    as: inputs[3] ? inputs[3].value.trim() : ''
+                };
+            }
+            pipeline.push(stageObj);
+        });
+        if (outputFormat === 'shell') {
+            return 'db.' + c + '.aggregate(' + js(pipeline) + ')';
+        }
+        if (outputFormat === 'nodejs') {
+            var lines = ['const { MongoClient } = require("mongodb");','','async function run() {','  const client = new MongoClient("mongodb://localhost:27017");','  await client.connect();','  const db = client.db("mydb");',''];
+            lines.push('  const pipeline = ' + js(pipeline) + ';', '');
+            lines.push('  const results = await db.collection("' + c + '")','    .aggregate(pipeline)','    .toArray();','','  console.log(results);','  await client.close();','}','','run().catch(console.error);');
+            return lines.join('\n');
+        }
+        // python
+        var lines = ['from pymongo import MongoClient','','client = MongoClient("mongodb://localhost:27017")','db = client["mydb"]',''];
+        lines.push('pipeline = ' + pyObj(pipeline), '');
+        lines.push('results = db["' + c + '"].aggregate(pipeline)','','for doc in results:','    print(doc)');
+        return lines.join('\n');
+    }
+
+    function genUpdate(c) {
+        var filter = collectFilters('updateFilters');
+        var update = {};
+        document.getElementById('updateOps').querySelectorAll('.condition-row').forEach(function(row) {
+            var sel = row.querySelector('select');
+            var inputs = row.querySelectorAll('input');
+            var op = sel.value, field = inputs[0].value.trim(), val = inputs[1].value.trim();
+            if (!field) return;
+            if (!update[op]) update[op] = {};
+            update[op][field] = op === '$unset' ? '' : parseVal(val);
+        });
+        if (outputFormat === 'shell') {
+            return 'db.' + c + '.updateMany(\n  ' + js(filter) + ',\n  ' + js(update) + '\n)';
+        }
+        if (outputFormat === 'nodejs') {
+            var lines = ['const { MongoClient } = require("mongodb");','','async function run() {','  const client = new MongoClient("mongodb://localhost:27017");','  await client.connect();','  const db = client.db("mydb");',''];
+            lines.push('  const result = await db.collection("' + c + '").updateMany(','    ' + js(filter) + ',','    ' + js(update),'  );','','  console.log(result.modifiedCount + " document(s) updated");','  await client.close();','}','','run().catch(console.error);');
+            return lines.join('\n');
+        }
+        var lines = ['from pymongo import MongoClient','','client = MongoClient("mongodb://localhost:27017")','db = client["mydb"]',''];
+        lines.push('result = db["' + c + '"].update_many(','    ' + pyObj(filter) + ',','    ' + pyObj(update),')','','print(f"{result.modified_count} document(s) updated")');
+        return lines.join('\n');
+    }
+
+    function genDelete(c) {
+        var filter = collectFilters('deleteFilters');
+        if (outputFormat === 'shell') {
+            return 'db.' + c + '.deleteMany(\n  ' + js(filter) + '\n)';
+        }
+        if (outputFormat === 'nodejs') {
+            var lines = ['const { MongoClient } = require("mongodb");','','async function run() {','  const client = new MongoClient("mongodb://localhost:27017");','  await client.connect();','  const db = client.db("mydb");',''];
+            lines.push('  const result = await db.collection("' + c + '").deleteMany(','    ' + js(filter),'  );','','  console.log(result.deletedCount + " document(s) deleted");','  await client.close();','}','','run().catch(console.error);');
+            return lines.join('\n');
+        }
+        var lines = ['from pymongo import MongoClient','','client = MongoClient("mongodb://localhost:27017")','db = client["mydb"]',''];
+        lines.push('result = db["' + c + '"].delete_many(','    ' + pyObj(filter),')','','print(f"{result.deleted_count} document(s) deleted")');
+        return lines.join('\n');
+    }
+
+    function genInsert(c) {
+        var raw = document.getElementById('insert-editor').value.trim();
+        var doc;
+        try { doc = JSON.parse(raw); } catch(e) { return '// Invalid JSON: ' + e.message; }
+        var isArray = Array.isArray(doc);
+        var method = isArray ? 'insertMany' : 'insertOne';
+        var pyMethod = isArray ? 'insert_many' : 'insert_one';
+        if (outputFormat === 'shell') {
+            return 'db.' + c + '.' + method + '(\n  ' + js(doc) + '\n)';
+        }
+        if (outputFormat === 'nodejs') {
+            var lines = ['const { MongoClient } = require("mongodb");','','async function run() {','  const client = new MongoClient("mongodb://localhost:27017");','  await client.connect();','  const db = client.db("mydb");',''];
+            lines.push('  const result = await db.collection("' + c + '").' + method + '(','    ' + js(doc),'  );','','  console.log(result);','  await client.close();','}','','run().catch(console.error);');
+            return lines.join('\n');
+        }
+        var lines = ['from pymongo import MongoClient','','client = MongoClient("mongodb://localhost:27017")','db = client["mydb"]',''];
+        lines.push('result = db["' + c + '"].' + pyMethod + '(','    ' + pyObj(doc),')','','print(result)');
+        return lines.join('\n');
+    }
+
+    // Python-style object representation
+    function pyObj(obj) {
+        if (obj === null) return 'None';
+        if (obj === true) return 'True';
+        if (obj === false) return 'False';
+        if (typeof obj === 'number' || typeof obj === 'string') return JSON.stringify(obj);
+        if (Array.isArray(obj)) return '[' + obj.map(pyObj).join(', ') + ']';
+        var pairs = Object.keys(obj).map(function(k) { return JSON.stringify(k) + ': ' + pyObj(obj[k]); });
+        return '{' + pairs.join(', ') + '}';
+    }
+
+    function copyOutput() {
+        var text = document.getElementById('output').textContent;
+        if (text && text !== 'Query output will appear here...') {
+            navigator.clipboard.writeText(text);
+            showToast('Copied to clipboard!');
+        }
+    }
+
+    function clearAll() {
+        document.getElementById('collName').value = 'users';
+        document.getElementById('findFilters').innerHTML = '';
+        document.getElementById('findProjection').innerHTML = '';
+        document.getElementById('findSort').innerHTML = '';
+        document.getElementById('findLimit').value = '';
+        document.getElementById('findSkip').value = '';
+        document.getElementById('aggStages').innerHTML = '';
+        document.getElementById('updateFilters').innerHTML = '';
+        document.getElementById('updateOps').innerHTML = '';
+        document.getElementById('deleteFilters').innerHTML = '';
+        document.getElementById('insert-editor').value = '{ "name": "Alice", "age": 30, "email": "alice@example.com" }';
+        setType('find');
+        generate();
+    }
+
+    // Initialize with a sample filter
+    addFindFilter();
+    generate();
+    </script>
+
+    <!-- Keyboard shortcuts -->
+    <div id="kbd-toast" style="display:none;position:fixed;bottom:20px;right:20px;background:#3b82f6;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:opacity 0.3s;"></div>
+    <div id="kbd-help" style="position:fixed;bottom:20px;left:20px;z-index:9998;">
+        <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#a0a0a0;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;" title="Keyboard shortcuts">&#9000; Shortcuts</button>
+        <div style="display:none;position:absolute;bottom:40px;left:0;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:12px 16px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+            <div style="font-weight:600;margin-bottom:8px;color:#e0e0e0;font-size:13px;">Keyboard Shortcuts</div>
+            <div style="color:#a0a0a0;font-size:12px;line-height:2;">
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Ctrl</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Enter</kbd> Copy output<br>
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Ctrl</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Shift</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">C</kbd> Copy output<br>
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Ctrl</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">L</kbd> Clear
+            </div>
+        </div>
+    </div>
+    <script>
+    function showToast(msg){var t=document.getElementById('kbd-toast');if(!t)return;t.textContent=msg;t.style.display='block';t.style.opacity='1';setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.style.display='none';},300);},1500);}
+    (function(){
+        document.addEventListener('keydown',function(e){
+            if(e.ctrlKey&&e.key==='Enter'){
+                e.preventDefault();
+                copyOutput();
+            }
+            if(e.ctrlKey&&e.shiftKey&&e.key==='C'){
+                e.preventDefault();
+                copyOutput();
+            }
+            if(e.ctrlKey&&e.key==='l'&&!e.shiftKey){
+                e.preventDefault();
+                clearAll();showToast('Cleared!');
+            }
+        });
+    })();
+    </script>
+
+<script src="/js/track.js" defer></script>
+</body>
+</html>

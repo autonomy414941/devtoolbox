@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS :has() Selector: Complete Guide — The Parent Selector | DevToolbox Blog</title>
+    <meta name="description" content="Master the CSS :has() selector, the long-awaited parent selector. Learn syntax, practical examples, combining with other selectors, browser support, performance tips, and real-world use cases.">
+    <meta name="keywords" content="css has selector, css parent selector, css has examples, css has browser support, css relational selector, css has pseudo-class">
+    <meta property="og:title" content="CSS :has() Selector: Complete Guide — The Parent Selector">
+    <meta property="og:description" content="Master the CSS :has() selector. Learn syntax, examples, combining with other selectors, browser support, and real-world use cases.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/css-has-selector-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-css-has-selector-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="CSS :has() Selector: Complete Guide">
+    <meta name="twitter:description" content="Master the CSS :has() selector, the parent selector CSS developers have wanted for years.">
+    <meta property="article:published_time" content="2026-02-12">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/css-has-selector-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "CSS :has() Selector: Complete Guide — The Parent Selector",
+        "description": "Master the CSS :has() selector, the long-awaited parent selector. Learn syntax, practical examples, combining with other selectors, browser support, performance tips, and real-world use cases.",
+        "datePublished": "2026-02-12",
+        "dateModified": "2026-02-12",
+        "url": "https://devtoolbox.dedyn.io/blog/css-has-selector-guide",
+        "author": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        },
+        "publisher": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the CSS :has() selector and why is it called the parent selector?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The CSS :has() selector is a relational pseudo-class that selects an element based on its descendants, children, or siblings. It is called the parent selector because it allows you to style a parent element based on what it contains. For example, a:has(img) selects any anchor element that contains an image. Before :has(), CSS could only select elements based on their ancestors, never the other way around. The :has() selector finally gives CSS the ability to look downward in the DOM tree."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is the CSS :has() selector supported in all browsers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, as of late 2023 the CSS :has() selector is supported in all major browsers including Chrome 105+, Safari 15.4+, Edge 105+, and Firefox 121+. It is considered Baseline Widely Available in 2025. For older browsers, you can use @supports selector(:has(*)) to provide fallback styles, but polyfills are generally not practical because :has() requires real-time DOM awareness that JavaScript shims cannot efficiently replicate."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can :has() select previous siblings in CSS?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, :has() can effectively select previous siblings by combining it with the general sibling combinator (~) or adjacent sibling combinator (+). For example, h2:has(+ p) selects an h2 that is immediately followed by a p element, effectively acting as a previous sibling selector. Similarly, .item:has(~ .item:hover) selects all .item elements that appear before a hovered .item. This was impossible in CSS before :has()."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does using :has() cause CSS performance problems?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "In typical usage, :has() does not cause noticeable performance issues. Browsers have implemented specific optimizations for :has() selectors. However, deeply nested or highly complex :has() selectors with broad universal matches like :has(*) on the body element can trigger more style recalculations. Best practices include keeping :has() selectors as specific as possible, avoiding :has() in selectors that match thousands of elements, and preferring direct child selectors (:has(> .child)) over descendant selectors when appropriate."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How does :has() compare to :focus-within and other existing pseudo-classes?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": ":focus-within is a narrow pseudo-class that only matches when a descendant has focus. :has() is far more general and can replicate :focus-within with :has(:focus), but also handles cases :focus-within cannot, such as styling based on checked checkboxes, valid/invalid inputs, hover states of specific children, empty containers, or the presence of certain child element types. Think of :has() as a superset that can express what :focus-within does and much more."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">CSS :has() Selector Guide</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Blog",
+                        "item": "https://devtoolbox.dedyn.io/blog"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "CSS :has() Selector: Complete Guide"
+                }
+        ]
+    }
+    </script>
+
+    <main style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+        <article>
+        <h1>CSS :has() Selector: Complete Guide &mdash; The Parent Selector</h1>
+        <p class="blog-date">Published on <time datetime="2026-02-12">February 12, 2026</time></p>
+        <p>For over two decades, CSS developers asked for one feature above all others: a parent selector. The ability to style an element based on its children was considered the holy grail of CSS. In 2022, browsers began shipping the <code>:has()</code> pseudo-class, and by late 2023 it reached full cross-browser support. This guide covers everything you need to know to use <code>:has()</code> effectively in production.</p>
+
+        <nav style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1.5rem 0;">
+            <strong>Table of Contents</strong>
+            <ol style="margin: 0.5rem 0 0 1.25rem; line-height: 1.8;">
+                <li><a href="#what-is-has">What Is :has()?</a></li>
+                <li><a href="#browser-support">Browser Support</a></li>
+                <li><a href="#basic-syntax">Basic Syntax</a></li>
+                <li><a href="#parent-selection">Parent Selection Patterns</a></li>
+                <li><a href="#sibling-selection">Sibling Selection with :has()</a></li>
+                <li><a href="#combining-selectors">Combining :has() with Other Selectors</a></li>
+                <li><a href="#form-styling">Form Styling with :has()</a></li>
+                <li><a href="#layout-patterns">Layout Patterns with :has()</a></li>
+                <li><a href="#theming">Theming with :has()</a></li>
+                <li><a href="#navigation">Navigation &amp; Menu Patterns</a></li>
+                <li><a href="#performance">Performance Considerations</a></li>
+                <li><a href="#replacing-js">Replacing JavaScript with :has()</a></li>
+                <li><a href="#best-practices">Best Practices</a></li>
+                <li><a href="#faq">Frequently Asked Questions</a></li>
+            </ol>
+        </nav>
+
+        <!-- Section 1: What Is :has()? -->
+        <h2 id="what-is-has">1. What Is :has()?</h2>
+        <p>The <code>:has()</code> pseudo-class is a <strong>relational pseudo-class</strong> defined in the CSS Selectors Level 4 specification. It matches an element if any of the relative selectors passed as arguments match at least one element when anchored against the subject element.</p>
+        <p>In plain language: <code>:has()</code> lets you select an element based on what it <em>contains</em> or what <em>follows</em> it. This is why it is widely known as the "parent selector," though it can do much more than parent selection alone.</p>
+
+<pre><code class="language-css">/* Select any &lt;a&gt; that contains an &lt;img&gt; */
+a:has(img) {
+  display: inline-block;
+  border: 2px solid transparent;
+}
+
+/* Select any &lt;section&gt; that contains a &lt;h2&gt; */
+section:has(h2) {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+}</code></pre>
+
+        <p>Before <code>:has()</code>, achieving this required JavaScript. You would query the DOM, check for children, and toggle classes manually. Now the browser handles it natively, reacting to DOM changes in real time.</p>
+
+        <!-- Section 2: Browser Support -->
+        <h2 id="browser-support">2. Browser Support</h2>
+        <p>The <code>:has()</code> selector is <strong>Baseline Widely Available</strong> as of 2025. Here is the support timeline:</p>
+        <ul>
+            <li><strong>Safari 15.4+</strong> (March 2022) &mdash; first to ship</li>
+            <li><strong>Chrome 105+</strong> (August 2022)</li>
+            <li><strong>Edge 105+</strong> (August 2022)</li>
+            <li><strong>Firefox 121+</strong> (December 2023) &mdash; last major holdout</li>
+        </ul>
+        <p>For progressive enhancement, use <code>@supports</code>:</p>
+<pre><code class="language-css">/* Feature detection for :has() */
+@supports selector(:has(*)) {
+  .card:has(img) {
+    grid-template-rows: auto 1fr;
+  }
+}
+
+/* Fallback for older browsers */
+@supports not selector(:has(*)) {
+  .card-with-image {
+    grid-template-rows: auto 1fr;
+  }
+}</code></pre>
+        <p>Polyfills are impractical for <code>:has()</code> because the selector needs live DOM awareness. If you must support very old browsers, use JavaScript class toggling as a fallback rather than attempting a CSS polyfill.</p>
+
+        <!-- Section 3: Basic Syntax -->
+        <h2 id="basic-syntax">3. Basic Syntax</h2>
+        <p>The <code>:has()</code> pseudo-class accepts one or more comma-separated relative selectors as its argument:</p>
+<pre><code class="language-css">/* Single argument */
+element:has(selector) { }
+
+/* Multiple arguments (OR logic) */
+element:has(selector1, selector2) { }
+
+/* Direct child only */
+element:has(&gt; selector) { }
+
+/* Descendant at any depth (default) */
+element:has(selector) { }</code></pre>
+
+        <p>The comma inside <code>:has()</code> acts as logical OR. The element matches if <em>any</em> of the selectors match:</p>
+<pre><code class="language-css">/* Matches if the section contains h2 OR h3 */
+section:has(h2, h3) {
+  margin-bottom: 2rem;
+}
+
+/* Equivalent to writing: */
+section:has(h2),
+section:has(h3) {
+  margin-bottom: 2rem;
+}</code></pre>
+
+        <p>Use the direct child combinator <code>&gt;</code> when you only want to match immediate children, not deeply nested elements:</p>
+<pre><code class="language-css">/* Only matches if img is a direct child */
+.card:has(&gt; img) {
+  padding-top: 0;
+}
+
+/* Matches img at any depth inside .card */
+.card:has(img) {
+  padding-top: 0;
+}</code></pre>
+
+        <!-- Section 4: Parent Selection Patterns -->
+        <h2 id="parent-selection">4. Parent Selection Patterns</h2>
+        <p>The most common use of <code>:has()</code> is styling a parent based on the state or type of its children.</p>
+
+        <h3>Style parent based on child element type</h3>
+<pre><code class="language-css">/* Card with an image gets a different layout */
+.card:has(&gt; img) {
+  display: grid;
+  grid-template-rows: 200px 1fr;
+  padding: 0;
+}
+
+.card:not(:has(&gt; img)) {
+  padding: 1.5rem;
+}</code></pre>
+
+        <h3>Style parent based on child state</h3>
+<pre><code class="language-css">/* Highlight form group when its input is focused */
+.form-group:has(input:focus) {
+  background: rgba(59, 130, 246, 0.05);
+  border-color: #3b82f6;
+}
+
+/* Style a list item when its link is hovered */
+li:has(a:hover) {
+  background: rgba(255, 255, 255, 0.05);
+}</code></pre>
+
+        <h3>Style parent based on child count</h3>
+<pre><code class="language-html">&lt;!-- HTML --&gt;
+&lt;ul class="tag-list"&gt;
+  &lt;li&gt;CSS&lt;/li&gt;
+  &lt;li&gt;HTML&lt;/li&gt;
+  &lt;li&gt;JavaScript&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+<pre><code class="language-css">/* If the list has more than 3 items, switch to grid */
+.tag-list:has(&gt; :nth-child(4)) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+}</code></pre>
+
+        <!-- Section 5: Sibling Selection -->
+        <h2 id="sibling-selection">5. Sibling Selection with :has()</h2>
+        <p>CSS has always been able to select <em>next</em> siblings with <code>+</code> and <code>~</code>, but never <em>previous</em> siblings. The <code>:has()</code> selector changes that.</p>
+
+        <h3>Previous sibling selector</h3>
+<pre><code class="language-css">/* Select the h2 that comes BEFORE a p */
+h2:has(+ p) {
+  margin-bottom: 0.5rem;
+}
+
+/* Select h2 that does NOT have a p after it */
+h2:not(:has(+ p)) {
+  margin-bottom: 1.5rem;
+}
+
+/* Select all items before a hovered item */
+.item:has(~ .item:hover) {
+  opacity: 0.7;
+}</code></pre>
+
+        <h3>Star rating pattern</h3>
+        <p>A classic example: hovering a star highlights it and all stars before it.</p>
+<pre><code class="language-html">&lt;div class="stars"&gt;
+  &lt;span class="star"&gt;&amp;#9733;&lt;/span&gt;
+  &lt;span class="star"&gt;&amp;#9733;&lt;/span&gt;
+  &lt;span class="star"&gt;&amp;#9733;&lt;/span&gt;
+  &lt;span class="star"&gt;&amp;#9733;&lt;/span&gt;
+  &lt;span class="star"&gt;&amp;#9733;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+<pre><code class="language-css">.star {
+  color: #666;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: color 0.15s;
+}
+
+/* Hovered star + all previous stars turn gold */
+.star:hover,
+.star:has(~ .star:hover) {
+  color: #f59e0b;
+}</code></pre>
+
+        <!-- Section 6: Combining with Other Selectors -->
+        <h2 id="combining-selectors">6. Combining :has() with Other Selectors</h2>
+
+        <h3>:has() + :not()</h3>
+<pre><code class="language-css">/* Select cards WITHOUT images */
+.card:not(:has(img)) {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+}
+
+/* Select inputs that are NOT inside a :has(:invalid) form */
+form:not(:has(:invalid)) .submit-btn {
+  opacity: 1;
+  pointer-events: auto;
+}</code></pre>
+
+        <h3>:has() + :is()</h3>
+<pre><code class="language-css">/* Match sections containing any heading level */
+section:has(:is(h1, h2, h3, h4, h5, h6)) {
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Style a container that has any interactive element */
+.container:has(:is(input, select, textarea, button)) {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+}</code></pre>
+
+        <h3>:has() + :where()</h3>
+        <p>Use <code>:where()</code> inside <code>:has()</code> when you want zero specificity contribution from the argument list:</p>
+<pre><code class="language-css">/* The :where() keeps specificity low */
+.wrapper:has(:where(.alert, .warning, .error)) {
+  border-left: 4px solid #ef4444;
+}</code></pre>
+
+        <h3>:has() with CSS Nesting</h3>
+<pre><code class="language-css">.card {
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  &amp;:has(img) {
+    padding: 0;
+
+    &amp; img {
+      border-radius: 8px 8px 0 0;
+      width: 100%;
+    }
+
+    &amp; .card-body {
+      padding: 1.5rem;
+    }
+  }
+}</code></pre>
+        <p>Learn more about nesting syntax in our <a href="/blog/css-nesting-complete-guide">CSS Nesting Complete Guide</a>.</p>
+
+        <!-- Section 7: Form Styling -->
+        <h2 id="form-styling">7. Form Styling with :has()</h2>
+        <p>Form styling is where <code>:has()</code> truly shines. It replaces many patterns that previously needed JavaScript.</p>
+
+        <h3>Validation states</h3>
+<pre><code class="language-css">/* Green border when all required fields are valid */
+form:has(input:required:valid):not(:has(input:required:invalid)) {
+  border-color: #22c55e;
+}
+
+/* Style individual field wrappers */
+.field:has(input:invalid:not(:placeholder-shown)) {
+  --field-color: #ef4444;
+}
+
+.field:has(input:valid:not(:placeholder-shown)) {
+  --field-color: #22c55e;
+}
+
+.field {
+  border-left: 3px solid var(--field-color, transparent);
+}</code></pre>
+
+        <h3>Checkbox and radio styling</h3>
+<pre><code class="language-css">/* Style a label's parent when checkbox is checked */
+.option:has(input[type="checkbox"]:checked) {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+/* Toggle visibility based on radio selection */
+.panel:has(input[value="advanced"]:checked) ~ .advanced-options {
+  display: block;
+}</code></pre>
+
+        <h3>:has() vs :focus-within</h3>
+        <p>The <code>:focus-within</code> pseudo-class only responds to focus. With <code>:has()</code>, you can respond to any state:</p>
+<pre><code class="language-css">/* :focus-within equivalent */
+.search-bar:has(input:focus) {
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* But :has() can also do things :focus-within cannot */
+.search-bar:has(input:not(:placeholder-shown)) {
+  /* Input has content &mdash; show clear button */
+  .clear-btn { display: block; }
+}
+
+.search-bar:has(input:placeholder-shown) {
+  /* Input is empty &mdash; show search icon */
+  .search-icon { opacity: 1; }
+}</code></pre>
+
+        <!-- Section 8: Layout Patterns -->
+        <h2 id="layout-patterns">8. Layout Patterns with :has()</h2>
+
+        <h3>Quantity queries</h3>
+        <p>Adjust layout based on how many items a container holds:</p>
+<pre><code class="language-css">/* 1 item: single column */
+.grid:has(&gt; :only-child) {
+  grid-template-columns: 1fr;
+  max-width: 600px;
+}
+
+/* 2 items: two columns */
+.grid:has(&gt; :nth-child(2)):not(:has(&gt; :nth-child(3))) {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* 3+ items: three columns */
+.grid:has(&gt; :nth-child(3)) {
+  grid-template-columns: repeat(3, 1fr);
+}</code></pre>
+
+        <h3>Empty state styling</h3>
+<pre><code class="language-css">/* Show empty state message when list has no items */
+.task-list:not(:has(&gt; .task)) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.task-list:not(:has(&gt; .task))::after {
+  content: "No tasks yet. Add one to get started.";
+  color: #9ca3af;
+  font-style: italic;
+}</code></pre>
+        <p>For more layout techniques, see our <a href="/blog/css-grid-complete-guide">CSS Grid Complete Guide</a>.</p>
+
+        <h3>Sidebar layout toggle</h3>
+<pre><code class="language-css">/* If sidebar has content, use two-column layout */
+.page:has(&gt; .sidebar:not(:empty)) {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+}
+
+/* If sidebar is empty, full-width main content */
+.page:has(&gt; .sidebar:empty),
+.page:not(:has(&gt; .sidebar)) {
+  display: block;
+  max-width: 800px;
+}</code></pre>
+
+        <!-- Section 9: Theming -->
+        <h2 id="theming">9. Theming with :has()</h2>
+        <p>The <code>:has()</code> selector enables CSS-only theme switching without JavaScript.</p>
+
+        <h3>Dark mode toggle</h3>
+<pre><code class="language-html">&lt;body&gt;
+  &lt;label class="theme-toggle"&gt;
+    &lt;input type="checkbox" id="dark-mode"&gt;
+    Dark Mode
+  &lt;/label&gt;
+  &lt;!-- page content --&gt;
+&lt;/body&gt;</code></pre>
+<pre><code class="language-css">/* Default: light theme */
+:root {
+  --bg: #ffffff;
+  --text: #1a1a2e;
+  --surface: #f4f4f5;
+}
+
+/* Switch to dark when checkbox is checked */
+:root:has(#dark-mode:checked) {
+  --bg: #0a0a0b;
+  --text: #e4e4e7;
+  --surface: #18181b;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}</code></pre>
+        <p>Combine with <a href="/blog/css-variables-guide">CSS custom properties</a> for a full theming system. You can also pair this with <code>prefers-color-scheme</code> for automatic defaults:</p>
+<pre><code class="language-css">/* Respect system preference by default */
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(#light-mode:checked)) {
+    --bg: #0a0a0b;
+    --text: #e4e4e7;
+  }
+}
+
+/* Override with explicit toggle */
+:root:has(#light-mode:checked) {
+  --bg: #ffffff;
+  --text: #1a1a2e;
+}</code></pre>
+
+        <h3>Accent color themes</h3>
+<pre><code class="language-css">:root:has(input[name="theme"][value="blue"]:checked) {
+  --accent: #3b82f6;
+}
+:root:has(input[name="theme"][value="green"]:checked) {
+  --accent: #22c55e;
+}
+:root:has(input[name="theme"][value="purple"]:checked) {
+  --accent: #a855f7;
+}</code></pre>
+
+        <!-- Section 10: Navigation & Menu Patterns -->
+        <h2 id="navigation">10. Navigation &amp; Menu Patterns</h2>
+
+        <h3>Active parent menu items</h3>
+<pre><code class="language-css">/* Highlight nav item that contains the current page link */
+.nav-item:has(&gt; a[aria-current="page"]) {
+  background: rgba(59, 130, 246, 0.1);
+  border-bottom: 2px solid #3b82f6;
+}
+
+/* Style parent menu when submenu is open */
+.nav-item:has(&gt; .submenu:hover),
+.nav-item:has(&gt; a:hover) {
+  background: rgba(255, 255, 255, 0.05);
+}</code></pre>
+
+        <h3>Dropdown indicator</h3>
+<pre><code class="language-css">/* Add dropdown arrow only to items with submenus */
+.nav-item:has(&gt; .submenu)::after {
+  content: "\25BE"; /* down triangle */
+  margin-left: 0.25rem;
+  font-size: 0.8em;
+}
+
+/* Show submenu on hover */
+.nav-item:has(&gt; .submenu):hover &gt; .submenu {
+  display: block;
+  opacity: 1;
+}</code></pre>
+
+        <h3>Breadcrumb separator</h3>
+<pre><code class="language-css">/* Only add separator if there is a next sibling */
+.breadcrumb-item:has(+ .breadcrumb-item)::after {
+  content: "/";
+  margin: 0 0.5rem;
+  color: #9ca3af;
+}</code></pre>
+
+        <!-- Section 11: Performance -->
+        <h2 id="performance">11. Performance Considerations</h2>
+        <p>Browsers have invested heavily in optimizing <code>:has()</code>. Chrome, for example, uses bloom filters and fast-reject heuristics to avoid unnecessary style recalculations. Still, some patterns are more expensive than others.</p>
+
+        <h3>Forgiving selector list</h3>
+        <p>The <code>:has()</code> pseudo-class uses a <strong>forgiving selector list</strong>. If one argument is invalid, the others still work:</p>
+<pre><code class="language-css">/* The :foo part is invalid but doesn't break the rule */
+.card:has(img, :foo, .badge) {
+  /* Still matches cards with img or .badge */
+}</code></pre>
+
+        <h3>Performance tips</h3>
+        <ul>
+            <li><strong>Be specific:</strong> <code>.card:has(&gt; img)</code> is faster than <code>.card:has(img)</code> because the browser only checks direct children.</li>
+            <li><strong>Avoid overly broad subjects:</strong> <code>*:has(.error)</code> forces the browser to check every element. Use <code>.form-field:has(.error)</code> instead.</li>
+            <li><strong>Limit depth:</strong> <code>:has(&gt; .child)</code> is cheaper than <code>:has(.deeply .nested .child)</code>.</li>
+            <li><strong>Avoid compound :has():</strong> <code>:has(:has())</code> (nested :has) is invalid in CSS and will not match.</li>
+            <li><strong>Test with real content:</strong> performance characteristics depend on actual DOM size and structure.</li>
+        </ul>
+<pre><code class="language-css">/* Slower: broad subject, descendant search */
+div:has(.active) { }
+
+/* Faster: specific subject, direct child */
+.tab-bar:has(&gt; .tab.active) { }</code></pre>
+
+        <!-- Section 12: Replacing JavaScript -->
+        <h2 id="replacing-js">12. Replacing JavaScript with :has()</h2>
+        <p>Many common JavaScript patterns exist solely because CSS could not select parents. Here are patterns you can now handle with CSS alone.</p>
+
+        <h3>Conditional class toggling</h3>
+<pre><code class="language-javascript">// Before: JavaScript
+document.querySelectorAll('.card').forEach(card =&gt; {
+  if (card.querySelector('img')) {
+    card.classList.add('has-image');
+  }
+});</code></pre>
+<pre><code class="language-css">/* After: CSS only */
+.card:has(img) {
+  /* styles for cards with images */
+}</code></pre>
+
+        <h3>Form submit button state</h3>
+<pre><code class="language-javascript">// Before: JavaScript
+form.addEventListener('input', () =&gt; {
+  const allValid = form.checkValidity();
+  submitBtn.disabled = !allValid;
+});</code></pre>
+<pre><code class="language-css">/* After: CSS only (visual treatment) */
+form:has(:invalid) .submit-btn {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+form:not(:has(:invalid)) .submit-btn {
+  opacity: 1;
+  pointer-events: auto;
+}</code></pre>
+        <p><strong>Note:</strong> The CSS approach handles visual state. You may still want JavaScript for actual form validation and submission logic.</p>
+
+        <h3>Empty state detection</h3>
+<pre><code class="language-javascript">// Before: JavaScript
+if (container.children.length === 0) {
+  container.classList.add('is-empty');
+}</code></pre>
+<pre><code class="language-css">/* After: CSS only */
+.container:not(:has(&gt; *)) {
+  /* empty state styles */
+}
+.container:not(:has(&gt; *))::before {
+  content: "Nothing here yet.";
+}</code></pre>
+
+        <h3>Tab-panel connection</h3>
+<pre><code class="language-html">&lt;div class="tabs"&gt;
+  &lt;input type="radio" name="tab" id="tab1" checked&gt;
+  &lt;label for="tab1"&gt;Tab 1&lt;/label&gt;
+  &lt;input type="radio" name="tab" id="tab2"&gt;
+  &lt;label for="tab2"&gt;Tab 2&lt;/label&gt;
+  &lt;div class="panel" data-tab="1"&gt;Panel 1 content&lt;/div&gt;
+  &lt;div class="panel" data-tab="2"&gt;Panel 2 content&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre><code class="language-css">.panel { display: none; }
+
+.tabs:has(#tab1:checked) [data-tab="1"],
+.tabs:has(#tab2:checked) [data-tab="2"] {
+  display: block;
+}</code></pre>
+
+        <!-- Section 13: Best Practices -->
+        <h2 id="best-practices">13. Best Practices</h2>
+        <ol>
+            <li><strong>Use <code>:has()</code> for styling, not logic.</strong> It is a CSS selector, not a programming construct. Keep validation, data handling, and state management in JavaScript.</li>
+            <li><strong>Prefer direct child selectors.</strong> <code>:has(&gt; .child)</code> is both more performant and more predictable than <code>:has(.child)</code>.</li>
+            <li><strong>Combine with <code>@supports</code> for progressive enhancement.</strong> Even though browser support is excellent, provide fallbacks for critical UI patterns.</li>
+            <li><strong>Avoid nesting <code>:has()</code> inside <code>:has()</code>.</strong> The spec explicitly disallows <code>:has()</code> within <code>:has()</code>. It will not match.</li>
+            <li><strong>Keep selectors readable.</strong> If a <code>:has()</code> selector becomes longer than a single line, consider using custom properties or adding a comment explaining the intent.</li>
+            <li><strong>Test dynamically.</strong> The <code>:has()</code> selector responds to DOM changes in real time. Add and remove elements in DevTools to verify behavior.</li>
+            <li><strong>Use our <a href="/tools/css-beautifier">CSS Beautifier</a></strong> to keep complex selectors formatted and readable.</li>
+            <li><strong>Pair with <a href="/blog/css-variables-guide">CSS custom properties</a></strong> for maximum flexibility. Use <code>:has()</code> to set variables and let children inherit them.</li>
+        </ol>
+<pre><code class="language-css">/* Best practice: :has() sets variables, children consume them */
+.card:has(&gt; .badge[data-type="warning"]) {
+  --card-accent: #f59e0b;
+  --card-bg: rgba(245, 158, 11, 0.05);
+}
+
+.card:has(&gt; .badge[data-type="error"]) {
+  --card-accent: #ef4444;
+  --card-bg: rgba(239, 68, 68, 0.05);
+}
+
+.card {
+  background: var(--card-bg, transparent);
+  border-left: 3px solid var(--card-accent, transparent);
+}</code></pre>
+
+        <p>For more CSS selector techniques, explore our <a href="/blog/css-selectors-complete-guide">CSS Selectors Complete Guide</a> and <a href="/blog/css-animations-complete-guide">CSS Animations Complete Guide</a>.</p>
+
+        <!-- FAQ Section -->
+        <h2 id="faq">Frequently Asked Questions</h2>
+
+        <div class="faq-item" style="margin-bottom: 1.5rem;">
+            <h3>What is the CSS :has() selector and why is it called the parent selector?</h3>
+            <p>The CSS <code>:has()</code> selector is a relational pseudo-class that selects an element based on its descendants, children, or siblings. It is called the "parent selector" because it allows you to style a parent element based on what it contains. For example, <code>a:has(img)</code> selects any anchor element that contains an image. Before <code>:has()</code>, CSS could only select elements based on their ancestors, never the other way around. The <code>:has()</code> selector finally gives CSS the ability to look downward in the DOM tree.</p>
+        </div>
+
+        <div class="faq-item" style="margin-bottom: 1.5rem;">
+            <h3>Is the CSS :has() selector supported in all browsers?</h3>
+            <p>Yes, as of late 2023 the CSS <code>:has()</code> selector is supported in all major browsers including Chrome 105+, Safari 15.4+, Edge 105+, and Firefox 121+. It is considered Baseline Widely Available in 2025. For older browsers, you can use <code>@supports selector(:has(*))</code> to provide fallback styles, but polyfills are generally not practical because <code>:has()</code> requires real-time DOM awareness that JavaScript shims cannot efficiently replicate.</p>
+        </div>
+
+        <div class="faq-item" style="margin-bottom: 1.5rem;">
+            <h3>Can :has() select previous siblings in CSS?</h3>
+            <p>Yes, <code>:has()</code> can effectively select previous siblings by combining it with the general sibling combinator (<code>~</code>) or adjacent sibling combinator (<code>+</code>). For example, <code>h2:has(+ p)</code> selects an <code>h2</code> that is immediately followed by a <code>p</code> element, effectively acting as a previous sibling selector. Similarly, <code>.item:has(~ .item:hover)</code> selects all <code>.item</code> elements that appear before a hovered <code>.item</code>. This was impossible in CSS before <code>:has()</code>.</p>
+        </div>
+
+        <div class="faq-item" style="margin-bottom: 1.5rem;">
+            <h3>Does using :has() cause CSS performance problems?</h3>
+            <p>In typical usage, <code>:has()</code> does not cause noticeable performance issues. Browsers have implemented specific optimizations for <code>:has()</code> selectors. However, deeply nested or highly complex <code>:has()</code> selectors with broad universal matches like <code>:has(*)</code> on the body element can trigger more style recalculations. Best practices include keeping <code>:has()</code> selectors as specific as possible, avoiding <code>:has()</code> in selectors that match thousands of elements, and preferring direct child selectors (<code>:has(&gt; .child)</code>) over descendant selectors when appropriate.</p>
+        </div>
+
+        <div class="faq-item" style="margin-bottom: 1.5rem;">
+            <h3>How does :has() compare to :focus-within and other existing pseudo-classes?</h3>
+            <p><code>:focus-within</code> is a narrow pseudo-class that only matches when a descendant has focus. <code>:has()</code> is far more general and can replicate <code>:focus-within</code> with <code>:has(:focus)</code>, but also handles cases <code>:focus-within</code> cannot, such as styling based on checked checkboxes, valid/invalid inputs, hover states of specific children, empty containers, or the presence of certain child element types. Think of <code>:has()</code> as a superset that can express what <code>:focus-within</code> does and much more.</p>
+        </div>
+
+        </article>
+    </main>
+
+    <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/css-grid-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Grid Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Master two-dimensional layouts with CSS Grid</div>
+            </a>
+            <a href="/blog/css-selectors-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Selectors Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Every CSS selector explained with examples</div>
+            </a>
+            <a href="/blog/css-animations-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Animations Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Transitions, keyframes, and animation best practices</div>
+            </a>
+            <a href="/blog/css-variables-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Variables Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Custom properties, theming, and dynamic styles</div>
+            </a>
+            <a href="/tools/css-beautifier" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Beautifier Tool</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Format and clean up your CSS code</div>
+            </a>
+        </div>
+    </section>
+
+    <footer><p>DevToolbox &mdash; Free developer tools, no strings attached.</p></footer>
+    <script src="/js/track.js" defer></script>
+</body>
+</html>

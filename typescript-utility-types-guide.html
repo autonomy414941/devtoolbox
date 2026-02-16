@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeScript Utility Types: Complete Guide with Examples | DevToolbox Blog</title>
+    <meta name="description" content="Master TypeScript utility types: Partial, Required, Readonly, Pick, Omit, Record, Exclude, Extract, ReturnType, Parameters, and more. Practical examples and custom utility types.">
+    <meta name="keywords" content="typescript utility types, typescript partial, typescript pick, typescript omit, typescript record, typescript exclude, typescript mapped types, typescript conditional types">
+    <meta property="og:title" content="TypeScript Utility Types: Complete Guide with Examples">
+    <meta property="og:description" content="Master TypeScript utility types: Partial, Required, Pick, Omit, Record, Exclude, ReturnType, and custom utility types with examples.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/typescript-utility-types-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-typescript-utility-types-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="TypeScript Utility Types: Complete Guide with Examples">
+    <meta name="twitter:description" content="Master TypeScript utility types with practical examples.">
+    <meta property="article:published_time" content="2026-02-12">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/typescript-utility-types-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "TypeScript Utility Types: Complete Guide with Examples",
+        "description": "Master TypeScript utility types: Partial, Required, Readonly, Pick, Omit, Record, Exclude, Extract, ReturnType, Parameters, and more. Practical examples and custom utility types.",
+        "datePublished": "2026-02-12",
+        "dateModified": "2026-02-12",
+        "url": "https://devtoolbox.dedyn.io/blog/typescript-utility-types-guide",
+        "author": { "@type": "Organization", "name": "DevToolbox" },
+        "publisher": { "@type": "Organization", "name": "DevToolbox", "logo": { "@type": "ImageObject", "url": "https://devtoolbox.dedyn.io/favicon.svg" } }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What are TypeScript utility types?",
+                "acceptedAnswer": { "@type": "Answer", "text": "TypeScript utility types are built-in generic types that transform existing types into new ones. They let you make properties optional (Partial), required (Required), read-only (Readonly), pick specific properties (Pick), omit properties (Omit), create dictionaries (Record), and extract or exclude union members (Extract, Exclude). They eliminate repetitive type definitions and keep your codebase DRY." }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the difference between Pick and Omit in TypeScript?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Pick<T, K> creates a new type by selecting specific properties K from type T, while Omit<T, K> creates a new type by removing properties K from type T. They are complementary: Pick is better when you want a small subset of properties, and Omit is better when you want most properties but need to exclude a few. For example, Pick<User, 'name' | 'email'> keeps only name and email, while Omit<User, 'password'> keeps everything except password." }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I create custom utility types in TypeScript?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Custom utility types are built using mapped types, conditional types, and the infer keyword. A mapped type iterates over keys of a type using the [K in keyof T] syntax and transforms each property. Conditional types use the T extends U ? X : Y pattern to branch based on type relationships. The infer keyword extracts types from within other types. For example, type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] } makes all nested properties optional." }
+            },
+            {
+                "@type": "Question",
+                "name": "When should I use Record vs a regular interface in TypeScript?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Use Record<K, V> when you need a dictionary or map-like structure where all values share the same type, especially with dynamic or union keys. Use an interface when each property has a different type or when you need declaration merging. For example, Record<string, number> is ideal for a scores dictionary, while an interface is better for a User object with name (string), age (number), and active (boolean) properties." }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the Awaited utility type in TypeScript?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Awaited<T> (TypeScript 4.5+) recursively unwraps Promise types to get the resolved value type. Awaited<Promise<string>> gives you string, and Awaited<Promise<Promise<number>>> gives you number. It is especially useful with ReturnType when working with async functions: type Result = Awaited<ReturnType<typeof fetchUser>> gives you the resolved return type of an async function rather than a Promise." }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">TypeScript Utility Types Guide</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "TypeScript Utility Types Guide" }
+        ]
+    }
+    </script>
+    <main class="blog-post">
+        <article>
+            <h1>TypeScript Utility Types: Complete Guide with Examples</h1>
+            <p class="meta">Published February 12, 2026 &middot; 15 min read</p>
+
+            <p class="intro">TypeScript ships with over 20 built-in utility types that transform existing types into new ones. Instead of writing repetitive type definitions, utility types let you derive new types from your existing ones &mdash; making properties optional, picking subsets, creating dictionaries, extracting return types, and much more. This guide covers every built-in utility type with practical examples, then shows you how to build your own.</p>
+
+            <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+                <strong style="color: #3b82f6;">&#9881; Try it:</strong> Use our <a href="/tools/json-to-typescript" style="color: #3b82f6;">JSON to TypeScript Converter</a> to generate interfaces from JSON data, then apply utility types to transform them.
+            </div>
+
+            <nav class="toc">
+                <h2>Table of Contents</h2>
+                <ol>
+                    <li><a href="#what-are-utility-types">What Are Utility Types?</a></li>
+                    <li><a href="#object-utilities">Object Type Utilities</a></li>
+                    <li><a href="#record-type">Record Type</a></li>
+                    <li><a href="#union-utilities">Union Type Utilities</a></li>
+                    <li><a href="#function-utilities">Function Type Utilities</a></li>
+                    <li><a href="#string-utilities">String Utilities</a></li>
+                    <li><a href="#promise-utilities">Promise Utilities</a></li>
+                    <li><a href="#mapped-types">Mapped Types</a></li>
+                    <li><a href="#conditional-types">Conditional Types</a></li>
+                    <li><a href="#template-literal-types">Template Literal Types</a></li>
+                    <li><a href="#custom-utility-types">Custom Utility Types</a></li>
+                    <li><a href="#real-world-patterns">Real-World Patterns</a></li>
+                </ol>
+            </nav>
+
+            <!-- Section 1 -->
+            <section id="what-are-utility-types">
+                <h2>1. What Are Utility Types?</h2>
+
+                <p>Utility types are generic types built into TypeScript that take one or more type parameters and produce a transformed type. They solve a fundamental problem: you often need variations of an existing type without duplicating its definition.</p>
+
+<pre><code class="language-typescript">interface User {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+    createdAt: Date;
+}
+
+// Without utility types: manual duplication
+interface UserUpdate {
+    name?: string;
+    email?: string;
+    password?: string;
+}
+
+// With utility types: derive from the source type
+type UserUpdate = Partial&lt;Omit&lt;User, "id" | "createdAt"&gt;&gt;;
+// { name?: string; email?: string; password?: string; }</code></pre>
+
+                <p>When the <code>User</code> interface changes, the derived type updates automatically. This is the core value of utility types: <strong>a single source of truth</strong> for your type definitions.</p>
+            </section>
+
+            <!-- Section 2 -->
+            <section id="object-utilities">
+                <h2>2. Object Type Utilities</h2>
+
+                <h3>Partial&lt;T&gt;</h3>
+                <p>Makes all properties of <code>T</code> optional. Ideal for update operations where only some fields may be provided.</p>
+
+<pre><code class="language-typescript">interface Config {
+    host: string;
+    port: number;
+    debug: boolean;
+}
+
+function updateConfig(current: Config, overrides: Partial&lt;Config&gt;): Config {
+    return { ...current, ...overrides };
+}
+
+// Only override what you need
+updateConfig(defaultConfig, { debug: true });</code></pre>
+
+                <h3>Required&lt;T&gt;</h3>
+                <p>The opposite of <code>Partial</code> &mdash; makes all properties required, removing any <code>?</code> modifiers.</p>
+
+<pre><code class="language-typescript">interface FormFields {
+    name?: string;
+    email?: string;
+    age?: number;
+}
+
+// Ensure all fields are filled before submission
+function submitForm(data: Required&lt;FormFields&gt;): void {
+    // data.name, data.email, data.age are all guaranteed to exist
+    console.log(`Submitting: ${data.name}, ${data.email}, ${data.age}`);
+}</code></pre>
+
+                <h3>Readonly&lt;T&gt;</h3>
+                <p>Makes all properties read-only. The compiler prevents reassignment after creation.</p>
+
+<pre><code class="language-typescript">interface AppState {
+    user: string;
+    theme: "light" | "dark";
+    notifications: number;
+}
+
+function freeze(state: AppState): Readonly&lt;AppState&gt; {
+    return Object.freeze(state);
+}
+
+const state = freeze({ user: "Alice", theme: "dark", notifications: 3 });
+// state.theme = "light";  // Error: Cannot assign to 'theme' (read-only)</code></pre>
+
+                <h3>Pick&lt;T, K&gt;</h3>
+                <p>Creates a type with only the specified properties from <code>T</code>.</p>
+
+<pre><code class="language-typescript">interface Product {
+    id: number;
+    name: string;
+    price: number;
+    description: string;
+    category: string;
+    stock: number;
+}
+
+// For a product card, we only need a subset
+type ProductCard = Pick&lt;Product, "id" | "name" | "price"&gt;;
+// { id: number; name: string; price: number; }
+
+function renderCard(product: ProductCard): string {
+    return `${product.name}: $${product.price}`;
+}</code></pre>
+
+                <h3>Omit&lt;T, K&gt;</h3>
+                <p>Creates a type with all properties from <code>T</code> except the specified keys. The complement of <code>Pick</code>.</p>
+
+<pre><code class="language-typescript">// Remove sensitive fields before sending to the client
+type PublicUser = Omit&lt;User, "password"&gt;;
+// { id: number; name: string; email: string; createdAt: Date; }
+
+// Remove auto-generated fields for creation
+type CreateProductInput = Omit&lt;Product, "id"&gt;;
+
+function createProduct(input: CreateProductInput): Product {
+    return { ...input, id: generateId() };
+}</code></pre>
+            </section>
+
+            <!-- Section 3 -->
+            <section id="record-type">
+                <h2>3. Record Type</h2>
+
+                <p><code>Record&lt;K, V&gt;</code> creates an object type with keys of type <code>K</code> and values of type <code>V</code>. It is the go-to type for dictionaries and lookup maps.</p>
+
+<pre><code class="language-typescript">// String-keyed dictionary
+type ErrorMessages = Record&lt;string, string&gt;;
+const errors: ErrorMessages = {
+    name: "Name is required",
+    email: "Invalid email format"
+};
+
+// Union keys ensure every member is handled
+type Status = "pending" | "active" | "archived";
+type StatusConfig = Record&lt;Status, { label: string; color: string }&gt;;
+
+const statusMap: StatusConfig = {
+    pending: { label: "Pending", color: "#f59e0b" },
+    active: { label: "Active", color: "#10b981" },
+    archived: { label: "Archived", color: "#6b7280" }
+    // Missing a status? TypeScript reports an error
+};
+
+// HTTP status code mapping
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+const handlers: Record&lt;HttpMethod, (url: string) =&gt; void&gt; = {
+    GET: (url) =&gt; fetch(url),
+    POST: (url) =&gt; fetch(url, { method: "POST" }),
+    PUT: (url) =&gt; fetch(url, { method: "PUT" }),
+    DELETE: (url) =&gt; fetch(url, { method: "DELETE" })
+};</code></pre>
+
+                <p>When you use a union type for <code>K</code>, TypeScript enforces that every member of the union is present as a key, giving you exhaustive coverage.</p>
+            </section>
+
+            <!-- Section 4 -->
+            <section id="union-utilities">
+                <h2>4. Union Type Utilities</h2>
+
+                <h3>Exclude&lt;T, U&gt;</h3>
+                <p>Removes members from a union type that are assignable to <code>U</code>.</p>
+
+<pre><code class="language-typescript">type AllEvents = "click" | "scroll" | "mousemove" | "keydown" | "keyup";
+
+// Remove mouse events
+type KeyboardEvents = Exclude&lt;AllEvents, "click" | "scroll" | "mousemove"&gt;;
+// "keydown" | "keyup"
+
+// Remove null and undefined
+type Defined = Exclude&lt;string | number | null | undefined, null | undefined&gt;;
+// string | number</code></pre>
+
+                <h3>Extract&lt;T, U&gt;</h3>
+                <p>Keeps only members from <code>T</code> that are assignable to <code>U</code>. The opposite of <code>Exclude</code>.</p>
+
+<pre><code class="language-typescript">type AllTypes = string | number | boolean | object | null;
+
+type Primitives = Extract&lt;AllTypes, string | number | boolean&gt;;
+// string | number | boolean
+
+// Extract specific event types from a discriminated union
+type AppEvent =
+    | { type: "user_login"; userId: string }
+    | { type: "user_logout"; userId: string }
+    | { type: "page_view"; url: string }
+    | { type: "error"; message: string };
+
+type UserEvent = Extract&lt;AppEvent, { type: "user_login" | "user_logout" }&gt;;
+// { type: "user_login"; userId: string } | { type: "user_logout"; userId: string }</code></pre>
+
+                <h3>NonNullable&lt;T&gt;</h3>
+                <p>Removes <code>null</code> and <code>undefined</code> from <code>T</code>. A shorthand for <code>Exclude&lt;T, null | undefined&gt;</code>.</p>
+
+<pre><code class="language-typescript">type MaybeString = string | null | undefined;
+type DefiniteString = NonNullable&lt;MaybeString&gt;;  // string
+
+// Useful with optional chaining results
+function getEnvVar(key: string): string {
+    const value: string | undefined = process.env[key];
+    if (!value) throw new Error(`Missing env var: ${key}`);
+    return value;  // narrowed to NonNullable&lt;string | undefined&gt; = string
+}</code></pre>
+            </section>
+
+            <!-- Section 5 -->
+            <section id="function-utilities">
+                <h2>5. Function Type Utilities</h2>
+
+                <h3>ReturnType&lt;T&gt;</h3>
+                <p>Extracts the return type of a function type. Invaluable when you need to type a variable based on what a function returns.</p>
+
+<pre><code class="language-typescript">function createUser(name: string, role: "admin" | "user") {
+    return { id: crypto.randomUUID(), name, role, createdAt: new Date() };
+}
+
+// Derive the type from the function instead of duplicating it
+type User = ReturnType&lt;typeof createUser&gt;;
+// { id: string; name: string; role: "admin" | "user"; createdAt: Date; }
+
+// Works with library functions you don't control
+type FetchResult = ReturnType&lt;typeof fetch&gt;;  // Promise&lt;Response&gt;</code></pre>
+
+                <h3>Parameters&lt;T&gt;</h3>
+                <p>Extracts parameter types as a tuple. Useful for wrapping or extending existing functions.</p>
+
+<pre><code class="language-typescript">function log(level: "info" | "warn" | "error", message: string, meta?: object) {
+    console.log(`[${level}] ${message}`, meta);
+}
+
+type LogParams = Parameters&lt;typeof log&gt;;
+// [level: "info" | "warn" | "error", message: string, meta?: object]
+
+// Create a wrapper that adds a timestamp
+function timedLog(...args: LogParams): void {
+    const [level, message, meta] = args;
+    log(level, `${new Date().toISOString()} ${message}`, meta);
+}</code></pre>
+
+                <h3>ConstructorParameters&lt;T&gt;</h3>
+                <p>Extracts constructor parameter types as a tuple, similar to <code>Parameters</code> but for class constructors.</p>
+
+<pre><code class="language-typescript">class Database {
+    constructor(host: string, port: number, name: string) { /* ... */ }
+}
+
+type DbArgs = ConstructorParameters&lt;typeof Database&gt;;
+// [host: string, port: number, name: string]
+
+function createDatabase(...args: DbArgs): Database {
+    return new Database(...args);
+}</code></pre>
+            </section>
+
+            <!-- Section 6 -->
+            <section id="string-utilities">
+                <h2>6. String Utilities</h2>
+
+                <p>TypeScript provides four intrinsic string manipulation types that work at the type level.</p>
+
+<pre><code class="language-typescript">type Upper = Uppercase&lt;"hello"&gt;;        // "HELLO"
+type Lower = Lowercase&lt;"HELLO"&gt;;        // "hello"
+type Cap   = Capitalize&lt;"hello"&gt;;       // "Hello"
+type Uncap = Uncapitalize&lt;"Hello"&gt;;     // "hello"
+
+// Practical: generate event handler names from event types
+type EventName = "click" | "focus" | "blur";
+type HandlerName = `on${Capitalize&lt;EventName&gt;}`;
+// "onClick" | "onFocus" | "onBlur"
+
+// Generate getter names from property names
+type PropName = "name" | "age" | "email";
+type GetterName = `get${Capitalize&lt;PropName&gt;}`;
+// "getName" | "getAge" | "getEmail"</code></pre>
+            </section>
+
+            <!-- Section 7 -->
+            <section id="promise-utilities">
+                <h2>7. Promise Utilities</h2>
+
+                <p><code>Awaited&lt;T&gt;</code> (TypeScript 4.5+) recursively unwraps <code>Promise</code> types to get the resolved value type.</p>
+
+<pre><code class="language-typescript">type A = Awaited&lt;Promise&lt;string&gt;&gt;;              // string
+type B = Awaited&lt;Promise&lt;Promise&lt;number&gt;&gt;&gt;;     // number
+type C = Awaited&lt;string | Promise&lt;boolean&gt;&gt;;     // string | boolean
+
+// Most useful with async function return types
+async function fetchUser(id: string) {
+    const res = await fetch(`/api/users/${id}`);
+    return res.json() as Promise&lt;{ name: string; email: string }&gt;;
+}
+
+// Get the resolved type, not Promise&lt;...&gt;
+type UserData = Awaited&lt;ReturnType&lt;typeof fetchUser&gt;&gt;;
+// { name: string; email: string }</code></pre>
+            </section>
+
+            <!-- Section 8 -->
+            <section id="mapped-types">
+                <h2>8. Mapped Types</h2>
+
+                <p>Mapped types iterate over keys of a type and transform each property. They are the foundation that built-in utility types like <code>Partial</code>, <code>Required</code>, and <code>Readonly</code> are built on.</p>
+
+<pre><code class="language-typescript">// This is how Partial is implemented internally:
+type MyPartial&lt;T&gt; = {
+    [K in keyof T]?: T[K];
+};
+
+// And Readonly:
+type MyReadonly&lt;T&gt; = {
+    readonly [K in keyof T]: T[K];
+};
+
+// Make all properties nullable
+type Nullable&lt;T&gt; = {
+    [K in keyof T]: T[K] | null;
+};
+
+interface Settings {
+    theme: string;
+    fontSize: number;
+    language: string;
+}
+
+type NullableSettings = Nullable&lt;Settings&gt;;
+// { theme: string | null; fontSize: number | null; language: string | null; }</code></pre>
+
+                <h3>Key Remapping with <code>as</code></h3>
+                <p>TypeScript 4.1 added key remapping, letting you transform property names during mapping.</p>
+
+<pre><code class="language-typescript">// Add "get" prefix to all property names
+type Getters&lt;T&gt; = {
+    [K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K];
+};
+
+type UserGetters = Getters&lt;{ name: string; age: number }&gt;;
+// { getName: () =&gt; string; getAge: () =&gt; number; }
+
+// Filter out properties by type (remove non-string properties)
+type StringProps&lt;T&gt; = {
+    [K in keyof T as T[K] extends string ? K : never]: T[K];
+};
+
+type OnlyStrings = StringProps&lt;{ name: string; age: number; email: string }&gt;;
+// { name: string; email: string; }</code></pre>
+            </section>
+
+            <!-- Section 9 -->
+            <section id="conditional-types">
+                <h2>9. Conditional Types</h2>
+
+                <p>Conditional types choose between two types based on a condition, using the <code>extends</code> keyword as a type-level <code>if</code> statement.</p>
+
+<pre><code class="language-typescript">// Basic conditional type
+type IsString&lt;T&gt; = T extends string ? true : false;
+
+type A = IsString&lt;"hello"&gt;;    // true
+type B = IsString&lt;42&gt;;         // false
+
+// Flatten arrays, leave other types unchanged
+type Flatten&lt;T&gt; = T extends Array&lt;infer Item&gt; ? Item : T;
+
+type Str = Flatten&lt;string[]&gt;;     // string
+type Num = Flatten&lt;number&gt;;       // number</code></pre>
+
+                <h3>The <code>infer</code> Keyword</h3>
+                <p><code>infer</code> declares a type variable within a conditional type, letting you extract types from complex structures.</p>
+
+<pre><code class="language-typescript">// Extract the element type from an array
+type ElementOf&lt;T&gt; = T extends (infer E)[] ? E : never;
+type Item = ElementOf&lt;string[]&gt;;  // string
+
+// Extract the resolved type from a Promise
+type UnwrapPromise&lt;T&gt; = T extends Promise&lt;infer R&gt; ? R : T;
+
+// Extract the return type of a function (how ReturnType works)
+type MyReturnType&lt;T&gt; = T extends (...args: any[]) =&gt; infer R ? R : never;
+
+// Extract the first argument type
+type FirstArg&lt;T&gt; = T extends (first: infer F, ...rest: any[]) =&gt; any ? F : never;
+type First = FirstArg&lt;(name: string, age: number) =&gt; void&gt;;  // string</code></pre>
+
+                <h3>Distributive Conditional Types</h3>
+                <p>When a conditional type acts on a union, it distributes across each member individually.</p>
+
+<pre><code class="language-typescript">type ToArray&lt;T&gt; = T extends any ? T[] : never;
+
+// Distributes over the union:
+type Result = ToArray&lt;string | number&gt;;
+// string[] | number[]  (NOT (string | number)[])
+
+// Prevent distribution by wrapping in a tuple:
+type ToArrayNonDist&lt;T&gt; = [T] extends [any] ? T[] : never;
+type Result2 = ToArrayNonDist&lt;string | number&gt;;
+// (string | number)[]</code></pre>
+            </section>
+
+            <!-- Section 10 -->
+            <section id="template-literal-types">
+                <h2>10. Template Literal Types</h2>
+
+                <p>Template literal types use backtick syntax at the type level to construct string literal types from other types.</p>
+
+<pre><code class="language-typescript">// Basic template literal type
+type Greeting = `Hello, ${string}`;
+const g: Greeting = "Hello, world";   // OK
+// const g2: Greeting = "Hi, world";  // Error
+
+// Combine with unions for powerful patterns
+type Color = "red" | "blue" | "green";
+type Shade = "light" | "dark";
+type ColorVariant = `${Shade}-${Color}`;
+// "light-red" | "light-blue" | "light-green" | "dark-red" | "dark-blue" | "dark-green"
+
+// CSS property types
+type CSSUnit = "px" | "rem" | "em" | "%";
+type CSSValue = `${number}${CSSUnit}`;
+const width: CSSValue = "100px";      // OK
+const height: CSSValue = "2.5rem";    // OK
+
+// Event listener pattern
+type DOMEvent = "click" | "focus" | "blur" | "input";
+type EventHandler = `on${Capitalize&lt;DOMEvent&gt;}`;
+// "onClick" | "onFocus" | "onBlur" | "onInput"</code></pre>
+
+                <h3>Pattern Matching with Template Literals</h3>
+
+<pre><code class="language-typescript">// Extract parts of a string type
+type ExtractRoute&lt;S extends string&gt; =
+    S extends `/${infer Segment}/${infer Rest}`
+        ? Segment | ExtractRoute&lt;`/${Rest}`&gt;
+        : S extends `/${infer Segment}`
+            ? Segment
+            : never;
+
+type Segments = ExtractRoute&lt;"/users/123/posts"&gt;;
+// "users" | "123" | "posts"</code></pre>
+            </section>
+
+            <!-- Section 11 -->
+            <section id="custom-utility-types">
+                <h2>11. Custom Utility Types</h2>
+
+                <p>Combining mapped types, conditional types, and <code>infer</code>, you can build powerful custom utility types for your projects.</p>
+
+                <h3>DeepPartial&lt;T&gt;</h3>
+
+<pre><code class="language-typescript">// Make ALL nested properties optional (Partial only affects top level)
+type DeepPartial&lt;T&gt; = {
+    [K in keyof T]?: T[K] extends object ? DeepPartial&lt;T[K]&gt; : T[K];
+};
+
+interface NestedConfig {
+    server: { host: string; port: number };
+    database: { connection: { host: string; port: number } };
+}
+
+type PartialConfig = DeepPartial&lt;NestedConfig&gt;;
+// server?: { host?: string; port?: number; }
+// database?: { connection?: { host?: string; port?: number; } }</code></pre>
+
+                <h3>DeepReadonly&lt;T&gt;</h3>
+
+<pre><code class="language-typescript">type DeepReadonly&lt;T&gt; = {
+    readonly [K in keyof T]: T[K] extends object ? DeepReadonly&lt;T[K]&gt; : T[K];
+};</code></pre>
+
+                <h3>Mutable&lt;T&gt; (Remove readonly)</h3>
+
+<pre><code class="language-typescript">type Mutable&lt;T&gt; = {
+    -readonly [K in keyof T]: T[K];
+};
+
+interface FrozenUser { readonly name: string; readonly email: string; }
+type EditableUser = Mutable&lt;FrozenUser&gt;;
+// { name: string; email: string; }</code></pre>
+
+                <h3>RequiredKeys&lt;T&gt; and OptionalKeys&lt;T&gt;</h3>
+
+<pre><code class="language-typescript">// Extract keys that are required vs optional
+type RequiredKeys&lt;T&gt; = {
+    [K in keyof T]-?: {} extends Pick&lt;T, K&gt; ? never : K;
+}[keyof T];
+
+type OptionalKeys&lt;T&gt; = {
+    [K in keyof T]-?: {} extends Pick&lt;T, K&gt; ? K : never;
+}[keyof T];
+
+interface Mixed { name: string; age: number; nickname?: string; bio?: string; }
+type Req = RequiredKeys&lt;Mixed&gt;;  // "name" | "age"
+type Opt = OptionalKeys&lt;Mixed&gt;;  // "nickname" | "bio"</code></pre>
+
+                <h3>PickByType&lt;T, V&gt;</h3>
+
+<pre><code class="language-typescript">// Pick only properties whose values match a given type
+type PickByType&lt;T, V&gt; = {
+    [K in keyof T as T[K] extends V ? K : never]: T[K];
+};
+
+interface Mixed { name: string; age: number; active: boolean; email: string; }
+type StringFields = PickByType&lt;Mixed, string&gt;;
+// { name: string; email: string; }</code></pre>
+            </section>
+
+            <!-- Section 12 -->
+            <section id="real-world-patterns">
+                <h2>12. Real-World Patterns</h2>
+
+                <h3>API Response Types</h3>
+
+<pre><code class="language-typescript">// Generic API response wrapper
+type ApiResponse&lt;T&gt; = {
+    data: T;
+    status: number;
+    message: string;
+    timestamp: string;
+};
+
+type ApiError = {
+    error: string;
+    code: number;
+    details?: Record&lt;string, string[]&gt;;
+};
+
+type ApiResult&lt;T&gt; = ApiResponse&lt;T&gt; | ApiError;
+
+// Derive request types from your models
+interface Article {
+    id: string;
+    title: string;
+    body: string;
+    author: string;
+    publishedAt: Date;
+    updatedAt: Date;
+}
+
+type CreateArticle = Omit&lt;Article, "id" | "publishedAt" | "updatedAt"&gt;;
+type UpdateArticle = Partial&lt;Pick&lt;Article, "title" | "body"&gt;&gt;;
+type ArticlePreview = Pick&lt;Article, "id" | "title" | "author" | "publishedAt"&gt;;</code></pre>
+
+                <h3>Form Handling</h3>
+
+<pre><code class="language-typescript">// Type-safe form state
+type FormState&lt;T&gt; = {
+    values: T;
+    errors: Partial&lt;Record&lt;keyof T, string&gt;&gt;;
+    touched: Partial&lt;Record&lt;keyof T, boolean&gt;&gt;;
+    isSubmitting: boolean;
+};
+
+interface LoginForm { email: string; password: string; remember: boolean; }
+
+type LoginFormState = FormState&lt;LoginForm&gt;;
+// {
+//   values: { email: string; password: string; remember: boolean; };
+//   errors: { email?: string; password?: string; remember?: string; };
+//   touched: { email?: boolean; password?: boolean; remember?: boolean; };
+//   isSubmitting: boolean;
+// }
+
+// Type-safe field change handler
+type FieldHandler&lt;T&gt; = &lt;K extends keyof T&gt;(field: K, value: T[K]) =&gt; void;
+
+const handleChange: FieldHandler&lt;LoginForm&gt; = (field, value) =&gt; {
+    // field is narrowed to "email" | "password" | "remember"
+    // value matches the field's type
+};</code></pre>
+
+                <h3>State Management</h3>
+
+<pre><code class="language-typescript">// Type-safe action creators from a state shape
+type ActionMap&lt;T&gt; = {
+    [K in keyof T]: T[K] extends undefined
+        ? { type: K }
+        : { type: K; payload: T[K] };
+};
+
+interface PayloadTypes {
+    SET_USER: { name: string; id: string };
+    SET_THEME: "light" | "dark";
+    LOGOUT: undefined;
+}
+
+type Actions = ActionMap&lt;PayloadTypes&gt;[keyof PayloadTypes];
+// { type: "SET_USER"; payload: { name: string; id: string } }
+// | { type: "SET_THEME"; payload: "light" | "dark" }
+// | { type: "LOGOUT" }
+
+function reducer(state: AppState, action: Actions): AppState {
+    switch (action.type) {
+        case "SET_USER":
+            return { ...state, user: action.payload }; // payload is typed
+        case "SET_THEME":
+            return { ...state, theme: action.payload }; // "light" | "dark"
+        case "LOGOUT":
+            return { ...state, user: null };
+    }
+}</code></pre>
+
+                <h3>Builder Pattern with Chained Generics</h3>
+
+<pre><code class="language-typescript">// Type-safe query builder
+type QueryResult&lt;
+    Selected extends string,
+    Table extends string
+&gt; = Record&lt;Selected, unknown&gt; &amp; { __table: Table };
+
+class QueryBuilder&lt;T extends string = never, Table extends string = string&gt; {
+    select&lt;K extends string&gt;(...cols: K[]): QueryBuilder&lt;T | K, Table&gt; {
+        return this as any;
+    }
+    from&lt;TName extends string&gt;(table: TName): QueryBuilder&lt;T, TName&gt; {
+        return this as any;
+    }
+    execute(): QueryResult&lt;T, Table&gt;[] {
+        return [] as any;
+    }
+}
+
+const results = new QueryBuilder()
+    .select("name", "email")
+    .from("users")
+    .execute();
+// QueryResult&lt;"name" | "email", "users"&gt;[]</code></pre>
+
+            </section>
+
+            <!-- FAQ Section -->
+            <section id="faq" class="faq-section">
+                <h2>Frequently Asked Questions</h2>
+
+                <details>
+                    <summary>What are TypeScript utility types?</summary>
+                    <div class="faq-answer">
+                        <p>TypeScript utility types are built-in generic types that transform existing types into new ones. They let you make properties optional (<code>Partial</code>), required (<code>Required</code>), read-only (<code>Readonly</code>), pick specific properties (<code>Pick</code>), omit properties (<code>Omit</code>), create dictionaries (<code>Record</code>), and extract or exclude union members (<code>Extract</code>, <code>Exclude</code>). They eliminate repetitive type definitions and keep your codebase DRY.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>What is the difference between Pick and Omit in TypeScript?</summary>
+                    <div class="faq-answer">
+                        <p><code>Pick&lt;T, K&gt;</code> creates a new type by selecting specific properties <code>K</code> from type <code>T</code>, while <code>Omit&lt;T, K&gt;</code> creates a new type by removing properties <code>K</code> from type <code>T</code>. They are complementary: Pick is better when you want a small subset of properties, and Omit is better when you want most properties but need to exclude a few. For example, <code>Pick&lt;User, "name" | "email"&gt;</code> keeps only name and email, while <code>Omit&lt;User, "password"&gt;</code> keeps everything except password.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>How do I create custom utility types in TypeScript?</summary>
+                    <div class="faq-answer">
+                        <p>Custom utility types are built using mapped types, conditional types, and the <code>infer</code> keyword. A mapped type iterates over keys of a type using the <code>[K in keyof T]</code> syntax and transforms each property. Conditional types use the <code>T extends U ? X : Y</code> pattern to branch based on type relationships. The <code>infer</code> keyword extracts types from within other types. For example, <code>type DeepPartial&lt;T&gt; = { [K in keyof T]?: T[K] extends object ? DeepPartial&lt;T[K]&gt; : T[K] }</code> makes all nested properties optional.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>When should I use Record vs a regular interface in TypeScript?</summary>
+                    <div class="faq-answer">
+                        <p>Use <code>Record&lt;K, V&gt;</code> when you need a dictionary or map-like structure where all values share the same type, especially with dynamic or union keys. Use an interface when each property has a different type or when you need declaration merging. For example, <code>Record&lt;string, number&gt;</code> is ideal for a scores dictionary, while an interface is better for a User object with name (string), age (number), and active (boolean) properties.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>What is the Awaited utility type in TypeScript?</summary>
+                    <div class="faq-answer">
+                        <p><code>Awaited&lt;T&gt;</code> (TypeScript 4.5+) recursively unwraps Promise types to get the resolved value type. <code>Awaited&lt;Promise&lt;string&gt;&gt;</code> gives you <code>string</code>, and <code>Awaited&lt;Promise&lt;Promise&lt;number&gt;&gt;&gt;</code> gives you <code>number</code>. It is especially useful with <code>ReturnType</code> when working with async functions: <code>type Result = Awaited&lt;ReturnType&lt;typeof fetchUser&gt;&gt;</code> gives you the resolved return type of an async function rather than a Promise.</p>
+                    </div>
+                </details>
+            </section>
+
+            <h2>Related Resources</h2>
+
+            <ul>
+                <li><a href="/blog/typescript-tips-and-tricks">TypeScript Tips and Tricks</a> &mdash; 15 practical patterns for cleaner TypeScript code</li>
+                <li><a href="/blog/typescript-complete-guide">TypeScript Complete Guide</a> &mdash; comprehensive guide from basics to advanced TypeScript</li>
+                <li><a href="/cheatsheets/typescript-types">TypeScript Types Cheat Sheet</a> &mdash; quick reference for all built-in types</li>
+                <li><a href="/tools/json-to-typescript">JSON to TypeScript Converter</a> &mdash; generate TypeScript interfaces from JSON data</li>
+                <li><a href="/tools/json-formatter">JSON Formatter</a> &mdash; format and validate JSON for your TypeScript projects</li>
+            </ul>
+
+            <p style="margin-top:2rem;padding:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;">
+                <strong>Keep learning:</strong> Utility types are one piece of the TypeScript puzzle. Our <a href="/blog/typescript-tips-and-tricks">TypeScript Tips and Tricks</a> guide covers const assertions, discriminated unions, branded types, and more patterns that pair perfectly with utility types. Use the <a href="/cheatsheets/typescript-types">TypeScript Types Cheat Sheet</a> for a quick reference while coding.
+            </p>
+        </article>
+    </main>
+
+    <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/typescript-tips-and-tricks" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">TypeScript Tips and Tricks</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">15 practical patterns for cleaner TypeScript</div>
+            </a>
+            <a href="/cheatsheets/typescript-types" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">TypeScript Types Cheat Sheet</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Quick reference for all built-in types</div>
+            </a>
+            <a href="/tools/json-to-typescript" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">JSON to TypeScript Converter</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Generate interfaces from JSON data</div>
+            </a>
+            <a href="/tools/json-formatter" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">JSON Formatter</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Format and validate JSON for TypeScript APIs</div>
+            </a>
+        </div>
+    </section>
+
+    <footer><p>DevToolbox &mdash; Free developer tools, no strings attached.</p></footer>
+
+    <script src="/js/track.js" defer></script>
+
+    <script>
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            window.location.href = '/tools/';
+        }
+    });
+    </script>
+
+    <style>
+        .faq-section { margin-top: 3rem; }
+        .faq-section details { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; margin-bottom: 1rem; padding: 0; }
+        .faq-section summary { color: #3b82f6; font-weight: bold; cursor: pointer; padding: 1rem 1.5rem; font-size: 1.1rem; }
+        .faq-section summary:hover { color: #60a5fa; }
+        .faq-answer { padding: 0 1.5rem 1rem; color: #d1d5db; line-height: 1.7; }
+        .faq-answer p { margin: 0; }
+    </style>
+</body>
+</html>

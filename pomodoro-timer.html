@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer - Focus & Productivity | DevToolbox</title>
+    <meta name="description" content="Free online Pomodoro timer for developers. 25-min focus sessions, customizable durations, task tracking, session stats, audio alerts. Runs 100% in your browser.">
+    <meta property="og:title" content="Pomodoro Timer - Focus & Productivity | DevToolbox">
+    <meta property="og:description" content="Free online Pomodoro timer with focus sessions, breaks, task tracking, and stats">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/tools/pomodoro-timer">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/tool-pomodoro-timer.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Pomodoro Timer - Focus & Productivity | DevToolbox">
+    <meta name="twitter:description" content="Free online Pomodoro timer with focus sessions, breaks, task tracking, and stats">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/tools/pomodoro-timer">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Pomodoro Timer",
+        "description": "Free online Pomodoro timer with customizable focus sessions, short and long breaks, task tracking, session statistics, and audio notifications.",
+        "url": "https://devtoolbox.dedyn.io/tools/pomodoro-timer",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Any",
+        "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+        },
+        "creator": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "What is the Pomodoro Technique?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The Pomodoro Technique is a time management method developed by Francesco Cirillo in the late 1980s. It uses a timer to break work into 25-minute focused intervals (called pomodoros) separated by 5-minute short breaks. After completing four pomodoros, you take a longer 15-minute break. This cycle helps maintain focus, reduce mental fatigue, and improve productivity."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Can I customize the timer durations?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. While the classic Pomodoro durations are 25 minutes for work, 5 minutes for short breaks, and 15 minutes for long breaks, this timer lets you customize all three durations to suit your workflow. Some developers prefer 50-minute focus sessions with 10-minute breaks, while others work best with shorter 15-minute sprints."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Does this timer work offline and is my data private?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "This Pomodoro timer runs 100% in your browser using JavaScript. No data is ever sent to a server. Your session statistics and task history are stored in your browser's localStorage, so they persist between visits but remain completely private on your device. The timer also works offline once the page has loaded."
+            }
+        }
+        ]
+    }
+    </script>
+    <style>
+        /* Pomodoro Timer Styles */
+        .pomo-app {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .pomo-mode-tabs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .pomo-mode-tab {
+            padding: 0.6rem 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .pomo-mode-tab:hover {
+            border-color: var(--primary);
+            color: var(--text);
+        }
+
+        .pomo-mode-tab.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .pomo-timer-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .pomo-circle {
+            position: relative;
+            width: 280px;
+            height: 280px;
+        }
+
+        .pomo-circle svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .pomo-circle-bg {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 8;
+        }
+
+        .pomo-circle-progress {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease, stroke 0.3s ease;
+        }
+
+        .pomo-circle-progress.break-mode {
+            stroke: var(--accent);
+        }
+
+        .pomo-time-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .pomo-time {
+            font-size: 3.5rem;
+            font-weight: 700;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .pomo-phase-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .pomo-controls {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .pomo-controls .btn {
+            min-width: 80px;
+            text-align: center;
+            font-size: 0.95rem;
+            padding: 0.6rem 1.25rem;
+        }
+
+        .pomo-task-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .pomo-task-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .pomo-task-input:focus {
+            border-color: var(--primary);
+        }
+
+        .pomo-task-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .pomo-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pomo-stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .pomo-stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        .pomo-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pomo-session-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pomo-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: transparent;
+            transition: all 0.3s;
+        }
+
+        .pomo-dot.completed {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .pomo-dot.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+        }
+
+        .pomo-settings {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pomo-settings summary {
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .pomo-settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .pomo-setting-item label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pomo-setting-item input[type="number"] {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--code-bg);
+            color: var(--text);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .pomo-setting-item input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+
+        .pomo-auto-start {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .pomo-auto-start input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+        }
+
+        .pomo-reset-stats {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .pomo-circle {
+                width: 220px;
+                height: 220px;
+            }
+            .pomo-time {
+                font-size: 2.5rem;
+            }
+            .pomo-stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .pomo-mode-tabs {
+                flex-wrap: wrap;
+            }
+            .pomo-mode-tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            .pomo-settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links">
+                <a href="/tools/">Tools</a>
+                <a href="/cheatsheets/">Cheat Sheets</a>
+                <a href="/blog/">Blog</a>
+            </div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/tools/">Tools</a><span class="separator">/</span><span class="current">Pomodoro Timer</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Tools",
+                        "item": "https://devtoolbox.dedyn.io/tools"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Pomodoro Timer"
+                }
+        ]
+    }
+    </script>
+
+    <div class="embed-banner">
+        <details>
+            <summary>Embed this tool on your site</summary>
+            <pre><code>&lt;iframe src="https://devtoolbox.dedyn.io/tools/pomodoro-timer" width="100%" height="700" frameborder="0" title="Pomodoro Timer"&gt;&lt;/iframe&gt;</code></pre>
+        </details>
+    </div>
+
+    <main class="tool-page">
+        <h1>Pomodoro Timer</h1>
+        <p class="description">Stay focused with the Pomodoro Technique. Work in 25-minute sprints, take short breaks, and track your productivity. Everything runs in your browser.</p>
+
+        <div class="pomo-app">
+            <!-- Mode Tabs -->
+            <div class="pomo-mode-tabs">
+                <button class="pomo-mode-tab active" data-mode="work" onclick="switchMode('work')">Focus</button>
+                <button class="pomo-mode-tab" data-mode="shortBreak" onclick="switchMode('shortBreak')">Short Break</button>
+                <button class="pomo-mode-tab" data-mode="longBreak" onclick="switchMode('longBreak')">Long Break</button>
+            </div>
+
+            <!-- Circular Progress Timer -->
+            <div class="pomo-timer-wrap">
+                <div class="pomo-circle">
+                    <svg viewBox="0 0 280 280">
+                        <circle class="pomo-circle-bg" cx="140" cy="140" r="124"></circle>
+                        <circle id="progressCircle" class="pomo-circle-progress" cx="140" cy="140" r="124"
+                            stroke-dasharray="779.2" stroke-dashoffset="0"></circle>
+                    </svg>
+                    <div class="pomo-time-display">
+                        <div id="timerDisplay" class="pomo-time">25:00</div>
+                        <div id="phaseLabel" class="pomo-phase-label">Focus Time</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session Dots (4 pomodoros per cycle) -->
+            <div class="pomo-session-dots" id="sessionDots">
+                <div class="pomo-dot active"></div>
+                <div class="pomo-dot"></div>
+                <div class="pomo-dot"></div>
+                <div class="pomo-dot"></div>
+            </div>
+
+            <!-- Controls -->
+            <div class="pomo-controls">
+                <button class="btn btn-primary" id="startPauseBtn" onclick="toggleTimer()">Start</button>
+                <button class="btn" onclick="resetTimer()">Reset</button>
+                <button class="btn" onclick="skipPhase()">Skip</button>
+            </div>
+
+            <!-- Task Input -->
+            <div class="pomo-task-section">
+                <input type="text" class="pomo-task-input" id="taskInput" placeholder="What are you working on?" maxlength="100">
+            </div>
+
+            <!-- Stats -->
+            <div class="pomo-stats-grid">
+                <div class="pomo-stat-card">
+                    <div class="pomo-stat-value" id="statSessions">0</div>
+                    <div class="pomo-stat-label">Sessions Today</div>
+                </div>
+                <div class="pomo-stat-card">
+                    <div class="pomo-stat-value" id="statFocusTime">0m</div>
+                    <div class="pomo-stat-label">Focus Time</div>
+                </div>
+                <div class="pomo-stat-card">
+                    <div class="pomo-stat-value" id="statTotal">0</div>
+                    <div class="pomo-stat-label">All-Time Sessions</div>
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <details class="pomo-settings">
+                <summary>Settings</summary>
+                <div class="pomo-settings-grid">
+                    <div class="pomo-setting-item">
+                        <label for="setWork">Focus (min)</label>
+                        <input type="number" id="setWork" min="1" max="120" value="25">
+                    </div>
+                    <div class="pomo-setting-item">
+                        <label for="setShort">Short Break (min)</label>
+                        <input type="number" id="setShort" min="1" max="60" value="5">
+                    </div>
+                    <div class="pomo-setting-item">
+                        <label for="setLong">Long Break (min)</label>
+                        <input type="number" id="setLong" min="1" max="60" value="15">
+                    </div>
+                </div>
+                <label class="pomo-auto-start">
+                    <input type="checkbox" id="autoStartCheck"> Auto-start next timer
+                </label>
+                <div class="pomo-reset-stats">
+                    <button class="btn" onclick="resetAllStats()" style="font-size:0.8rem;padding:0.4rem 0.75rem;">Reset All Statistics</button>
+                </div>
+            </details>
+        </div>
+
+        <section style="margin-top: 3rem;">
+            <h2>About the Pomodoro Technique</h2>
+            <p style="color: var(--text-muted); line-height: 1.8; margin-bottom: 1rem;">The Pomodoro Technique is one of the most popular time management methods, especially among developers. Created by Francesco Cirillo in the late 1980s, it uses a simple cycle: work in focused 25-minute sprints (called "pomodoros"), then take a 5-minute break. After four pomodoros, reward yourself with a longer 15-minute break.</p>
+            <p style="color: var(--text-muted); line-height: 1.8; margin-bottom: 1rem;">This technique works because it combats two common productivity killers: context switching and mental fatigue. By committing to a single task for 25 minutes, you train your brain to resist distractions. The regular breaks prevent burnout and keep your focus sharp throughout the day.</p>
+            <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Features</h3>
+            <ul style="color: var(--text-muted); padding-left: 1.5rem; line-height: 2;">
+                <li>Classic 25/5/15 Pomodoro cycle with visual progress ring</li>
+                <li>Customizable work, short break, and long break durations</li>
+                <li>Audio notification when each phase ends (no external files needed)</li>
+                <li>Session counter and daily/all-time focus statistics in localStorage</li>
+                <li>Task input to name your current focus area</li>
+                <li>Keyboard shortcuts: Space (start/pause), R (reset), S (skip)</li>
+                <li>100% client-side — works offline, no data leaves your browser</li>
+            </ul>
+        </section>
+
+        <section class="related-tools">
+            <h3>Related Tools</h3>
+            <div class="grid">
+                <a href="/tools/epoch-converter" class="tool-card"><div class="tool-icon">&#9200;</div><h3>Epoch Converter</h3><p>Convert Unix timestamps</p></a>
+                <a href="/tools/countdown-timer" class="tool-card"><div class="tool-icon">&#9203;</div><h3>Countdown Timer</h3><p>Set a custom countdown</p></a>
+                <a href="/tools/stopwatch" class="tool-card"><div class="tool-icon">&#9201;</div><h3>Stopwatch</h3><p>Precise time tracking</p></a>
+                <a href="/tools/markdown-editor" class="tool-card"><div class="tool-icon">MD</div><h3>Markdown Editor</h3><p>Write and preview Markdown</p></a>
+            </div>
+        </section>
+    </main>
+
+    <section class="faq-section" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1.5rem;">Frequently Asked Questions</h2>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">What is the Pomodoro Technique?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">The Pomodoro Technique is a time management method developed by Francesco Cirillo in the late 1980s. It uses a timer to break work into 25-minute focused intervals (called pomodoros) separated by 5-minute short breaks. After completing four pomodoros, you take a longer 15-minute break. This cycle helps maintain focus, reduce mental fatigue, and improve productivity.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">Can I customize the timer durations?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">Yes. While the classic Pomodoro durations are 25 minutes for work, 5 minutes for short breaks, and 15 minutes for long breaks, this timer lets you customize all three durations to suit your workflow. Some developers prefer 50-minute focus sessions with 10-minute breaks, while others work best with shorter 15-minute sprints.</div>
+        </details>
+        <details class="faq-item" style="margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0;">
+            <summary style="padding: 1rem 1.25rem; cursor: pointer; font-weight: 500; color: #e0e0e0; list-style: none; display: flex; justify-content: space-between; align-items: center;">Does this timer work offline and is my data private?<span style="transition: transform 0.2s; color: #3b82f6;">&#9660;</span></summary>
+            <div style="padding: 0 1.25rem 1rem; color: #a0a0a0; line-height: 1.7;">This Pomodoro timer runs 100% in your browser using JavaScript. No data is ever sent to a server. Your session statistics and task history are stored in your browser's localStorage, so they persist between visits but remain completely private on your device. The timer also works offline once the page has loaded.</div>
+        </details>
+    </section>
+
+    <footer>
+        <p>DevToolbox &mdash; Free developer tools, no strings attached.</p>
+    </footer>
+
+    <script>
+    // === Pomodoro Timer App ===
+    (function() {
+        'use strict';
+
+        // --- State ---
+        var CIRCUMFERENCE = 2 * Math.PI * 124; // ~779.2
+        var state = {
+            mode: 'work',           // 'work', 'shortBreak', 'longBreak'
+            running: false,
+            timeLeft: 25 * 60,      // seconds
+            totalTime: 25 * 60,     // for progress calc
+            cycleCount: 0,          // pomodoros completed in current set of 4
+            interval: null
+        };
+
+        var durations = { work: 25, shortBreak: 5, longBreak: 15 };
+
+        // --- DOM refs ---
+        var timerDisplay = document.getElementById('timerDisplay');
+        var phaseLabel = document.getElementById('phaseLabel');
+        var progressCircle = document.getElementById('progressCircle');
+        var startPauseBtn = document.getElementById('startPauseBtn');
+        var sessionDots = document.getElementById('sessionDots');
+        var statSessions = document.getElementById('statSessions');
+        var statFocusTime = document.getElementById('statFocusTime');
+        var statTotal = document.getElementById('statTotal');
+        var taskInput = document.getElementById('taskInput');
+        var setWork = document.getElementById('setWork');
+        var setShort = document.getElementById('setShort');
+        var setLong = document.getElementById('setLong');
+        var autoStartCheck = document.getElementById('autoStartCheck');
+
+        // --- localStorage Stats ---
+        function getTodayKey() {
+            return 'pomo_' + new Date().toISOString().slice(0, 10);
+        }
+
+        function loadStats() {
+            var todayKey = getTodayKey();
+            var todaySessions = parseInt(localStorage.getItem(todayKey) || '0', 10);
+            var todayMinutes = parseInt(localStorage.getItem(todayKey + '_min') || '0', 10);
+            var totalSessions = parseInt(localStorage.getItem('pomo_total') || '0', 10);
+            statSessions.textContent = todaySessions;
+            statFocusTime.textContent = todayMinutes >= 60
+                ? Math.floor(todayMinutes / 60) + 'h ' + (todayMinutes % 60) + 'm'
+                : todayMinutes + 'm';
+            statTotal.textContent = totalSessions;
+        }
+
+        function saveStat() {
+            var todayKey = getTodayKey();
+            var todaySessions = parseInt(localStorage.getItem(todayKey) || '0', 10) + 1;
+            var todayMinutes = parseInt(localStorage.getItem(todayKey + '_min') || '0', 10) + durations.work;
+            var totalSessions = parseInt(localStorage.getItem('pomo_total') || '0', 10) + 1;
+            localStorage.setItem(todayKey, todaySessions);
+            localStorage.setItem(todayKey + '_min', todayMinutes);
+            localStorage.setItem('pomo_total', totalSessions);
+            loadStats();
+        }
+
+        function resetAllStats() {
+            if (!confirm('Reset all Pomodoro statistics? This cannot be undone.')) return;
+            var keysToRemove = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                if (key && key.indexOf('pomo_') === 0) keysToRemove.push(key);
+            }
+            keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
+            loadStats();
+        }
+        window.resetAllStats = resetAllStats;
+
+        // --- Audio Notification (Web Audio API) ---
+        function playNotificationSound() {
+            try {
+                var ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Play a pleasant two-tone chime
+                function playTone(freq, startTime, duration) {
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.3, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                }
+
+                var now = ctx.currentTime;
+                playTone(523.25, now, 0.3);        // C5
+                playTone(659.25, now + 0.15, 0.3);  // E5
+                playTone(783.99, now + 0.3, 0.4);   // G5
+
+                // Second chime
+                playTone(523.25, now + 0.8, 0.3);
+                playTone(659.25, now + 0.95, 0.3);
+                playTone(783.99, now + 1.1, 0.5);
+            } catch (e) {
+                // Web Audio not supported, silently fail
+            }
+        }
+
+        // --- Timer Logic ---
+        function formatTime(seconds) {
+            var m = Math.floor(seconds / 60);
+            var s = seconds % 60;
+            return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(state.timeLeft);
+
+            // Update progress circle
+            var progress = 1 - (state.timeLeft / state.totalTime);
+            var offset = CIRCUMFERENCE * (1 - progress);
+            progressCircle.style.strokeDashoffset = offset;
+
+            // Update color based on mode
+            if (state.mode === 'work') {
+                progressCircle.classList.remove('break-mode');
+            } else {
+                progressCircle.classList.add('break-mode');
+            }
+
+            // Update document title
+            var prefix = state.running ? (state.mode === 'work' ? 'Focus' : 'Break') : 'Paused';
+            document.title = formatTime(state.timeLeft) + ' - ' + prefix + ' | DevToolbox';
+
+            // Phase label
+            var labels = { work: 'Focus Time', shortBreak: 'Short Break', longBreak: 'Long Break' };
+            phaseLabel.textContent = labels[state.mode];
+        }
+
+        function updateDots() {
+            var dots = sessionDots.children;
+            for (var i = 0; i < 4; i++) {
+                dots[i].className = 'pomo-dot';
+                if (i < state.cycleCount) {
+                    dots[i].classList.add('completed');
+                }
+                if (i === state.cycleCount && state.mode === 'work') {
+                    dots[i].classList.add('active');
+                }
+            }
+        }
+
+        function setTimerForMode(mode) {
+            state.mode = mode;
+            state.timeLeft = durations[mode] * 60;
+            state.totalTime = durations[mode] * 60;
+
+            // Update active tab
+            var tabs = document.querySelectorAll('.pomo-mode-tab');
+            tabs.forEach(function(tab) {
+                tab.classList.toggle('active', tab.getAttribute('data-mode') === mode);
+            });
+
+            updateDisplay();
+            updateDots();
+        }
+
+        function startTimer() {
+            if (state.running) return;
+            state.running = true;
+            startPauseBtn.textContent = 'Pause';
+
+            state.interval = setInterval(function() {
+                state.timeLeft--;
+                if (state.timeLeft <= 0) {
+                    state.timeLeft = 0;
+                    clearInterval(state.interval);
+                    state.interval = null;
+                    state.running = false;
+                    startPauseBtn.textContent = 'Start';
+
+                    updateDisplay();
+                    playNotificationSound();
+                    onPhaseComplete();
+                    return;
+                }
+                updateDisplay();
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (!state.running) return;
+            state.running = false;
+            clearInterval(state.interval);
+            state.interval = null;
+            startPauseBtn.textContent = 'Start';
+            updateDisplay();
+        }
+
+        function toggleTimer() {
+            if (state.running) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+        window.toggleTimer = toggleTimer;
+
+        function resetTimer() {
+            pauseTimer();
+            setTimerForMode(state.mode);
+            document.title = 'Pomodoro Timer - Focus & Productivity | DevToolbox';
+        }
+        window.resetTimer = resetTimer;
+
+        function skipPhase() {
+            pauseTimer();
+            onPhaseComplete();
+        }
+        window.skipPhase = skipPhase;
+
+        function switchMode(mode) {
+            pauseTimer();
+            setTimerForMode(mode);
+            document.title = 'Pomodoro Timer - Focus & Productivity | DevToolbox';
+        }
+        window.switchMode = switchMode;
+
+        function onPhaseComplete() {
+            if (state.mode === 'work') {
+                // Completed a pomodoro
+                state.cycleCount++;
+                saveStat();
+
+                if (state.cycleCount >= 4) {
+                    // Long break after 4 pomodoros
+                    state.cycleCount = 0;
+                    setTimerForMode('longBreak');
+                } else {
+                    setTimerForMode('shortBreak');
+                }
+            } else {
+                // Break completed, back to work
+                setTimerForMode('work');
+            }
+
+            if (autoStartCheck.checked) {
+                startTimer();
+            }
+        }
+
+        // --- Settings ---
+        function applySettings() {
+            durations.work = Math.max(1, Math.min(120, parseInt(setWork.value, 10) || 25));
+            durations.shortBreak = Math.max(1, Math.min(60, parseInt(setShort.value, 10) || 5));
+            durations.longBreak = Math.max(1, Math.min(60, parseInt(setLong.value, 10) || 15));
+
+            setWork.value = durations.work;
+            setShort.value = durations.shortBreak;
+            setLong.value = durations.longBreak;
+
+            // Save to localStorage
+            localStorage.setItem('pomo_settings', JSON.stringify(durations));
+            localStorage.setItem('pomo_autostart', autoStartCheck.checked ? '1' : '0');
+
+            // Update current timer if not running
+            if (!state.running) {
+                setTimerForMode(state.mode);
+            }
+        }
+
+        function loadSettings() {
+            try {
+                var saved = JSON.parse(localStorage.getItem('pomo_settings'));
+                if (saved) {
+                    durations.work = saved.work || 25;
+                    durations.shortBreak = saved.shortBreak || 5;
+                    durations.longBreak = saved.longBreak || 15;
+                    setWork.value = durations.work;
+                    setShort.value = durations.shortBreak;
+                    setLong.value = durations.longBreak;
+                }
+            } catch (e) {}
+            autoStartCheck.checked = localStorage.getItem('pomo_autostart') === '1';
+        }
+
+        setWork.addEventListener('change', applySettings);
+        setShort.addEventListener('change', applySettings);
+        setLong.addEventListener('change', applySettings);
+        autoStartCheck.addEventListener('change', applySettings);
+
+        // Save task
+        taskInput.addEventListener('input', function() {
+            localStorage.setItem('pomo_task', taskInput.value);
+        });
+
+        // --- Keyboard Shortcuts ---
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger if typing in input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (e.code === 'Space' || e.key === ' ') {
+                e.preventDefault();
+                toggleTimer();
+            } else if (e.key === 'r' || e.key === 'R') {
+                e.preventDefault();
+                resetTimer();
+            } else if (e.key === 's' || e.key === 'S') {
+                e.preventDefault();
+                skipPhase();
+            }
+        });
+
+        // --- Init ---
+        loadSettings();
+        loadStats();
+        setTimerForMode('work');
+
+        // Restore task
+        var savedTask = localStorage.getItem('pomo_task');
+        if (savedTask) taskInput.value = savedTask;
+
+        // Reset title on unload
+        window.addEventListener('beforeunload', function() {
+            // Nothing needed, title resets on reload
+        });
+
+    })();
+    </script>
+
+    <!-- Keyboard shortcuts -->
+    <div id="kbd-toast" style="display:none;position:fixed;bottom:20px;right:20px;background:#3b82f6;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:opacity 0.3s;"></div>
+    <div id="kbd-help" style="position:fixed;bottom:20px;left:20px;z-index:9998;">
+        <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#a0a0a0;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;" title="Keyboard shortcuts">&#9000; Shortcuts</button>
+        <div style="display:none;position:absolute;bottom:40px;left:0;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:12px 16px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+            <div style="font-weight:600;margin-bottom:8px;color:#e0e0e0;font-size:13px;">Keyboard Shortcuts</div>
+            <div style="color:#a0a0a0;font-size:12px;line-height:2;">
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Space</kbd> Start / Pause<br>
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">R</kbd> Reset timer<br>
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">S</kbd> Skip phase<br>
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Ctrl</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Enter</kbd> Start / Pause<br>
+                <kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">Ctrl</kbd>+<kbd style="background:#2a2a4a;padding:2px 6px;border-radius:3px;font-size:11px;">L</kbd> Reset
+            </div>
+        </div>
+    </div>
+    <script>
+    (function(){
+        function showToast(msg){var t=document.getElementById('kbd-toast');if(!t)return;t.textContent=msg;t.style.display='block';t.style.opacity='1';setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.style.display='none';},300);},1500);}
+        document.addEventListener('keydown',function(e){
+            if(e.ctrlKey&&e.key==='Enter'){
+                e.preventDefault();
+                window.toggleTimer();
+                showToast(document.getElementById('startPauseBtn').textContent==='Pause'?'Timer started!':'Timer paused!');
+            }
+            if(e.ctrlKey&&e.key==='l'&&!e.shiftKey){
+                e.preventDefault();
+                window.resetTimer();
+                showToast('Timer reset!');
+            }
+        });
+    })();
+    </script>
+
+<script src="/js/track.js"></script>
+</body>
+</html>

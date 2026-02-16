@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Web Framework: Complete Guide for 2026 | DevToolbox Blog</title>
+    <meta name="description" content="Master Flask, Python's lightweight web framework. Learn routing, templates, forms, databases, REST APIs, authentication, deployment, and best practices with practical examples.">
+    <meta name="keywords" content="flask tutorial, flask python, flask web framework, flask api, flask rest api, flask sqlalchemy, flask deployment, python web development">
+    <meta property="og:title" content="Flask Web Framework: Complete Guide for 2026">
+    <meta property="og:description" content="Master Flask, Python's lightweight web framework. Learn routing, templates, databases, REST APIs, authentication, and deployment.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/flask-web-framework-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-flask-web-framework-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Flask Web Framework: Complete Guide for 2026">
+    <meta name="twitter:description" content="Master Flask, Python's lightweight web framework. Learn routing, templates, databases, REST APIs, authentication, and deployment.">
+    <meta property="article:published_time" content="2026-02-12">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/flask-web-framework-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Flask Web Framework: Complete Guide for 2026",
+        "description": "Master Flask, Python's lightweight web framework. Learn routing, templates, forms, databases, REST APIs, authentication, deployment, and best practices with practical examples.",
+        "datePublished": "2026-02-12",
+        "dateModified": "2026-02-12",
+        "url": "https://devtoolbox.dedyn.io/blog/flask-web-framework-guide",
+        "author": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        },
+        "publisher": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the difference between Flask and Django?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Flask is a micro-framework that gives you routing, a template engine (Jinja2), and a development server, then lets you choose every other component yourself. Django is a batteries-included framework with a built-in ORM, admin panel, authentication system, and form handling. Choose Flask when you want full control over your stack, are building a lightweight API or microservice, or prefer to pick your own database library and auth solution. Choose Django when you need a data-driven application with an admin interface, complex models, and built-in user management. Flask has a smaller learning curve and is easier to understand from top to bottom, while Django is faster for large applications because it makes more decisions for you."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I deploy a Flask application to production?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Never use Flask's built-in development server in production. Instead, use a production WSGI server like Gunicorn: run 'gunicorn -w 4 -b 0.0.0.0:8000 app:app' with 2-4 workers per CPU core. Place a reverse proxy like Nginx in front of Gunicorn to handle static files, SSL termination, and load balancing. Store secrets in environment variables, never in code. For containerized deployments, create a Dockerfile with a slim Python base image, install dependencies from requirements.txt, and use Docker Compose to orchestrate the app with its database and cache services. Set up health check endpoints and configure logging to stdout for container-friendly log collection."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I connect Flask to a database?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The most common approach is Flask-SQLAlchemy, which integrates SQLAlchemy's ORM with Flask's application context. Install it with 'pip install flask-sqlalchemy', configure the SQLALCHEMY_DATABASE_URI (e.g., 'sqlite:///app.db' for development or 'postgresql://user:pass@host/dbname' for production), and define models as Python classes that inherit from db.Model. Use Flask-Migrate (which wraps Alembic) for database migrations: 'flask db init' to set up, 'flask db migrate' to generate migration scripts, and 'flask db upgrade' to apply them. For simple applications, you can also use SQLite directly with Python's built-in sqlite3 module, but Flask-SQLAlchemy provides better session management, connection pooling, and model relationships."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I build a REST API with Flask?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Flask is excellent for REST APIs. Use the jsonify() function to return JSON responses, request.get_json() to parse incoming JSON, and HTTP method decorators to define endpoints. Structure your API with Blueprints to organize related routes into modules. For input validation, use a library like marshmallow or pydantic. Handle errors with @app.errorhandler decorators that return JSON instead of HTML. Add CORS support with Flask-CORS. For larger APIs, consider Flask-RESTX which adds Swagger documentation and request parsing, or Flask-Smorest which integrates marshmallow schemas with OpenAPI documentation automatically."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I handle authentication in Flask?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Flask does not include authentication out of the box, but Flask-Login is the standard extension for session-based auth. It manages user sessions, provides a login_required decorator, and handles remember-me cookies. Hash passwords with bcrypt via the flask-bcrypt extension, never store them in plain text. For API authentication, use JSON Web Tokens (JWT) with the flask-jwt-extended extension, which provides access tokens, refresh tokens, and token revocation. For OAuth (Google, GitHub login), use Authlib or Flask-Dance. Regardless of approach, always use HTTPS in production, set secure cookie flags, and implement CSRF protection with Flask-WTF for form-based applications."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Flask Web Framework: Complete Guide</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Blog",
+                        "item": "https://devtoolbox.dedyn.io/blog"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Flask Web Framework: Complete Guide for 2026"
+                }
+        ]
+    }
+    </script>
+
+    <script src="/js/track.js" defer></script>
+
+    <style>
+        .faq-section {
+            margin-top: 3rem;
+        }
+        .faq-section details {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            padding: 0;
+        }
+        .faq-section summary {
+            color: #3b82f6;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+        }
+        .faq-section summary:hover {
+            color: #60a5fa;
+        }
+        .faq-section details > p {
+            padding: 0 1.5rem 1rem 1.5rem;
+            margin: 0;
+        }
+        .toc {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+        }
+        .toc h3 {
+            margin-top: 0;
+            color: #e4e4e7;
+        }
+        .toc ol {
+            margin-bottom: 0;
+            line-height: 2;
+        }
+        .toc a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+    </style>
+
+    <main class="blog-post">
+        <article>
+        <h1>Flask Web Framework: Complete Guide for 2026</h1>
+        <div class="blog-meta" style="color: #9ca3af; margin-bottom: 2rem;">
+            <span>February 12, 2026</span> &mdash; <span>22 min read</span>
+        </div>
+
+        <p>Flask is Python's most popular micro-framework. It gives you a URL router, a template engine, a development server, and a debugger &mdash; then gets out of your way. You choose the database library, the authentication system, the form validator, and every other component. That freedom makes Flask the go-to choice for REST APIs, microservices, prototypes, and any project where you want to understand every layer of your application.</p>
+
+        <p>This guide takes you from installation through production deployment, with working code at every step. Whether you are building a simple API, a full web application, or a microservice, the patterns here will carry you from first route to production.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Related resources:</strong> Debug API responses with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>, learn API testing in our <a href="/blog/api-testing-complete-guide" style="color: #3b82f6;">API Testing Guide</a>, containerize your app with the <a href="/blog/docker-containers-beginners-guide" style="color: #3b82f6;">Docker Guide</a>, and reference our <a href="/cheatsheets/python-string-methods" style="color: #3b82f6;">Python String Methods Cheat Sheet</a>.
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+                <li><a href="#what-is-flask">What Is Flask? Why Flask?</a></li>
+                <li><a href="#installation">Installation &amp; Project Setup</a></li>
+                <li><a href="#first-app">Your First Flask App</a></li>
+                <li><a href="#routing">Routing &amp; URL Parameters</a></li>
+                <li><a href="#templates">Templates with Jinja2</a></li>
+                <li><a href="#forms">Forms &amp; Request Handling</a></li>
+                <li><a href="#database">Database with Flask-SQLAlchemy</a></li>
+                <li><a href="#rest-api">REST API Development</a></li>
+                <li><a href="#authentication">Authentication &amp; Sessions</a></li>
+                <li><a href="#blueprints">Blueprints &amp; App Structure</a></li>
+                <li><a href="#deployment">Deployment</a></li>
+                <li><a href="#best-practices">Best Practices &amp; Common Pitfalls</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- 1. What Is Flask?                            -->
+        <!-- ============================================ -->
+        <h2 id="what-is-flask">1. What Is Flask? Why Flask?</h2>
+
+        <p>Flask was created by Armin Ronacher in 2010. It wraps two libraries he also wrote: <strong>Werkzeug</strong> (a WSGI toolkit for HTTP handling) and <strong>Jinja2</strong> (a template engine). Flask itself is the glue that ties them together with a clean API, configuration management, and an extension ecosystem.</p>
+
+        <h3>Flask vs Django</h3>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+            <thead><tr style="border-bottom: 2px solid rgba(255,255,255,0.1);">
+                <th style="text-align: left; padding: 0.75rem;">Feature</th>
+                <th style="text-align: left; padding: 0.75rem;">Flask</th>
+                <th style="text-align: left; padding: 0.75rem;">Django</th>
+            </tr></thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 0.5rem 0.75rem;">Philosophy</td><td style="padding: 0.5rem 0.75rem;">Micro-framework, choose your own components</td><td style="padding: 0.5rem 0.75rem;">Batteries-included, convention over configuration</td></tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 0.5rem 0.75rem;">ORM</td><td style="padding: 0.5rem 0.75rem;">None built-in (use SQLAlchemy)</td><td style="padding: 0.5rem 0.75rem;">Built-in Django ORM</td></tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 0.5rem 0.75rem;">Admin Panel</td><td style="padding: 0.5rem 0.75rem;">Flask-Admin (optional)</td><td style="padding: 0.5rem 0.75rem;">Built-in, production-ready</td></tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 0.5rem 0.75rem;">Auth</td><td style="padding: 0.5rem 0.75rem;">Flask-Login (optional)</td><td style="padding: 0.5rem 0.75rem;">Built-in user model and auth views</td></tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 0.5rem 0.75rem;">Best For</td><td style="padding: 0.5rem 0.75rem;">APIs, microservices, learning</td><td style="padding: 0.5rem 0.75rem;">Full web apps, CMS, e-commerce</td></tr>
+                <tr><td style="padding: 0.5rem 0.75rem;">Learning Curve</td><td style="padding: 0.5rem 0.75rem;">Gentle &mdash; small core to learn</td><td style="padding: 0.5rem 0.75rem;">Steeper &mdash; more conventions to absorb</td></tr>
+            </tbody>
+        </table>
+
+        <p><strong>Choose Flask when</strong> you want to understand every component, you are building an API or microservice, or you need a lightweight foundation. <strong>Choose Django when</strong> you need an admin panel, built-in auth, and an ORM out of the box for a data-heavy application.</p>
+
+        <!-- ============================================ -->
+        <!-- 2. Installation & Project Setup              -->
+        <!-- ============================================ -->
+        <h2 id="installation">2. Installation &amp; Project Setup</h2>
+
+        <p>Always use a virtual environment. This keeps your project dependencies isolated from your system Python.</p>
+
+<pre><code class="language-python"># Create project directory and virtual environment
+mkdir myflaskapp &amp;&amp; cd myflaskapp
+python3 -m venv venv
+source venv/bin/activate    # Linux/macOS
+# venv\Scripts\activate     # Windows
+
+# Install Flask
+pip install flask
+
+# Verify installation
+python -c "import flask; print(flask.__version__)"</code></pre>
+
+        <h3>Recommended Project Structure</h3>
+
+        <p>For anything beyond a single file, organize your project like this:</p>
+
+<pre><code class="language-python">myflaskapp/
+    app/
+        __init__.py        # Application factory
+        models.py          # Database models
+        routes/
+            __init__.py
+            main.py        # Main blueprint
+            api.py         # API blueprint
+        templates/
+            base.html
+            index.html
+        static/
+            css/
+            js/
+    config.py              # Configuration classes
+    requirements.txt
+    run.py                 # Entry point</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 3. Your First Flask App                      -->
+        <!-- ============================================ -->
+        <h2 id="first-app">3. Your First Flask App</h2>
+
+        <p>A minimal Flask application is five lines of code:</p>
+
+<pre><code class="language-python">from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Hello, Flask!"
+
+if __name__ == "__main__":
+    app.run(debug=True)</code></pre>
+
+        <p>Save this as <code>app.py</code> and run it:</p>
+
+<pre><code class="language-python"># Method 1: Run directly
+python app.py
+
+# Method 2: Use the flask command
+export FLASK_APP=app.py
+export FLASK_DEBUG=1
+flask run</code></pre>
+
+        <p>Open <code>http://127.0.0.1:5000</code> in your browser. The <code>debug=True</code> flag enables the interactive debugger and auto-reloading &mdash; the server restarts automatically when you save code changes.</p>
+
+        <h3>The Application Factory Pattern</h3>
+
+        <p>For real projects, use a factory function instead of a global app object. This makes testing easier and allows multiple app configurations:</p>
+
+<pre><code class="language-python"># app/__init__.py
+from flask import Flask
+
+def create_app(config_name="development"):
+    app = Flask(__name__)
+    app.config.from_object(f"config.{config_name.title()}Config")
+
+    # Initialize extensions
+    from app.extensions import db, migrate
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    # Register blueprints
+    from app.routes.main import main_bp
+    app.register_blueprint(main_bp)
+
+    return app</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 4. Routing & URL Parameters                  -->
+        <!-- ============================================ -->
+        <h2 id="routing">4. Routing &amp; URL Parameters</h2>
+
+        <p>Routes map URLs to Python functions. Flask uses decorators to define them.</p>
+
+<pre><code class="language-python">@app.route("/")
+def index():
+    return "Home page"
+
+# Variable rules: capture parts of the URL
+@app.route("/user/&lt;username&gt;")
+def profile(username):
+    return f"Profile: {username}"
+
+# Type converters: int, float, path, uuid
+@app.route("/post/&lt;int:post_id&gt;")
+def show_post(post_id):
+    return f"Post #{post_id}"
+
+# Multiple HTTP methods on one route
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        return do_login()
+    return render_template("login.html")</code></pre>
+
+        <h3>URL Building with url_for()</h3>
+
+        <p>Never hardcode URLs. Use <code>url_for()</code> to generate them from function names. This way, if you change a URL pattern, all references update automatically:</p>
+
+<pre><code class="language-python">from flask import url_for
+
+# In Python code
+url_for("index")               # "/"
+url_for("profile", username="alice")  # "/user/alice"
+url_for("static", filename="css/style.css")  # "/static/css/style.css"
+
+# In Jinja2 templates
+# &lt;a href="{{ url_for('index') }}"&gt;Home&lt;/a&gt;</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 5. Templates with Jinja2                     -->
+        <!-- ============================================ -->
+        <h2 id="templates">5. Templates with Jinja2</h2>
+
+        <p>Jinja2 separates your HTML from your Python logic. Templates live in the <code>templates/</code> directory by default.</p>
+
+        <h3>Template Inheritance</h3>
+
+        <p>Define a base layout and extend it in child templates. This eliminates duplicate HTML:</p>
+
+<pre><code class="language-python">&lt;!-- templates/base.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;{% block title %}My App{% endblock %}&lt;/title&gt;
+    &lt;link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;nav&gt;
+        &lt;a href="{{ url_for('index') }}"&gt;Home&lt;/a&gt;
+        &lt;a href="{{ url_for('about') }}"&gt;About&lt;/a&gt;
+    &lt;/nav&gt;
+    &lt;main&gt;{% block content %}{% endblock %}&lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+&lt;!-- templates/index.html --&gt;
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+    &lt;h1&gt;Welcome, {{ user.name }}&lt;/h1&gt;
+    {% for post in posts %}
+        &lt;article&gt;
+            &lt;h2&gt;{{ post.title }}&lt;/h2&gt;
+            &lt;p&gt;{{ post.body | truncate(200) }}&lt;/p&gt;
+        &lt;/article&gt;
+    {% endfor %}
+{% endblock %}</code></pre>
+
+        <h3>Useful Jinja2 Features</h3>
+
+<pre><code class="language-python">{# Filters: transform values inline #}
+{{ name | capitalize }}
+{{ price | round(2) }}
+{{ html_content | safe }}       {# mark as safe HTML, skip escaping #}
+{{ items | join(", ") }}
+
+{# Conditionals #}
+{% if user.is_admin %}
+    &lt;a href="/admin"&gt;Admin Panel&lt;/a&gt;
+{% elif user.is_authenticated %}
+    &lt;span&gt;Welcome back&lt;/span&gt;
+{% else %}
+    &lt;a href="/login"&gt;Log in&lt;/a&gt;
+{% endif %}
+
+{# Macros: reusable template functions #}
+{% macro input_field(name, label, type="text") %}
+    &lt;label for="{{ name }}"&gt;{{ label }}&lt;/label&gt;
+    &lt;input type="{{ type }}" id="{{ name }}" name="{{ name }}"&gt;
+{% endmacro %}
+
+{{ input_field("email", "Email Address", type="email") }}</code></pre>
+
+        <p>Render templates from your route with <code>render_template()</code>:</p>
+
+<pre><code class="language-python">from flask import render_template
+
+@app.route("/")
+def index():
+    posts = Post.query.order_by(Post.created.desc()).limit(10).all()
+    return render_template("index.html", posts=posts, user=current_user)</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 6. Forms & Request Handling                  -->
+        <!-- ============================================ -->
+        <h2 id="forms">6. Forms &amp; Request Handling</h2>
+
+        <p>Flask gives you raw access to request data through the <code>request</code> object. For production forms, use Flask-WTF which adds CSRF protection and validation.</p>
+
+<pre><code class="language-python">from flask import request, redirect, url_for, flash
+
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        message = request.form.get("message")
+
+        if not all([name, email, message]):
+            flash("All fields are required.", "error")
+            return redirect(url_for("contact"))
+
+        # Process the form data
+        send_message(name, email, message)
+        flash("Message sent!", "success")
+        return redirect(url_for("index"))
+
+    return render_template("contact.html")</code></pre>
+
+        <h3>Flask-WTF for Validated Forms</h3>
+
+<pre><code class="language-python">pip install flask-wtf</code></pre>
+
+<pre><code class="language-python">from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField
+from wtforms.validators import DataRequired, Email, Length
+
+class ContactForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired(), Length(max=100)])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    message = TextAreaField("Message", validators=[DataRequired(), Length(max=2000)])
+    submit = SubmitField("Send")
+
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    form = ContactForm()
+    if form.validate_on_submit():
+        send_message(form.name.data, form.email.data, form.message.data)
+        flash("Message sent!", "success")
+        return redirect(url_for("index"))
+    return render_template("contact.html", form=form)</code></pre>
+
+        <h3>File Uploads</h3>
+
+<pre><code class="language-python">import os
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB limit
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route("/upload", methods=["POST"])
+def upload_file():
+    if "file" not in request.files:
+        return "No file provided", 400
+    file = request.files["file"]
+    if file.filename == "" or not allowed_file(file.filename):
+        return "Invalid file", 400
+
+    filename = secure_filename(file.filename)
+    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+    return redirect(url_for("index"))</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 7. Database with Flask-SQLAlchemy            -->
+        <!-- ============================================ -->
+        <h2 id="database">7. Database with Flask-SQLAlchemy</h2>
+
+        <p>Flask-SQLAlchemy integrates SQLAlchemy with Flask's application context, giving you a powerful ORM with session management and connection pooling.</p>
+
+<pre><code class="language-python">pip install flask-sqlalchemy flask-migrate</code></pre>
+
+        <h3>Configuration and Models</h3>
+
+<pre><code class="language-python">from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from datetime import datetime, timezone
+
+db = SQLAlchemy()
+migrate = Migrate()
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    posts = db.relationship("Post", backref="author", lazy="dynamic")
+
+    def __repr__(self):
+        return f"&lt;User {self.username}&gt;"
+
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+# In your factory function:
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+db.init_app(app)
+migrate.init_app(app, db)</code></pre>
+
+        <h3>CRUD Operations</h3>
+
+<pre><code class="language-python"># CREATE
+user = User(username="alice", email="alice@example.com", password_hash=hashed)
+db.session.add(user)
+db.session.commit()
+
+# READ
+user = User.query.filter_by(username="alice").first_or_404()
+all_posts = Post.query.order_by(Post.created.desc()).all()
+recent = Post.query.filter(Post.created >= last_week).limit(10).all()
+
+# UPDATE
+user.email = "newemail@example.com"
+db.session.commit()
+
+# DELETE
+db.session.delete(user)
+db.session.commit()</code></pre>
+
+        <h3>Migrations with Flask-Migrate</h3>
+
+<pre><code class="language-python"># Initialize migrations (once)
+flask db init
+
+# Generate a migration after changing models
+flask db migrate -m "add posts table"
+
+# Apply the migration
+flask db upgrade
+
+# Rollback one migration
+flask db downgrade</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 8. REST API Development                      -->
+        <!-- ============================================ -->
+        <h2 id="rest-api">8. REST API Development</h2>
+
+        <p>Flask is one of the most popular choices for building REST APIs. Use <code>jsonify()</code> for responses and <code>request.get_json()</code> to parse incoming data. Format and debug your API responses with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>.</p>
+
+<pre><code class="language-python">from flask import jsonify, request, abort
+
+@app.route("/api/posts", methods=["GET"])
+def get_posts():
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 20, type=int)
+    pagination = Post.query.order_by(Post.created.desc()).paginate(
+        page=page, per_page=min(per_page, 100), error_out=False
+    )
+    return jsonify({
+        "posts": [{"id": p.id, "title": p.title, "body": p.body} for p in pagination.items],
+        "total": pagination.total,
+        "page": page,
+        "pages": pagination.pages
+    })
+
+@app.route("/api/posts", methods=["POST"])
+def create_post():
+    data = request.get_json()
+    if not data or not data.get("title") or not data.get("body"):
+        abort(400, description="Title and body are required.")
+
+    post = Post(title=data["title"], body=data["body"], user_id=current_user.id)
+    db.session.add(post)
+    db.session.commit()
+    return jsonify({"id": post.id, "title": post.title}), 201
+
+@app.route("/api/posts/&lt;int:post_id&gt;", methods=["PUT"])
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    data = request.get_json()
+    post.title = data.get("title", post.title)
+    post.body = data.get("body", post.body)
+    db.session.commit()
+    return jsonify({"id": post.id, "title": post.title})
+
+@app.route("/api/posts/&lt;int:post_id&gt;", methods=["DELETE"])
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    db.session.delete(post)
+    db.session.commit()
+    return "", 204</code></pre>
+
+        <h3>Error Handling for APIs</h3>
+
+<pre><code class="language-python">@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"error": "Not found", "message": str(error)}), 404
+
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({"error": "Bad request", "message": str(error)}), 400
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return jsonify({"error": "Internal server error"}), 500</code></pre>
+
+        <p>For comprehensive API testing strategies, see our <a href="/blog/api-testing-complete-guide" style="color: #3b82f6;">API Testing Complete Guide</a>.</p>
+
+        <!-- ============================================ -->
+        <!-- 9. Authentication & Sessions                 -->
+        <!-- ============================================ -->
+        <h2 id="authentication">9. Authentication &amp; Sessions</h2>
+
+        <h3>Session-Based Auth with Flask-Login</h3>
+
+<pre><code class="language-python">pip install flask-login flask-bcrypt</code></pre>
+
+<pre><code class="language-python">from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_bcrypt import Bcrypt
+
+login_manager = LoginManager()
+bcrypt = Bcrypt()
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.password_hash, password)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        user = User.query.filter_by(username=request.form["username"]).first()
+        if user and user.check_password(request.form["password"]):
+            login_user(user, remember=request.form.get("remember"))
+            return redirect(url_for("dashboard"))
+        flash("Invalid credentials.", "error")
+    return render_template("login.html")
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")</code></pre>
+
+        <h3>JWT for API Authentication</h3>
+
+<pre><code class="language-python">pip install flask-jwt-extended</code></pre>
+
+<pre><code class="language-python">from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
+jwt = JWTManager(app)
+
+@app.route("/api/auth/login", methods=["POST"])
+def api_login():
+    data = request.get_json()
+    user = User.query.filter_by(username=data.get("username")).first()
+    if not user or not user.check_password(data.get("password")):
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    token = create_access_token(identity=user.id)
+    return jsonify({"access_token": token})
+
+@app.route("/api/me")
+@jwt_required()
+def api_me():
+    user = User.query.get(get_jwt_identity())
+    return jsonify({"username": user.username, "email": user.email})</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 10. Blueprints & App Structure               -->
+        <!-- ============================================ -->
+        <h2 id="blueprints">10. Blueprints &amp; App Structure</h2>
+
+        <p>Blueprints split a large Flask application into modular, reusable components. Each blueprint can have its own routes, templates, and static files.</p>
+
+<pre><code class="language-python"># app/routes/main.py
+from flask import Blueprint, render_template
+
+main_bp = Blueprint("main", __name__, template_folder="templates")
+
+@main_bp.route("/")
+def index():
+    return render_template("index.html")
+
+@main_bp.route("/about")
+def about():
+    return render_template("about.html")
+
+
+# app/routes/api.py
+from flask import Blueprint, jsonify
+
+api_bp = Blueprint("api", __name__, url_prefix="/api")
+
+@api_bp.route("/health")
+def health():
+    return jsonify({"status": "ok"})
+
+
+# app/__init__.py - register blueprints
+def create_app():
+    app = Flask(__name__)
+
+    from app.routes.main import main_bp
+    from app.routes.api import api_bp
+    app.register_blueprint(main_bp)
+    app.register_blueprint(api_bp)
+
+    return app</code></pre>
+
+        <h3>Full Project Layout</h3>
+
+<pre><code class="language-python">myflaskapp/
+    app/
+        __init__.py          # create_app() factory
+        extensions.py        # db, migrate, login_manager, bcrypt
+        models/
+            __init__.py
+            user.py
+            post.py
+        routes/
+            __init__.py
+            main.py          # Blueprint: pages
+            api.py           # Blueprint: /api/*
+            auth.py          # Blueprint: /auth/*
+        templates/
+            base.html
+            main/
+            auth/
+        static/
+    config.py                # DevelopmentConfig, ProductionConfig, TestingConfig
+    migrations/              # Flask-Migrate auto-generated
+    tests/
+        conftest.py
+        test_auth.py
+        test_api.py
+    requirements.txt
+    Dockerfile
+    docker-compose.yml
+    run.py                   # from app import create_app; app = create_app()</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 11. Deployment                               -->
+        <!-- ============================================ -->
+        <h2 id="deployment">11. Deployment</h2>
+
+        <p><strong>Never use Flask's development server in production.</strong> It is single-threaded, unoptimized, and not designed for security.</p>
+
+        <h3>Gunicorn (WSGI Server)</h3>
+
+<pre><code class="language-python">pip install gunicorn
+
+# Run with 4 workers
+gunicorn -w 4 -b 0.0.0.0:8000 "app:create_app()"
+
+# With access logging and timeout
+gunicorn -w 4 -b 0.0.0.0:8000 --access-logfile - --timeout 120 "app:create_app()"</code></pre>
+
+        <h3>Docker Deployment</h3>
+
+        <p>For Docker fundamentals, see our <a href="/blog/docker-containers-beginners-guide" style="color: #3b82f6;">Docker Containers Guide</a>.</p>
+
+<pre><code class="language-python"># Dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "app:create_app()"]</code></pre>
+
+<pre><code class="language-python"># docker-compose.yml
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://user:pass@db/myapp
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      - db
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=myapp
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+volumes:
+  pgdata:</code></pre>
+
+        <h3>Environment Configuration</h3>
+
+<pre><code class="language-python"># config.py
+import os
+
+class Config:
+    SECRET_KEY = os.environ.get("SECRET_KEY", "change-this-in-production")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = "sqlite:///dev.db"
+
+class ProductionConfig(Config):
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 12. Best Practices & Common Pitfalls         -->
+        <!-- ============================================ -->
+        <h2 id="best-practices">12. Best Practices &amp; Common Pitfalls</h2>
+
+        <h3>Do</h3>
+        <ul>
+            <li><strong>Use the application factory pattern</strong> &mdash; it makes testing and multiple configurations straightforward.</li>
+            <li><strong>Store secrets in environment variables</strong>, never in source code. Use <code>python-dotenv</code> for local development.</li>
+            <li><strong>Use Flask-Migrate</strong> for every schema change. Never modify the database schema manually.</li>
+            <li><strong>Add CSRF protection</strong> to all forms with Flask-WTF.</li>
+            <li><strong>Set <code>MAX_CONTENT_LENGTH</code></strong> to prevent denial-of-service via large uploads.</li>
+            <li><strong>Use <code>url_for()</code></strong> instead of hardcoding URLs in templates and redirects.</li>
+            <li><strong>Write tests</strong> &mdash; Flask provides a test client that simulates requests without a running server.</li>
+        </ul>
+
+        <h3>Avoid</h3>
+        <ul>
+            <li><strong>Running the dev server in production</strong> &mdash; always use Gunicorn or uWSGI behind a reverse proxy.</li>
+            <li><strong>Storing passwords in plain text</strong> &mdash; always hash with bcrypt or argon2.</li>
+            <li><strong>Circular imports</strong> &mdash; use the factory pattern and import inside functions when necessary.</li>
+            <li><strong>Using <code>| safe</code> on user input</strong> &mdash; this disables Jinja2's auto-escaping and opens you to XSS attacks.</li>
+            <li><strong>Committing <code>.env</code> files or secrets</strong> to version control.</li>
+            <li><strong>Ignoring database connection cleanup</strong> &mdash; Flask-SQLAlchemy handles this, but raw connections need <code>teardown_appcontext</code>.</li>
+        </ul>
+
+        <h3>Testing Example</h3>
+
+<pre><code class="language-python">import pytest
+from app import create_app
+
+@pytest.fixture
+def client():
+    app = create_app("testing")
+    with app.test_client() as client:
+        with app.app_context():
+            db.create_all()
+        yield client
+
+def test_home_page(client):
+    response = client.get("/")
+    assert response.status_code == 200
+
+def test_create_post(client):
+    response = client.post("/api/posts",
+        json={"title": "Test Post", "body": "Content here"},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 201
+    assert response.get_json()["title"] == "Test Post"</code></pre>
+
+        <!-- ============================================ -->
+        <!-- FAQ Section                                  -->
+        <!-- ============================================ -->
+        <div class="faq-section" id="faq">
+            <h2>Frequently Asked Questions</h2>
+
+            <details>
+                <summary>What is the difference between Flask and Django?</summary>
+                <p>Flask is a micro-framework that gives you routing, a template engine (Jinja2), and a development server, then lets you choose every other component yourself. Django is a batteries-included framework with a built-in ORM, admin panel, authentication system, and form handling. Choose Flask when you want full control over your stack, are building a lightweight API or microservice, or prefer to pick your own database library and auth solution. Choose Django when you need a data-driven application with an admin interface, complex models, and built-in user management. Flask has a smaller learning curve and is easier to understand from top to bottom, while Django is faster for large applications because it makes more decisions for you.</p>
+            </details>
+
+            <details>
+                <summary>How do I deploy a Flask application to production?</summary>
+                <p>Never use Flask's built-in development server in production. Instead, use a production WSGI server like Gunicorn: run <code>gunicorn -w 4 -b 0.0.0.0:8000 "app:create_app()"</code> with 2&ndash;4 workers per CPU core. Place a reverse proxy like Nginx in front of Gunicorn to handle static files, SSL termination, and load balancing. Store secrets in environment variables, never in code. For containerized deployments, create a Dockerfile with a slim Python base image, install dependencies from requirements.txt, and use Docker Compose to orchestrate the app with its database and cache services.</p>
+            </details>
+
+            <details>
+                <summary>How do I connect Flask to a database?</summary>
+                <p>The most common approach is Flask-SQLAlchemy, which integrates SQLAlchemy's ORM with Flask's application context. Install it with <code>pip install flask-sqlalchemy</code>, configure the <code>SQLALCHEMY_DATABASE_URI</code> (e.g., <code>sqlite:///app.db</code> for development or a PostgreSQL URI for production), and define models as Python classes that inherit from <code>db.Model</code>. Use Flask-Migrate for schema migrations: <code>flask db init</code> to set up, <code>flask db migrate</code> to generate scripts, and <code>flask db upgrade</code> to apply them.</p>
+            </details>
+
+            <details>
+                <summary>How do I build a REST API with Flask?</summary>
+                <p>Flask is excellent for REST APIs. Use <code>jsonify()</code> to return JSON responses, <code>request.get_json()</code> to parse incoming JSON, and HTTP method decorators to define endpoints. Structure your API with Blueprints to organize related routes into modules. For input validation, use marshmallow or pydantic. Handle errors with <code>@app.errorhandler</code> decorators that return JSON instead of HTML. Add CORS support with Flask-CORS. For larger APIs, consider Flask-RESTX for Swagger documentation or Flask-Smorest for OpenAPI integration.</p>
+            </details>
+
+            <details>
+                <summary>How do I handle authentication in Flask?</summary>
+                <p>Flask does not include authentication out of the box, but Flask-Login is the standard extension for session-based auth. It manages user sessions, provides a <code>login_required</code> decorator, and handles remember-me cookies. Hash passwords with bcrypt via Flask-Bcrypt &mdash; never store them in plain text. For API authentication, use JSON Web Tokens with Flask-JWT-Extended, which provides access tokens, refresh tokens, and token revocation. For OAuth (Google, GitHub login), use Authlib or Flask-Dance. Always use HTTPS in production and enable CSRF protection with Flask-WTF for forms.</p>
+            </details>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- Conclusion                                   -->
+        <!-- ============================================ -->
+        <h2>Conclusion</h2>
+
+        <p>Flask gives you a clean foundation and the freedom to build exactly the application you need. Start with a single file to learn the fundamentals, then graduate to the application factory pattern with Blueprints when your project grows. Use Flask-SQLAlchemy for database access, Flask-Login or Flask-JWT-Extended for authentication, and Gunicorn behind Nginx or in a Docker container for production deployment.</p>
+
+        <p>The micro-framework philosophy means you will understand every piece of your stack. That understanding pays off when debugging production issues, optimizing performance, or onboarding new team members. Flask's ecosystem is mature, its documentation is excellent, and its patterns scale from weekend projects to production services handling millions of requests.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Essential tools:</strong> Debug API responses with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>, learn testing strategies in our <a href="/blog/api-testing-complete-guide" style="color: #3b82f6;">API Testing Guide</a>, and keep our <a href="/cheatsheets/python-string-methods" style="color: #3b82f6;">Python String Methods Cheat Sheet</a> bookmarked.
+        </div>
+
+        <h2>Related Resources</h2>
+
+        <section style="margin-top: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/api-testing-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">API Testing Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Test your Flask API endpoints effectively</div>
+            </a>
+            <a href="/blog/docker-containers-beginners-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Containers Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Containerize Flask apps for consistent deployments</div>
+            </a>
+            <a href="/blog/python-django-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Django Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Compare Flask with Django's batteries-included approach</div>
+            </a>
+            <a href="/tools/json-formatter" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">JSON Formatter</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Format and validate API responses from Flask endpoints</div>
+            </a>
+            <a href="/cheatsheets/python-string-methods" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Python String Methods</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Quick reference for string manipulation in Python</div>
+            </a>
+            <a href="/blog/rest-api-design-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">REST API Design Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Best practices for designing RESTful API endpoints</div>
+            </a>
+        </div>
+        </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 DevToolbox. Free developer tools.</p>
+            <div class="footer-links">
+                <a href="/about">About</a>
+                <a href="/blog/">Blog</a>
+                <a href="/feed.xml">RSS</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            window.location.href = '/tools/';
+        }
+    });
+    </script>
+</body>
+</html>
