@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Merge Queue Expiry Extension Reapproval: Decision Flow for Prolonged Rollback Incidents (2026) | DevToolbox Blog</title>
+    <meta name="description" content="Need to extend emergency merge queue bypass past original expiry? Use this reapproval decision flow, evidence checklist, and copy-paste macros for prolonged rollback incidents.">
+    <meta name="keywords" content="github merge queue expiry extension, rollback reapproval decision flow, merge queue bypass extension template, required checks rollback extension, incident bypass expiry policy">
+
+    <meta property="og:title" content="Merge Queue Expiry Extension Reapproval Decision Flow (2026)">
+    <meta property="og:description" content="How to reapprove or deny bypass expiry extension during prolonged rollback incidents.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/github-merge-queue-expiry-extension-reapproval-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-github-merge-queue-expiry-extension-reapproval-guide.png">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Merge Queue Expiry Extension Reapproval (2026)">
+    <meta name="twitter:description" content="Decision flow and templates for expiry extension requests in rollback incidents.">
+
+    <meta property="article:published_time" content="2026-02-17">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/github-merge-queue-expiry-extension-reapproval-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/track.js" defer></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "GitHub Merge Queue Expiry Extension Reapproval: Decision Flow for Prolonged Rollback Incidents (2026)",
+        "description": "Need to extend emergency merge queue bypass past original expiry? Use this reapproval decision flow, evidence checklist, and copy-paste macros for prolonged rollback incidents.",
+        "datePublished": "2026-02-17",
+        "dateModified": "2026-02-17",
+        "url": "https://devtoolbox.dedyn.io/blog/github-merge-queue-expiry-extension-reapproval-guide",
+        "author": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "When should we request expiry extension instead of restoring baseline policy?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Request extension only when active impact remains and rollback validation work is still in progress with documented evidence. If service is stable and compensating checks are complete, restore baseline policy immediately."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does an expiry extension need fresh dual approval every time?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Every extension is a new risk decision and needs fresh approval from two distinct approvers before the previous expiry timestamp is reached."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How long should one extension window be?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Keep each extension short, usually 15 to 30 minutes, so teams regularly reassess risk and avoid accidental long-lived policy drift."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What evidence is mandatory in an extension request?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Include previous expiry, reason work is incomplete, updated validation status, current production risk, compensating controls still active, and a named restoration owner."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the most common failure in extension handling?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Teams often extend informally in chat without updating the PR thread, which breaks auditability and causes confusion about the active expiry timestamp."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Merge Queue Expiry Extension Reapproval Guide" }
+        ]
+    }
+    </script>
+
+    <style>
+        .tool-callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            line-height: 1.75;
+            color: #d1d5db;
+        }
+        .tool-callout a { color: #3b82f6; }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #d1fae5;
+        }
+
+        .warn-box {
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.25);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #fde68a;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+        .toc h3 { margin: 0 0 0.75rem 0; color: #e5e7eb; }
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc li { margin: 0.35rem 0; }
+        .toc a { color: #93c5fd; }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .mini-table th, .mini-table td {
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+            vertical-align: top;
+        }
+        .mini-table th { color: #e5e7eb; font-weight: 700; background: rgba(255,255,255,0.03); }
+        .mini-table td { color: #d1d5db; }
+        .mini-table tr:last-child td { border-bottom: 0; }
+
+        .checklist {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .checklist li { margin: 0.55rem 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Merge Queue Expiry Extension Reapproval Guide</span></nav>
+
+    <main class="blog-post">
+        <h1>GitHub Merge Queue Expiry Extension Reapproval: Decision Flow for Prolonged Rollback Incidents (2026)</h1>
+        <p class="meta">Published February 17, 2026 &middot; 10 min read</p>
+
+        <p>During severe rollback incidents, teams often set a short emergency bypass expiry, then hit a second decision point when the window is about to end. This is where process quality drops: some teams extend by habit, some restore too early, and others forget to record who approved what.</p>
+
+        <p>This guide gives a <strong>reapproval decision flow</strong> for expiry extension requests so you can protect auditability while still restoring service quickly under pressure.</p>
+
+        <div class="tool-callout">
+            <strong style="color:#3b82f6;">&#9881; Quick links:</strong>
+            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide">Emergency Bypass Governance Guide</a> &middot;
+            <a href="/blog/github-merge-queue-approval-evidence-template-guide">Approval Evidence Template Guide</a> &middot;
+            <a href="/blog/github-merge-queue-codeowners-approval-deadlock-guide">CODEOWNERS Deadlock Guide</a> &middot;
+            <a href="/blog/github-merge-queue-stale-review-dismissal-guide">Stale Review Dismissal Guide</a> &middot;
+            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide">Timeout/Cancelled Checks Guide</a> &middot;
+            <a href="/blog/github-merge-queue-runner-saturation-vs-queue-starvation-guide">Saturation vs Starvation Guide</a> &middot;
+            <a href="/blog/github-actions-cicd-complete-guide">GitHub Actions CI/CD Guide</a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of contents</h3>
+            <ol>
+                <li><a href="#why">Why extension decisions fail</a></li>
+                <li><a href="#flow">Extension decision flow (T-10 to T+5)</a></li>
+                <li><a href="#evidence">Mandatory evidence for extension requests</a></li>
+                <li><a href="#macros">Copy-paste extension macros</a></li>
+                <li><a href="#guardrails">Guardrail metrics and anti-patterns</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <h2 id="why">1. Why extension decisions fail</h2>
+
+        <p>Initial bypass approvals are usually documented. Extension approvals are where incidents drift. People assume the original approval still applies, even though the risk profile has changed.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Failure mode</th>
+                    <th>What it looks like</th>
+                    <th>Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Silent extension</td>
+                    <td>Team keeps bypass active without fresh PR comment</td>
+                    <td>No auditable approval trail</td>
+                </tr>
+                <tr>
+                    <td>Chat-only approval</td>
+                    <td>Decision made in Slack but not mirrored to PR timeline</td>
+                    <td>Split source of truth</td>
+                </tr>
+                <tr>
+                    <td>Open-ended extension</td>
+                    <td>"Until stable" without UTC cutoff</td>
+                    <td>Long-lived policy drift</td>
+                </tr>
+                <tr>
+                    <td>No restoration owner</td>
+                    <td>Everyone assumes someone else will restore checks</td>
+                    <td>Controls remain weakened after incident</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Hard rule:</strong> extension approval expires independently from initial approval. Treat every extension as a new risk decision.
+        </div>
+
+        <h2 id="flow">2. Extension decision flow (T-10 to T+5)</h2>
+
+        <p>Use this timeline around the current expiry timestamp:</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Time window</th>
+                    <th>Action</th>
+                    <th>Owner</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>T-10 min</td>
+                    <td>Post extension precheck: current impact, remaining rollback work, validation status</td>
+                    <td>Requester</td>
+                </tr>
+                <tr>
+                    <td>T-7 min</td>
+                    <td>Decide path: restore baseline now, extend with reapproval, or escalate to incident lead</td>
+                    <td>IC + service owner</td>
+                </tr>
+                <tr>
+                    <td>T-5 min</td>
+                    <td>If extending, post full extension evidence block with new UTC expiry</td>
+                    <td>Requester</td>
+                </tr>
+                <tr>
+                    <td>T-3 min</td>
+                    <td>Collect dual reapproval in PR thread</td>
+                    <td>Two approvers</td>
+                </tr>
+                <tr>
+                    <td>T0</td>
+                    <td>Old approval expires automatically; new approval must already exist</td>
+                    <td>All responders</td>
+                </tr>
+                <tr>
+                    <td>T+5 min</td>
+                    <td>Confirm controls still bounded and restoration plan is unchanged</td>
+                    <td>Restoration owner</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tip-box">
+            <strong>Decision shortcut:</strong> if service impact is decreasing and rollback confidence is high, bias toward restoring baseline instead of extending.
+        </div>
+
+        <h2 id="evidence">3. Mandatory evidence for extension requests</h2>
+
+        <p>Never post "need 30 more min" without context. Use this exact field set:</p>
+
+        <div class="checklist">
+            <ol>
+                <li><strong>Previous expiry (UTC):</strong> the active cutoff that is about to end.</li>
+                <li><strong>Why work is incomplete:</strong> concrete blocker (queue delay, validation lag, infra instability).</li>
+                <li><strong>Current production state:</strong> impact trend and risk if rollback remains partial.</li>
+                <li><strong>Updated validation evidence:</strong> latest run links and signal quality.</li>
+                <li><strong>Compensating controls active:</strong> canary percent, extra monitors, on-call coverage.</li>
+                <li><strong>New expiry (UTC):</strong> bounded, short, and explicit.</li>
+                <li><strong>Restoration owner:</strong> named person accountable for restoring baseline controls.</li>
+            </ol>
+        </div>
+
+        <p>If any field is missing, reject the extension and either restore baseline policy or escalate for fresh incident command review.</p>
+
+        <h2 id="macros">4. Copy-paste extension macros</h2>
+
+        <p><strong>Macro A: Extension request</strong></p>
+        <pre><code>Expiry extension request (rollback bypass)
+
+Incident: INC-2026-02-17-019
+Rollback PR: #8462
+Previous expiry (UTC): 2026-02-17T00:30:00Z
+Reason extension required: canary error budget check still running
+Current impact: checkout latency elevated, partial recovery in progress
+Updated evidence links:
+- workflow run: [run-7]
+- canary dashboard: [dash-3]
+Compensating controls active:
+- canary 5%
+- on-call watch: @oncall-payments
+- synthetic probe every 60s
+Proposed new expiry (UTC): 2026-02-17T00:50:00Z
+Restoration owner: @carol
+Reapproval requested from IC + service owner.
+</code></pre>
+
+        <p><strong>Macro B: Reapproval confirmation</strong></p>
+        <pre><code>Reapproval recorded.
+Role: Incident Commander
+Decision: Approved extension until 2026-02-17T00:50:00Z
+Conditions:
+- No further extension without fresh evidence block
+- Baseline policy restore posted by restoration owner before expiry
+</code></pre>
+
+        <p><strong>Macro C: Extension denied</strong></p>
+        <pre><code>Extension denied.
+Reason: missing updated validation evidence and unclear restoration owner.
+Action:
+- restore baseline protections at current expiry
+- continue rollback via queue-safe baseline path
+- escalate to incident lead if customer impact worsens
+</code></pre>
+
+        <h2 id="guardrails">5. Guardrail metrics and anti-patterns</h2>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Healthy</th>
+                    <th>Escalate when</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Extensions with missing dual approval</td>
+                    <td>0%</td>
+                    <td>Any occurrence</td>
+                </tr>
+                <tr>
+                    <td>Extensions with no restoration owner</td>
+                    <td>0%</td>
+                    <td>Any occurrence</td>
+                </tr>
+                <tr>
+                    <td>Average extension window length</td>
+                    <td>15-30 min</td>
+                    <td>&gt; 45 min</td>
+                </tr>
+                <tr>
+                    <td>Extensions per incident</td>
+                    <td>0-2</td>
+                    <td>&gt; 3</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Anti-pattern:</strong> repeated extensions usually indicate unresolved CI reliability debt. Treat the metric as platform health signal, not process success.
+        </div>
+
+        <h2 id="faq">6. FAQ</h2>
+
+        <details>
+            <summary>When should we request expiry extension instead of restoring baseline policy?</summary>
+            <p>Request extension only when active impact remains and rollback validation is still incomplete with documented evidence. If service is stable, restore baseline controls immediately.</p>
+        </details>
+
+        <details>
+            <summary>Does every extension require fresh dual approval?</summary>
+            <p>Yes. Every extension is a new risk decision and needs fresh reapproval before the previous expiry cutoff.</p>
+        </details>
+
+        <details>
+            <summary>How long should one extension window be?</summary>
+            <p>Keep extensions short, usually 15 to 30 minutes, so risk is reassessed frequently.</p>
+        </details>
+
+        <details>
+            <summary>What evidence is mandatory in an extension request?</summary>
+            <p>Previous expiry, reason work is incomplete, current impact, updated validation links, active controls, new expiry, and restoration owner.</p>
+        </details>
+
+        <details>
+            <summary>What is the most common failure in extension handling?</summary>
+            <p>Approvals happen in chat only and never reach the PR timeline, which breaks auditability and causes expiry confusion.</p>
+        </details>
+
+        <h2>Related merge queue incident guides</h2>
+        <section style="margin-top: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+                <a href="/blog/github-merge-queue-emergency-bypass-governance-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Emergency Bypass Governance Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Approval criteria and bounded control model for high-pressure incidents.</div>
+                </a>
+                <a href="/blog/github-merge-queue-approval-evidence-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Approval Evidence Template Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Copy-paste incident macros for approvals, expiry, and restoration evidence.</div>
+                </a>
+                <a href="/blog/github-merge-queue-codeowners-approval-deadlock-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CODEOWNERS Deadlock Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Unblock rollback PRs when required owner approvals are unavailable.</div>
+                </a>
+                <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Stale Review Dismissal Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Stop rollback approvals from getting invalidated during queue churn.</div>
+                </a>
+                <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Checks Timed Out or Cancelled Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Classify CI failure mode quickly when rollback path is blocked.</div>
+                </a>
+                <a href="/blog/github-merge-queue-runner-saturation-vs-queue-starvation-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Saturation vs Starvation Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Use SLO signals to separate capacity bottlenecks from queue control issues.</div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>DevToolbox &mdash; Free developer tools, no strings attached.</p>
+    </footer>
+</body>
+</html>
