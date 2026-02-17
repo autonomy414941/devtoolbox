@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Merge Queue Approval Evidence Template: Incident Comment Macros for Safe Rollbacks (2026) | DevToolbox Blog</title>
+    <meta name="description" content="Need consistent approval evidence before bypassing merge queue controls during incident rollback? Use this copy-paste template and comment macros for auditable, time-boxed decisions.">
+    <meta name="keywords" content="github merge queue approval evidence template, rollback incident comment macro, merge queue bypass audit trail, required checks emergency approval, github rollback governance template">
+
+    <meta property="og:title" content="Merge Queue Approval Evidence Template + Comment Macros (2026)">
+    <meta property="og:description" content="Copy-paste approval evidence template for rollback incidents in GitHub merge queue environments.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/github-merge-queue-approval-evidence-template-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-github-merge-queue-approval-evidence-template-guide.png">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Merge Queue Approval Evidence Template (2026)">
+    <meta name="twitter:description" content="Use copy-paste PR comment macros for dual approval, expiry, and restoration evidence during rollback incidents.">
+
+    <meta property="article:published_time" content="2026-02-16">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/github-merge-queue-approval-evidence-template-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/track.js" defer></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "GitHub Merge Queue Approval Evidence Template: Incident Comment Macros for Safe Rollbacks (2026)",
+        "description": "Need consistent approval evidence before bypassing merge queue controls during incident rollback? Use this copy-paste template and comment macros for auditable, time-boxed decisions.",
+        "datePublished": "2026-02-16",
+        "dateModified": "2026-02-16",
+        "url": "https://devtoolbox.dedyn.io/blog/github-merge-queue-approval-evidence-template-guide",
+        "author": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What evidence is mandatory before emergency merge queue bypass approval?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "At minimum include incident ID, severity, rollback PR link, proof baseline queue path failed, compensating controls, explicit expiry timestamp, and named restoration owner."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Who should provide approvals in the template?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use dual approval: incident commander plus service owner or designated delegate. The requester should not be the only approver."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can we reuse one approval comment across multiple rollback PRs?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. Each rollback PR needs its own evidence block, approvals, scope, and expiry because risk and blast radius differ by change set."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How long should emergency bypass approvals remain valid?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Keep approvals short-lived, usually 30 to 60 minutes, then require fresh evidence and reapproval if more time is needed."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Where should audit evidence be stored after the incident?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Store evidence in both the rollback PR thread and the incident timeline, then link post-incident action items for restoration and root-cause remediation."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Merge Queue Approval Evidence Template Guide" }
+        ]
+    }
+    </script>
+
+    <style>
+        .tool-callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            line-height: 1.75;
+            color: #d1d5db;
+        }
+        .tool-callout a { color: #3b82f6; }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #d1fae5;
+        }
+
+        .warn-box {
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.25);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #fde68a;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+        .toc h3 { margin: 0 0 0.75rem 0; color: #e5e7eb; }
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc li { margin: 0.35rem 0; }
+        .toc a { color: #93c5fd; }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .mini-table th, .mini-table td {
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+            vertical-align: top;
+        }
+        .mini-table th { color: #e5e7eb; font-weight: 700; background: rgba(255,255,255,0.03); }
+        .mini-table td { color: #d1d5db; }
+        .mini-table tr:last-child td { border-bottom: 0; }
+
+        .checklist {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .checklist li { margin: 0.55rem 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Merge Queue Approval Evidence Template Guide</span></nav>
+
+    <main class="blog-post">
+        <h1>GitHub Merge Queue Approval Evidence Template: Incident Comment Macros for Safe Rollbacks (2026)</h1>
+        <p class="meta">Published February 16, 2026 &middot; 10 min read</p>
+
+        <p>When rollback incidents hit, teams often lose time debating whether a merge queue bypass is justified. The technical fix is usually quick; the slow part is approval alignment and missing evidence. If one approver asks for context in chat and another asks in the PR thread, your queue-to-merge time stretches while production is already degraded.</p>
+
+        <p>This guide gives a <strong>copy-paste approval evidence template</strong> and <strong>PR comment macros</strong> so incident responders can make bounded, auditable decisions without improvising process during pressure.</p>
+
+        <div class="tool-callout">
+            <strong style="color:#3b82f6;">&#9881; Quick links:</strong>
+            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide">Emergency Bypass Governance Guide</a> &middot;
+            <a href="/blog/github-merge-queue-codeowners-approval-deadlock-guide">CODEOWNERS Deadlock Guide</a> &middot;
+            <a href="/blog/github-merge-queue-stale-review-dismissal-guide">Stale Review Dismissal Guide</a> &middot;
+            <a href="/blog/github-merge-queue-required-check-name-mismatch-guide">Required Check Name Mismatch Guide</a> &middot;
+            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide">Timeout/Cancelled Checks Guide</a> &middot;
+            <a href="/blog/github-merge-queue-runner-saturation-vs-queue-starvation-guide">Saturation vs Starvation Guide</a> &middot;
+            <a href="/blog/github-actions-cicd-complete-guide">GitHub Actions CI/CD Guide</a> &middot;
+            <a href="/cheatsheets/git-commands">Git Commands Cheat Sheet</a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of contents</h3>
+            <ol>
+                <li><a href="#why-template">Why approval evidence templates matter</a></li>
+                <li><a href="#fields">Required evidence fields</a></li>
+                <li><a href="#macros">Copy-paste PR comment macros</a></li>
+                <li><a href="#timeline">Incident timeline sequence</a></li>
+                <li><a href="#workflow">15-minute workflow</a></li>
+                <li><a href="#audit">Audit package checklist</a></li>
+                <li><a href="#metrics">Guardrail metrics</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <h2 id="why-template">1. Why approval evidence templates matter</h2>
+
+        <p>Templates are not bureaucracy. They are latency control for incident decisions. A good evidence template removes clarification loops and forces the same minimum signal each time.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Without template</th>
+                    <th>With template</th>
+                    <th>Operational effect</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Approvals happen in fragmented chat threads</td>
+                    <td>All evidence and approvals in PR + incident timeline</td>
+                    <td>Faster handoffs and cleaner postmortem</td>
+                </tr>
+                <tr>
+                    <td>Expiry omitted or implicit</td>
+                    <td>Explicit UTC expiry required field</td>
+                    <td>Reduces policy drift after recovery</td>
+                </tr>
+                <tr>
+                    <td>Risk controls assumed but not stated</td>
+                    <td>Compensating controls mandatory</td>
+                    <td>Lower chance of secondary incident</td>
+                </tr>
+                <tr>
+                    <td>Unclear restoration ownership</td>
+                    <td>Named restoration owner in same comment</td>
+                    <td>Branch protections restored faster</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tip-box">
+            <strong>Rule of thumb:</strong> if an approver cannot decide in under 90 seconds from your comment, your evidence block is incomplete.
+        </div>
+
+        <h2 id="fields">2. Required evidence fields</h2>
+
+        <p>Use these fields for every emergency bypass request. Keep wording short and factual.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>What to write</th>
+                    <th>Why it matters</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Incident ID</td>
+                    <td>Immutable incident ticket/reference</td>
+                    <td>Connects all actions to one timeline</td>
+                </tr>
+                <tr>
+                    <td>Severity and impact</td>
+                    <td>SEV level + customer/system impact in one line</td>
+                    <td>Justifies urgency</td>
+                </tr>
+                <tr>
+                    <td>Rollback target</td>
+                    <td>PR number + last known good commit</td>
+                    <td>Defines exact blast radius</td>
+                </tr>
+                <tr>
+                    <td>Baseline path failure evidence</td>
+                    <td>Timeout, cancellation, queue starvation, or policy block with links</td>
+                    <td>Prevents unjustified bypass</td>
+                </tr>
+                <tr>
+                    <td>Compensating controls</td>
+                    <td>Smoke tests, canary %, watch window, alert ownership</td>
+                    <td>Limits post-merge risk</td>
+                </tr>
+                <tr>
+                    <td>Approver A + B</td>
+                    <td>Incident commander + service owner (or delegate)</td>
+                    <td>Enforces dual control</td>
+                </tr>
+                <tr>
+                    <td>Expiry timestamp (UTC)</td>
+                    <td>Short validity window (30-60 min typical)</td>
+                    <td>Prevents lingering policy exceptions</td>
+                </tr>
+                <tr>
+                    <td>Restoration owner</td>
+                    <td>Named individual responsible for policy restore</td>
+                    <td>Creates explicit closure path</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Do not approve</strong> if expiry or restoration owner is missing. Those two fields are the common source of silent policy drift.
+        </div>
+
+        <h2 id="macros">3. Copy-paste PR comment macros</h2>
+
+        <p><strong>Macro A: Bypass request</strong></p>
+        <pre><code>Emergency bypass request (rollback)
+
+Incident: INC-2026-02-16-221
+Severity/impact: SEV-1, checkout API returning 5xx in prod
+Rollback PR: #8421
+Rollback target: 8f17c2d (last known good)
+Baseline queue path failure evidence:
+- required-ci timeout twice
+- queue wait exceeded 18m SLO
+- workflow run links: [run-1], [run-2]
+Compensating controls:
+- smoke suite: /health + checkout + payments
+- canary: 5% for 10 minutes
+- on-call watch: @oncall-payments
+Approver A (IC): @alice
+Approver B (Service Owner): @bob
+Expiry (UTC): 2026-02-16T23:40:00Z
+Restoration owner: @carol
+</code></pre>
+
+        <p><strong>Macro B: Approver acknowledgment</strong></p>
+        <pre><code>Approval recorded.
+Role: Incident Commander
+Decision: Approved for bounded rollback bypass
+Conditions:
+- Expiry honored exactly at 2026-02-16T23:40:00Z
+- Compensating controls executed and logged
+- Restoration owner confirms baseline policy restore in this thread
+</code></pre>
+
+        <p><strong>Macro C: Expiry extension (if needed)</strong></p>
+        <pre><code>Expiry extension request
+
+Reason extension is required: smoke tests delayed by runner backlog
+Previous expiry: 2026-02-16T23:40:00Z
+Proposed new expiry: 2026-02-17T00:05:00Z
+Updated evidence links: [run-3]
+Reapproval required from both approvers before old expiry.
+</code></pre>
+
+        <p><strong>Macro D: Restoration completion</strong></p>
+        <pre><code>Bypass restoration completed
+
+Timestamp (UTC): 2026-02-17T00:01:12Z
+Restored items:
+- Required check set returned to baseline
+- Temporary override removed
+- Branch ruleset diff attached
+Post-incident follow-up:
+- RC item #1: stabilize required-ci timeout
+- RC item #2: add queue latency alert at 10m
+</code></pre>
+
+        <h2 id="timeline">4. Incident timeline sequence</h2>
+
+        <div class="checklist">
+            <ol>
+                <li>Open rollback PR and add Macro A with complete evidence block.</li>
+                <li>Get dual approvals in-thread (not only in chat).</li>
+                <li>Execute bounded bypass and merge rollback.</li>
+                <li>Run compensating checks and log results in same thread.</li>
+                <li>Restore baseline policy before expiry time.</li>
+                <li>Post Macro D and link root-cause action items.</li>
+            </ol>
+        </div>
+
+        <p>This sequence ensures your incident timeline has a clean audit chain: request -> approval -> execution -> restoration.</p>
+
+        <h2 id="workflow">5. 15-minute workflow</h2>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Minute</th>
+                    <th>Action</th>
+                    <th>Owner</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0-3</td>
+                    <td>Draft Macro A with links to failing queue runs</td>
+                    <td>Requester</td>
+                </tr>
+                <tr>
+                    <td>3-6</td>
+                    <td>Collect dual approvals (Macro B style)</td>
+                    <td>IC + service owner</td>
+                </tr>
+                <tr>
+                    <td>6-10</td>
+                    <td>Merge rollback and execute smoke/canary checks</td>
+                    <td>Responder + on-call</td>
+                </tr>
+                <tr>
+                    <td>10-15</td>
+                    <td>Restore baseline policy and post Macro D</td>
+                    <td>Restoration owner</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="audit">6. Audit package checklist</h2>
+
+        <div class="checklist">
+            <ul>
+                <li>Rollback PR link with Macro A/B/C/D chain intact</li>
+                <li>Incident timeline links to queue failure evidence and merge event</li>
+                <li>UTC expiry timestamp plus restoration confirmation</li>
+                <li>Branch rule diff or screenshot proving baseline restore</li>
+                <li>Post-incident issue links for CI/queue remediation</li>
+            </ul>
+        </div>
+
+        <p>Skip none of these. If your team has a compliance review later, this package is what auditors and SRE leads will request first.</p>
+
+        <h2 id="metrics">7. Guardrail metrics</h2>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Healthy range</th>
+                    <th>Escalate when</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Bypass approvals missing expiry</td>
+                    <td>0%</td>
+                    <td>Any occurrence</td>
+                </tr>
+                <tr>
+                    <td>Bypass approvals missing dual sign-off</td>
+                    <td>0%</td>
+                    <td>Any occurrence</td>
+                </tr>
+                <tr>
+                    <td>Time to restore baseline policy</td>
+                    <td>&lt; 30 min</td>
+                    <td>&gt; 60 min</td>
+                </tr>
+                <tr>
+                    <td>Emergency bypass frequency</td>
+                    <td>0-2 per month</td>
+                    <td>&gt; 4 per month</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>If bypass frequency rises, treat it as CI/queue reliability debt, not a process success signal.</p>
+
+        <h2 id="faq">8. FAQ</h2>
+
+        <details>
+            <summary>What evidence is mandatory before emergency bypass approval?</summary>
+            <p>Incident ID, severity and impact, rollback target, baseline queue failure evidence, compensating controls, dual approvers, expiry, and restoration owner.</p>
+        </details>
+
+        <details>
+            <summary>Who should provide approvals in the template?</summary>
+            <p>Use two roles: incident commander plus service owner (or named delegate). Requester-only approval is a governance failure.</p>
+        </details>
+
+        <details>
+            <summary>Can we reuse one approval comment across multiple rollback PRs?</summary>
+            <p>No. Each rollback PR needs its own evidence block and expiry because risk differs across change sets.</p>
+        </details>
+
+        <details>
+            <summary>How long should bypass approvals stay valid?</summary>
+            <p>Keep validity short, typically 30 to 60 minutes, then require refreshed evidence and reapproval.</p>
+        </details>
+
+        <details>
+            <summary>Where should audit evidence be stored after incident closure?</summary>
+            <p>Store in both PR discussion and incident timeline, and link follow-up actions for restoration and root-cause fixes.</p>
+        </details>
+
+        <h2>Related merge queue incident guides</h2>
+        <section style="margin-top: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+                <a href="/blog/github-merge-queue-emergency-bypass-governance-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Emergency Bypass Governance Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Approval criteria and bounded policy controls for high-pressure rollback incidents</div>
+                </a>
+                <a href="/blog/github-merge-queue-codeowners-approval-deadlock-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CODEOWNERS Approval Deadlock Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Recover rollback flow when required approvers are blocked or unavailable</div>
+                </a>
+                <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Stale Review Dismissal Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Stop approval-loss loops after queue updates and policy churn</div>
+                </a>
+                <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Checks Timed Out or Cancelled Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Classify timeout versus cancellation failures and recover rollback path quickly</div>
+                </a>
+                <a href="/blog/github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Required Check Name Mismatch Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">Fix expected status deadlocks from workflow context drift</div>
+                </a>
+                <a href="/blog/github-merge-queue-runner-saturation-vs-queue-starvation-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Runner Saturation vs Queue Starvation Guide</div>
+                    <div style="color: #9ca3af; font-size: 0.9rem;">SLO-based triage to separate infra bottlenecks from queue-control issues</div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>DevToolbox &mdash; Free developer tools, no strings attached.</p>
+    </footer>
+</body>
+</html>
