@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Undo: Reset, Revert &amp; Restore &mdash; The Complete Guide for 2026 | DevToolbox Blog</title>
+    <meta name="description" content="Master every way to undo changes in Git. Learn git reset --soft/--mixed/--hard, git revert for pushed commits, git restore for files, git reflog for recovery, and step-by-step solutions for every undo scenario.">
+    <meta name="keywords" content="git undo commit, git reset, git revert, git restore, git reflog, undo last commit, git reset soft hard mixed, recover lost commits">
+    <meta property="og:title" content="Git Undo: Reset, Revert &amp; Restore &mdash; The Complete Guide for 2026">
+    <meta property="og:description" content="Master every way to undo changes in Git. Learn git reset, git revert, git restore, git reflog, and step-by-step solutions for every undo scenario.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/git-undo-reset-revert-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-git-undo-reset-revert-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Git Undo: Reset, Revert &amp; Restore &mdash; The Complete Guide for 2026">
+    <meta name="twitter:description" content="Master every way to undo in Git: reset, revert, restore, reflog. Step-by-step solutions for every scenario.">
+    <meta property="article:published_time" content="2026-02-13">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/git-undo-reset-revert-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Git Undo: Reset, Revert & Restore — The Complete Guide for 2026",
+        "description": "Master every way to undo changes in Git. Learn git reset --soft/--mixed/--hard, git revert for pushed commits, git restore for files, git reflog for recovery, and step-by-step solutions for every undo scenario.",
+        "datePublished": "2026-02-13",
+        "dateModified": "2026-02-13",
+        "url": "https://devtoolbox.dedyn.io/blog/git-undo-reset-revert-guide",
+        "author": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        },
+        "publisher": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How do I undo the last git commit without losing changes?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Run 'git reset --soft HEAD~1'. This moves HEAD back one commit but keeps all your changes staged and ready to commit again. Your files are untouched. If you also want to unstage the changes so you can edit them before recommitting, use 'git reset --mixed HEAD~1' (or just 'git reset HEAD~1', since --mixed is the default). Neither command destroys any work."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the difference between git reset --soft, --mixed, and --hard?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "All three move the HEAD pointer to a different commit, but they differ in what happens to your working directory and staging area. --soft keeps everything staged and your files unchanged. --mixed (the default) unstages changes but keeps your files unchanged. --hard discards everything — staged changes, unstaged changes, and file modifications are all deleted. Use --soft to recommit differently, --mixed to re-stage selectively, and --hard only when you truly want to throw away all work since that commit."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I undo a commit that has already been pushed?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use 'git revert <commit-hash>'. This creates a new commit that reverses the changes from the specified commit. Unlike git reset, git revert does not rewrite history — it adds a new commit on top, which is safe for shared branches. Run 'git revert HEAD' to undo the most recent commit, then 'git push' to share the fix. Never use 'git reset' followed by 'git push --force' on shared branches, as it rewrites history for everyone."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I recover a commit after git reset --hard?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, usually. Git keeps a record of every HEAD position change in the reflog for at least 30 days. Run 'git reflog' to see the history, find the commit hash from before the reset, and run 'git reset --hard <hash>' to restore it. However, uncommitted changes (files that were modified but never committed) cannot be recovered by reflog because Git never recorded them. This is why committing frequently and using --soft or --mixed instead of --hard is strongly recommended."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "When should I use git revert vs git reset?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use git revert when the commit has been pushed to a shared branch. Revert creates a new commit that undoes the changes, preserving history for all collaborators. Use git reset when the commit is local only (not yet pushed). Reset moves the branch pointer backward, effectively removing the commit from history. The rule of thumb: if anyone else might have pulled the commit, use revert. If it is only on your local branch, reset is cleaner."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I undo a git merge?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "If the merge is not pushed yet, run 'git reset --hard HEAD~1' to move back to the commit before the merge (or use 'git reset --hard ORIG_HEAD'). If the merge has been pushed, use 'git revert -m 1 <merge-commit-hash>'. The '-m 1' flag tells Git to keep the first parent (your branch) and reverse the changes from the second parent (the merged branch). Be aware that reverting a merge makes Git think those changes have already been applied, so re-merging the same branch later requires reverting the revert first."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Git Undo: Reset, Revert &amp; Restore</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Blog",
+                        "item": "https://devtoolbox.dedyn.io/blog"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Git Undo: Reset, Revert & Restore — The Complete Guide for 2026"
+                }
+        ]
+    }
+    </script>
+    <main class="blog-post">
+        <h1>Git Undo: Reset, Revert &amp; Restore &mdash; The Complete Guide for 2026</h1>
+        <div class="meta">February 13, 2026</div>
+
+        <p>Every developer reaches the moment: you committed the wrong files, pushed a broken build, or ran a rebase that scrambled your history. Git has powerful undo capabilities, but choosing the right command depends on exactly what you need to undo and whether the commit has been shared. The wrong choice can lose work or break your teammates' history.</p>
+
+        <p>This guide covers every undo scenario you will encounter: <code>git reset</code> for rewriting local history, <code>git revert</code> for safely undoing pushed commits, <code>git restore</code> for discarding file changes, and <code>git reflog</code> for recovering commits you thought were lost. Each section includes the exact commands to run and explains when to use each approach.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Related:</strong>
+            Need the full deep dive on <code>git reset</code>? See <a href="/blog/git-reset-complete-guide" style="color: #3b82f6;">Git Reset: Soft, Mixed, Hard &amp; Keep</a>.
+            Need pushed-branch rollback workflows? See <a href="/blog/git-revert-complete-guide" style="color: #3b82f6;">Git Revert: Undo Pushed Commits Safely</a>.
+            Need a fast copy/paste rollback path? Use <a href="/blog/git-undo-pushed-commit-guide" style="color: #3b82f6;">Git Undo Pushed Commit</a>.
+            Reverted a merge with the wrong <code>-m</code> parent? Follow <a href="/blog/git-revert-wrong-mainline-parent-guide" style="color: #3b82f6;">Git Revert Wrong Mainline Parent</a>.
+            Rollback blocked by merge queue required checks? Use <a href="/blog/github-merge-queue-rollback-required-checks-guide" style="color: #3b82f6;">GitHub Merge Queue Rollback Required Checks Guide</a>.
+            Rollback PR approved but still stuck in queue? Use <a href="/blog/github-merge-queue-rollback-stuck-guide" style="color: #3b82f6;">GitHub Merge Queue Rollback Stuck Guide</a>.
+            Pending checks never start in queue? Use <a href="/blog/github-merge-queue-pending-checks-rollback-guide" style="color: #3b82f6;">GitHub Merge Queue Pending Checks Guide</a>.
+            If pending checks are caused by missing workflow events, use <a href="/blog/github-merge-queue-merge-group-trigger-guide" style="color: #3b82f6;">GitHub Merge Queue merge_group Trigger Guide</a>.
+            If rollback approvals are repeatedly dismissed after queue updates, use <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="color: #3b82f6;">GitHub Merge Queue Stale Review Dismissal Guide</a>.
+            If rollback bypass expiry is about to end during ongoing incidents, use <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="color: #3b82f6;">Merge Queue Expiry Extension Reapproval Guide</a>.
+            If a denied extension is contested, follow <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide" style="color: #3b82f6;">Merge Queue Denial Appeal Escalation Path Guide</a>.
+            If rollback incidents repeat after closure, use <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide" style="color: #3b82f6;">Merge Queue Closure Quality Metrics Dashboard Guide</a> to set thresholds and escalation triggers.
+            Need only one thing right now? Use <a href="/blog/git-undo-last-commit-guide" style="color: #3b82f6;">Undo Last Commit in Git</a> for the fastest path.
+            For the common "undo <code>git add</code>" workflow, use <a href="/blog/git-undo-add-guide" style="color: #3b82f6;">Undo git add: Unstage Files Safely</a>.
+            Need broader file-level undo? Read <a href="/blog/git-restore-complete-guide" style="color: #3b82f6;">Git Restore: Unstage &amp; Discard Changes</a>.
+            Lost a commit after reset/rebase? See <a href="/blog/git-reflog-recover-lost-commits-guide" style="color: #3b82f6;">Git Reflog: Recover Lost Commits</a>.
+            Need to remove untracked files? See <a href="/blog/git-clean-complete-guide" style="color: #3b82f6;">Git Clean: Remove Untracked Files Safely</a>.
+            Also keep the <a href="/cheatsheets/git-commands" style="color: #3b82f6;">Git Commands Cheat Sheet</a> handy.
+        </div>
+
+        <h2>Quick Reference: "I Want to Undo X"</h2>
+
+        <p>Find your scenario and jump to the right command:</p>
+
+        <div style="overflow-x: auto; margin: 1.5rem 0;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                <thead>
+                    <tr style="border-bottom: 2px solid rgba(255,255,255,0.15);">
+                        <th style="text-align: left; padding: 0.75rem; color: #93c5fd;">I want to undo&hellip;</th>
+                        <th style="text-align: left; padding: 0.75rem; color: #93c5fd;">Command</th>
+                    </tr>
+                </thead>
+                <tbody style="color: #d1d5db;">
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 0.6rem 0.75rem;">Last commit (keep changes staged)</td>
+                        <td style="padding: 0.6rem 0.75rem;"><code>git reset --soft HEAD~1</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 0.6rem 0.75rem;">Last commit (keep changes unstaged)</td>
+                        <td style="padding: 0.6rem 0.75rem;"><code>git reset HEAD~1</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 0.6rem 0.75rem;">Last commit (discard everything)</td>
+                        <td style="padding: 0.6rem 0.75rem;"><code>git reset --hard HEAD~1</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 0.6rem 0.75rem;">A pushed commit (safe for shared branches)</td>
+                        <td style="padding: 0.6rem 0.75rem;"><code>git revert &lt;commit-hash&gt;</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 0.6rem 0.75rem;">Changes to a file (not yet staged)</td>
+                        <td style="padding: 0.6rem 0.75rem;"><code>git restore &lt;file&gt;</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 0.6rem 0.75rem;">Staged changes (unstage a file)</td>
+                        <td style="padding: 0.6rem 0.75rem;"><code>git restore --staged &lt;file&gt;</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 0.6rem 0.75rem;">A merge (not yet pushed)</td>
+                        <td style="padding: 0.6rem 0.75rem;"><code>git reset --hard ORIG_HEAD</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 0.6rem 0.75rem;">A merge (already pushed)</td>
+                        <td style="padding: 0.6rem 0.75rem;"><code>git revert -m 1 &lt;merge-hash&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.6rem 0.75rem;">A lost commit (after reset --hard)</td>
+                        <td style="padding: 0.6rem 0.75rem;"><code>git reflog</code> then <code>git reset --hard &lt;hash&gt;</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>git reset: Rewrite Local History</h2>
+
+        <p><code>git reset</code> moves the branch pointer (HEAD) to a different commit. It is the primary tool for undoing local, unpushed commits. The three modes control what happens to your working directory and staging area.</p>
+
+        <h3>--soft: Keep Everything Staged</h3>
+
+        <p>Moves HEAD back but keeps all changes staged. Your files are completely untouched. Use this when the commit message was wrong or you want to combine commits:</p>
+
+        <pre><code># Undo the last commit, keep changes staged
+git reset --soft HEAD~1
+
+# Undo the last 3 commits, squash them into one
+git reset --soft HEAD~3
+git commit -m "Combined feature implementation"</code></pre>
+
+        <p>After <code>--soft</code>, running <code>git status</code> shows all the undone changes as "Changes to be committed".</p>
+
+        <h3>--mixed (default): Keep Changes, Unstage Them</h3>
+
+        <p>Moves HEAD back, unstages changes, but keeps file modifications. This is the default when you run <code>git reset</code> without a flag:</p>
+
+        <pre><code># These are equivalent
+git reset HEAD~1
+git reset --mixed HEAD~1
+
+# Unstage all files without moving HEAD
+git reset HEAD
+
+# Unstage a specific file
+git reset HEAD -- path/to/file.js</code></pre>
+
+        <p>After <code>--mixed</code>, changes appear as "Changes not staged for commit". You can re-stage selectively before recommitting.</p>
+
+        <h3>--hard: Discard Everything</h3>
+
+        <p>Moves HEAD back and <strong>deletes all changes</strong> &mdash; staged, unstaged, and file modifications. This is destructive:</p>
+
+        <pre><code># Discard the last commit and all its changes
+git reset --hard HEAD~1
+
+# Discard all local changes, match remote exactly
+git reset --hard origin/main
+
+# Discard all uncommitted changes (keep commits)
+git reset --hard HEAD</code></pre>
+
+        <p><strong>Warning:</strong> Uncommitted changes destroyed by <code>--hard</code> cannot be recovered. Always check <code>git stash</code> or <code>git diff</code> before running this.</p>
+
+        <h3>Visual: How the Three Modes Compare</h3>
+
+        <pre><code>Before reset (HEAD at commit C):
+  A --- B --- C (HEAD)
+              |
+              Staged: file.js (modified)
+              Working: file.js (modified)
+
+After git reset --soft HEAD~1:
+  A --- B (HEAD)
+        |
+        Staged: changes from C + file.js   (all staged)
+        Working: unchanged
+
+After git reset --mixed HEAD~1:
+  A --- B (HEAD)
+        |
+        Staged: (empty)
+        Working: changes from C + file.js   (all unstaged)
+
+After git reset --hard HEAD~1:
+  A --- B (HEAD)
+        |
+        Staged: (empty)
+        Working: (clean — everything deleted)</code></pre>
+
+        <h2>git revert: Safe Undo for Pushed Commits</h2>
+
+        <p><code>git revert</code> creates a <strong>new commit</strong> that reverses the changes from a previous commit. It does not rewrite history, making it safe for shared branches:</p>
+
+        <pre><code># Revert the most recent commit
+git revert HEAD
+
+# Revert a specific commit by hash
+git revert a1b2c3d
+
+# Revert without auto-committing (inspect changes first)
+git revert --no-commit a1b2c3d
+git diff --staged   # review what will be undone
+git commit -m "Revert: remove broken feature flag"
+
+# Revert multiple commits (oldest to newest)
+git revert a1b2c3d..f4e5d6c</code></pre>
+
+        <p><strong>When to use revert:</strong> Always use <code>git revert</code> instead of <code>git reset</code> when the commit exists on a shared branch (main, develop, or any branch others have pulled from). Reset rewrites history; revert preserves it.</p>
+
+        <h3>Handling Revert Conflicts</h3>
+
+        <p>If the revert conflicts with later changes, Git pauses and asks you to resolve:</p>
+
+        <pre><code>git revert a1b2c3d
+# CONFLICT in src/config.js
+# Fix the conflict manually, then:
+git add src/config.js
+git revert --continue
+
+# Or abort the revert entirely:
+git revert --abort</code></pre>
+
+        <h2>git restore: The Modern File-Level Undo</h2>
+
+        <p>Introduced in Git 2.23 (2019), <code>git restore</code> replaces the confusing <code>git checkout -- &lt;file&gt;</code> syntax. It operates on files, not commits:</p>
+
+        <h3>Discard Unstaged Changes</h3>
+
+        <pre><code># Restore a single file to its last committed state
+git restore src/app.js
+
+# Restore all files in a directory
+git restore src/
+
+# Restore everything (discard all unstaged changes)
+git restore .</code></pre>
+
+        <h3>Unstage Files</h3>
+
+        <pre><code># Unstage a file (keep changes in working directory)
+git restore --staged src/app.js
+
+# Unstage everything
+git restore --staged .
+
+# Unstage AND discard changes (both flags)
+git restore --staged --worktree src/app.js</code></pre>
+
+        <h3>Restore from a Specific Commit</h3>
+
+        <pre><code># Restore a file from 3 commits ago
+git restore --source HEAD~3 src/config.js
+
+# Restore a file from a specific commit
+git restore --source a1b2c3d src/config.js
+
+# Restore a deleted file
+git restore --source HEAD~1 src/deleted-file.js</code></pre>
+
+        <h2>git reflog: Recovering "Lost" Commits</h2>
+
+        <p>The reflog records every time HEAD moves &mdash; commits, resets, rebases, checkouts. Even after <code>git reset --hard</code>, the old commits still exist in Git's object database for at least 30 days:</p>
+
+        <pre><code># View the reflog
+git reflog
+
+# Output looks like:
+a1b2c3d HEAD@{0}: reset: moving to HEAD~3
+f4e5d6c HEAD@{1}: commit: Add user authentication
+b7c8d9e HEAD@{2}: commit: Update dashboard layout
+e1f2g3h HEAD@{3}: commit: Fix navigation bug
+
+# Recover: reset back to the commit before the destructive reset
+git reset --hard f4e5d6c
+
+# Or create a new branch from the lost commit
+git branch recovery-branch f4e5d6c</code></pre>
+
+        <h3>Reflog for Specific Branches</h3>
+
+        <pre><code># View reflog for a specific branch
+git reflog show feature/auth
+
+# View reflog with timestamps
+git reflog --date=relative
+
+# Output:
+a1b2c3d HEAD@{2 hours ago}: commit: Add login form
+f4e5d6c HEAD@{5 hours ago}: commit: Set up auth routes</code></pre>
+
+        <p><strong>Key limitation:</strong> The reflog only tracks commits that Git recorded. If you modified a file but never committed or stashed it, <code>git reflog</code> cannot help. Commit early and often.</p>
+
+        <h2>Undo Scenarios: Step-by-Step</h2>
+
+        <h3>Scenario 1: Undo the Last Commit (Not Pushed)</h3>
+
+        <pre><code># Keep changes staged (fix the commit message or add more files)
+git reset --soft HEAD~1
+git commit -m "Corrected commit message"
+
+# Keep changes unstaged (re-edit before committing)
+git reset HEAD~1
+# edit files...
+git add -p   # stage selectively
+git commit -m "Clean implementation"</code></pre>
+
+        <h3>Scenario 2: Undo the Last Commit (Already Pushed)</h3>
+
+        <pre><code># Create a new commit that reverses the changes
+git revert HEAD
+git push origin main
+
+# Never do this on shared branches:
+# git reset --hard HEAD~1 && git push --force  # DANGEROUS</code></pre>
+
+        <h3>Scenario 3: Undo Staged Changes</h3>
+
+        <pre><code># Accidentally staged the wrong file
+git restore --staged secrets.env
+# File is now unstaged but still modified in working directory
+
+# Accidentally ran git add .
+git restore --staged .</code></pre>
+
+        <h3>Scenario 4: Undo Unstaged Changes</h3>
+
+        <pre><code># Discard modifications to a single file
+git restore src/app.js
+
+# Discard all modifications (keep untracked files)
+git restore .
+
+# Remove untracked files too
+git clean -fd   # -f = force, -d = directories
+git clean -fdn  # dry run first (show what would be deleted)</code></pre>
+
+        <h3>Scenario 5: Undo a Merge (Not Pushed)</h3>
+
+        <pre><code># Git saves the pre-merge HEAD in ORIG_HEAD
+git reset --hard ORIG_HEAD
+
+# Or use reflog to find the exact commit
+git reflog
+git reset --hard HEAD@{1}</code></pre>
+
+        <h3>Scenario 6: Undo a Merge (Already Pushed)</h3>
+
+        <pre><code># -m 1 means "keep parent 1 (our branch), undo parent 2 (merged branch)"
+git revert -m 1 &lt;merge-commit-hash&gt;
+git push origin main
+
+# Warning: if you later want to re-merge the same branch,
+# you must first revert the revert:
+git revert &lt;revert-commit-hash&gt;
+git merge feature/that-branch</code></pre>
+
+        <h3>Scenario 7: Undo a Rebase</h3>
+
+        <pre><code># Find where you were before the rebase
+git reflog
+# Look for the entry before "rebase (start)"
+# e.g., HEAD@{5}: checkout: moving from feature to feature
+
+git reset --hard HEAD@{5}
+
+# Or use ORIG_HEAD (set before rebase starts)
+git reset --hard ORIG_HEAD</code></pre>
+
+        <h3>Scenario 8: Recover After a Force Push</h3>
+
+        <pre><code># Someone (maybe you) force-pushed and overwrote commits
+# If you still have the local repo with the original commits:
+git reflog
+git reset --hard &lt;original-commit-hash&gt;
+git push --force-with-lease origin main
+
+# If you do not have the commits locally, check if a teammate does
+# They can push the correct history back</code></pre>
+
+        <h2>Common Mistakes and How to Fix Them</h2>
+
+        <h3>Mistake: Used --hard When You Meant --soft</h3>
+
+        <pre><code># You ran: git reset --hard HEAD~1 (lost your changes!)
+# Fix: recover the commit from reflog
+git reflog
+# Find the lost commit hash
+git reset --hard &lt;lost-commit-hash&gt;</code></pre>
+
+        <h3>Mistake: Committed to the Wrong Branch</h3>
+
+        <pre><code># You committed to main instead of feature/login
+# Step 1: save the commit hash
+git log --oneline -1   # note the hash
+
+# Step 2: remove from main
+git reset --soft HEAD~1
+
+# Step 3: switch and recommit
+git stash
+git checkout feature/login
+git stash pop
+git commit -m "Add login form"</code></pre>
+
+        <h3>Mistake: Amended a Commit and Lost the Original</h3>
+
+        <pre><code># git commit --amend overwrites the previous commit
+# The original commit still exists in reflog
+git reflog
+# Find the pre-amend commit (the one before "commit (amend)")
+git reset --soft &lt;pre-amend-hash&gt;
+git commit -m "Original message restored"</code></pre>
+
+        <h3>Mistake: Deleted an Untracked File</h3>
+
+        <pre><code># If Git never tracked the file, Git cannot recover it
+# Prevention: always run git clean with --dry-run first
+git clean -fdn   # shows what WOULD be deleted
+git clean -fd    # actually deletes</code></pre>
+
+        <h2>Decision Flowchart: Which Undo Command?</h2>
+
+        <pre><code>Is the change committed?
+  |
+  +-- NO: Is the change staged?
+  |     |
+  |     +-- YES --> git restore --staged &lt;file&gt;  (unstage)
+  |     |
+  |     +-- NO --> git restore &lt;file&gt;  (discard modification)
+  |
+  +-- YES: Has the commit been pushed?
+        |
+        +-- NO: Do you want to keep the changes?
+        |     |
+        |     +-- YES, staged --> git reset --soft HEAD~1
+        |     |
+        |     +-- YES, unstaged --> git reset HEAD~1
+        |     |
+        |     +-- NO --> git reset --hard HEAD~1
+        |
+        +-- YES: Is it on a shared branch?
+              |
+              +-- YES --> git revert &lt;hash&gt;  (safe, creates new commit)
+              |
+              +-- NO (your own branch) --> git reset --hard HEAD~1
+                                           git push --force-with-lease</code></pre>
+
+        <h2>Best Practices for Safe Undoing</h2>
+
+        <ol>
+            <li><strong>Commit frequently.</strong> Small commits give you more granular undo points. You can always squash later.</li>
+            <li><strong>Use <code>--force-with-lease</code> instead of <code>--force</code>.</strong> It refuses to push if someone else has pushed commits you do not have, preventing data loss.</li>
+            <li><strong>Check <code>git status</code> and <code>git diff</code> before any destructive command.</strong> Verify what will be affected.</li>
+            <li><strong>Use <code>git stash</code> before risky operations.</strong> Stash your work-in-progress, perform the undo, then pop the stash.</li>
+            <li><strong>Never reset on shared branches.</strong> If others have pulled the commit, use <code>git revert</code> instead.</li>
+            <li><strong>Know your reflog.</strong> It is your safety net. Commits linger for 30+ days even after <code>reset --hard</code>.</li>
+            <li><strong>Prefer <code>git restore</code> over <code>git checkout --</code>.</strong> The newer syntax is explicit about whether you are acting on the staging area or working directory.</li>
+        </ol>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Deep dive:</strong> For more Git techniques, see our <a href="/blog/git-revert-complete-guide" style="color: #3b82f6;">Git Revert Guide</a>, <a href="/blog/git-rebase-complete-guide" style="color: #3b82f6;">Git Rebase Guide</a>, and <a href="/blog/git-stash-complete-guide" style="color: #3b82f6;">Git Stash Guide</a>.
+        </div>
+
+        <h2>Frequently Asked Questions</h2>
+
+        <h3>How do I undo the last git commit without losing changes?</h3>
+        <p>Run <code>git reset --soft HEAD~1</code>. This moves HEAD back one commit but keeps all your changes staged and ready to commit again. Your files are untouched. If you also want to unstage the changes, use <code>git reset HEAD~1</code> (the default <code>--mixed</code> mode).</p>
+
+        <h3>What is the difference between git reset --soft, --mixed, and --hard?</h3>
+        <p>All three move the HEAD pointer to a different commit. <code>--soft</code> keeps everything staged and files unchanged. <code>--mixed</code> (the default) unstages changes but keeps files unchanged. <code>--hard</code> discards everything &mdash; staged changes, unstaged changes, and file modifications are all deleted. Use <code>--soft</code> to recommit differently, <code>--mixed</code> to re-stage selectively, and <code>--hard</code> only when you want to throw away all work.</p>
+
+        <h3>How do I undo a commit that has already been pushed?</h3>
+        <p>Use <code>git revert &lt;commit-hash&gt;</code>. This creates a new commit that reverses the specified commit's changes without rewriting history. Run <code>git revert HEAD</code> to undo the most recent commit, then <code>git push</code>. Never use <code>git reset</code> followed by force push on shared branches.</p>
+
+        <h3>Can I recover a commit after git reset --hard?</h3>
+        <p>Yes. Git's reflog records every HEAD position change for at least 30 days. Run <code>git reflog</code>, find the commit hash from before the reset, and run <code>git reset --hard &lt;hash&gt;</code> to restore it. However, <strong>uncommitted</strong> changes (never committed or stashed) cannot be recovered.</p>
+
+        <h3>When should I use git revert vs git reset?</h3>
+        <p>Use <code>git revert</code> when the commit has been pushed to a shared branch &mdash; it creates a new commit that preserves history. Use <code>git reset</code> when the commit is local only, since it cleanly removes the commit from history. Rule of thumb: if anyone else might have pulled the commit, use revert.</p>
+
+        <h3>How do I undo a git merge?</h3>
+        <p>If the merge is not pushed, run <code>git reset --hard ORIG_HEAD</code>. If the merge has been pushed, use <code>git revert -m 1 &lt;merge-commit-hash&gt;</code>. The <code>-m 1</code> flag keeps the first parent and reverses the merged branch's changes. Note that re-merging the same branch later requires reverting the revert first.</p>
+    </main>
+
+    <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/git-undo-pushed-commit-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Undo Pushed Commit Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Quick git revert workflows for shared branches and pushed history</div>
+            </a>
+            <a href="/blog/git-revert-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Revert Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Safe rollback playbook for pushed commits, ranges, and merge reverts</div>
+            </a>
+            <a href="/blog/github-revert-commit-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Revert a Commit on GitHub</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Use GitHub Revert buttons for commit and PR rollbacks, plus CLI fallback.</div>
+            </a>
+            <a href="/blog/github-merge-queue-rollback-required-checks-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Rollback Checks Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Fix required-check failures on GitHub rollback PRs without force-push.</div>
+            </a>
+            <a href="/blog/github-merge-queue-rollback-stuck-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Rollback Stuck Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Queue-safe triage for rollback PRs that stay pending even after approvals.</div>
+            </a>
+            <a href="/blog/github-merge-queue-pending-checks-rollback-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Pending Checks Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Diagnose rollback PR checks that stay pending forever in merge queue.</div>
+            </a>
+            <a href="/blog/github-merge-queue-merge-group-trigger-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue merge_group Trigger Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Fix queue checks that never start by wiring merge_group triggers correctly.</div>
+            </a>
+            <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Stale Review Dismissal Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Handle rollback PR approvals repeatedly invalidated by stale-review policy during queue churn.</div>
+            </a>
+            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Expiry Extension Reapproval Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Use a bounded decision flow when bypass expiry is near but rollback evidence is still evolving.</div>
+            </a>
+            <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Denial Appeal Escalation Path</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Escalation runbook for challenged extension denials with strict UTC decision checkpoints.</div>
+            </a>
+            <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Closure Quality Metrics Dashboard</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">KPI and threshold playbook for recurring rollback incidents after initial closure.</div>
+            </a>
+            <a href="/blog/git-rebase-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Rebase Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Rewrite commit history with interactive and standard rebase</div>
+            </a>
+            <a href="/blog/git-log-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Log Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Pretty graphs, filters, ranges, and searching history</div>
+            </a>
+            <a href="/blog/git-blame-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Blame Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Find who changed a line (ranges, renames, moved code, ignore-revs)</div>
+            </a>
+            <a href="/blog/git-cherry-pick-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Cherry-Pick Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Apply specific commits from any branch to your current branch</div>
+            </a>
+            <a href="/blog/git-stash-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Stash Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Save work-in-progress and switch contexts without committing</div>
+            </a>
+            <a href="/blog/git-merge-conflicts-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Merge Conflicts Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Resolve merge conflicts confidently with proven strategies</div>
+            </a>
+            <a href="/blog/git-branching-strategies-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Branching Strategies</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Git Flow, GitHub Flow, trunk-based development, and more</div>
+            </a>
+            <a href="/blog/git-hooks-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Hooks Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Automate workflows with pre-commit, pre-push, and custom hooks</div>
+            </a>
+            <a href="/blog/git-cherry-pick-vs-revert" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Cherry-Pick vs Revert</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Decide whether to copy a commit or safely undo one</div>
+            </a>
+        </div>
+    </section>
+
+    <footer><p>DevToolbox &mdash; Free developer tools, no strings attached.</p></footer>
+    <script src="/js/track.js" defer></script>
+</body>
+</html>

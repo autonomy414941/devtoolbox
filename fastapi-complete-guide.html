@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Complete Guide: Build High-Performance Python APIs in 2026 | DevToolbox Blog</title>
+    <meta name="description" content="Master FastAPI, the fastest-growing Python web framework. Learn async endpoints, Pydantic models, dependency injection, JWT authentication, database integration, testing, and production deployment with practical examples.">
+    <meta name="keywords" content="fastapi tutorial, fastapi guide, python fastapi, fastapi rest api, fastapi async, fastapi pydantic, fastapi authentication, fastapi deployment, fastapi sqlalchemy">
+    <meta property="og:title" content="FastAPI Complete Guide: Build High-Performance Python APIs in 2026">
+    <meta property="og:description" content="Master FastAPI, the fastest-growing Python web framework. Learn async endpoints, Pydantic models, dependency injection, authentication, databases, and deployment.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/fastapi-complete-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-fastapi-complete-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="FastAPI Complete Guide: Build High-Performance Python APIs in 2026">
+    <meta name="twitter:description" content="Master FastAPI, the fastest-growing Python web framework. Learn async endpoints, Pydantic models, dependency injection, authentication, databases, and deployment.">
+    <meta property="article:published_time" content="2026-02-12">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/fastapi-complete-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "FastAPI Complete Guide: Build High-Performance Python APIs in 2026",
+        "description": "Master FastAPI, the fastest-growing Python web framework. Learn async endpoints, Pydantic models, dependency injection, JWT authentication, database integration, testing, and production deployment with practical examples.",
+        "datePublished": "2026-02-12",
+        "dateModified": "2026-02-12",
+        "url": "https://devtoolbox.dedyn.io/blog/fastapi-complete-guide",
+        "author": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        },
+        "publisher": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Is FastAPI faster than Flask and Django?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, FastAPI is significantly faster than both Flask and Django for API workloads. In benchmarks, FastAPI handles 2-3x more requests per second than Flask because it runs on ASGI (Uvicorn/Starlette) with native async support, while Flask and Django use synchronous WSGI. FastAPI's performance is comparable to Node.js and Go frameworks. The speed difference is most pronounced for I/O-bound workloads like database queries and external API calls, where async concurrency allows FastAPI to handle many requests simultaneously instead of blocking on each one."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How does FastAPI compare to Flask?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "FastAPI and Flask serve similar purposes but differ in philosophy and features. FastAPI provides automatic request validation via Pydantic, auto-generated OpenAPI documentation, native async/await support, and dependency injection out of the box. Flask is a minimal micro-framework that requires you to add validation, documentation, and async support through extensions. FastAPI has better performance due to its ASGI foundation. Flask has a larger ecosystem of extensions and more community resources due to its longer history. Choose FastAPI for new API projects, especially if you need automatic docs and type safety. Choose Flask if you need server-side HTML rendering with Jinja2 or have an existing Flask codebase."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I use FastAPI with a synchronous database like SQLAlchemy?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, FastAPI works with synchronous SQLAlchemy. Define your database functions as regular (non-async) functions and FastAPI will automatically run them in a thread pool so they do not block the event loop. Alternatively, use SQLAlchemy 2.0's async engine with asyncpg or aiosqlite for true async database access. For most applications, synchronous SQLAlchemy with FastAPI's thread pool is simpler and performs well. Switch to async SQLAlchemy only if you need maximum concurrency for database-heavy workloads or are already using an async database driver."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I deploy FastAPI to production?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Deploy FastAPI with Uvicorn as the ASGI server, managed by Gunicorn for process management: run 'gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000' with 2-4 workers per CPU core. Place a reverse proxy like Nginx or Traefik in front to handle SSL, static files, and load balancing. For containerized deployments, use the official Python slim image in Docker, install dependencies, and expose the Uvicorn port. Set environment variables for secrets and database URLs, enable structured JSON logging, and add health check endpoints. Use Docker Compose or Kubernetes for orchestration with your database and cache services."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I handle authentication in FastAPI?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "FastAPI has built-in support for OAuth2 with the OAuth2PasswordBearer security scheme. The standard approach is JWT (JSON Web Token) authentication: create a /token endpoint that validates credentials and returns a signed JWT, then use a dependency function to decode and verify the token on protected routes. Hash passwords with bcrypt via the passlib library. FastAPI's dependency injection makes it easy to create reusable auth dependencies like get_current_user that extract the user from the token. For OAuth2 with third-party providers (Google, GitHub), use the authlib or httpx-oauth libraries. FastAPI's automatic OpenAPI docs will show a login button for testing authenticated endpoints."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">FastAPI Complete Guide</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Blog",
+                        "item": "https://devtoolbox.dedyn.io/blog"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "FastAPI Complete Guide"
+                }
+        ]
+    }
+    </script>
+
+    <script src="/js/track.js" defer></script>
+
+    <style>
+        .faq-section {
+            margin-top: 3rem;
+        }
+        .faq-section details {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            padding: 0;
+        }
+        .faq-section summary {
+            color: #3b82f6;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+        }
+        .faq-section summary:hover {
+            color: #60a5fa;
+        }
+        .faq-section details > p {
+            padding: 0 1.5rem 1rem 1.5rem;
+            margin: 0;
+        }
+        .toc {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+        }
+        .toc h3 {
+            margin-top: 0;
+            color: #e4e4e7;
+        }
+        .toc ol {
+            margin-bottom: 0;
+            line-height: 2;
+        }
+        .toc a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+    </style>
+
+    <main class="blog-post">
+        <article>
+        <h1>FastAPI Complete Guide: Build High-Performance Python APIs in 2026</h1>
+        <div class="blog-meta" style="color: #9ca3af; margin-bottom: 2rem;">
+            <span>February 12, 2026</span> &mdash; <span>25 min read</span>
+        </div>
+
+        <p>FastAPI is the fastest-growing Python web framework. It combines the simplicity of Flask with the performance of Node.js, adds automatic data validation through Pydantic, and generates interactive API documentation out of the box. Built on top of Starlette for the web layer and Pydantic for the data layer, FastAPI lets you write production-grade APIs with Python type hints &mdash; and it catches bugs before they reach production.</p>
+
+        <p>This guide takes you from your first endpoint through production deployment, with working code at every step. You will learn path operations, Pydantic models, dependency injection, JWT authentication, database integration, background tasks, testing, and performance tuning.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Related resources:</strong> Test your API endpoints with the <a href="/tools/api-request-builder" style="color: #3b82f6;">API Request Builder</a>, mock responses with the <a href="/tools/api-mock-builder" style="color: #3b82f6;">API Mock Builder</a>, and learn REST conventions in our <a href="/blog/rest-api-design-complete-guide" style="color: #3b82f6;">REST API Design Guide</a>.
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+                <li><a href="#what-is-fastapi">What Is FastAPI?</a></li>
+                <li><a href="#installation">Installation &amp; Setup</a></li>
+                <li><a href="#path-operations">Path Operations</a></li>
+                <li><a href="#request-body">Request Body &amp; Pydantic Models</a></li>
+                <li><a href="#response-models">Response Models</a></li>
+                <li><a href="#dependency-injection">Dependency Injection</a></li>
+                <li><a href="#authentication">Authentication with JWT</a></li>
+                <li><a href="#database">Database Integration</a></li>
+                <li><a href="#middleware">Middleware &amp; CORS</a></li>
+                <li><a href="#background-tasks">Background Tasks</a></li>
+                <li><a href="#testing">Testing</a></li>
+                <li><a href="#deployment">Deployment</a></li>
+                <li><a href="#performance">Performance Tips</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- 1. What Is FastAPI                           -->
+        <!-- ============================================ -->
+        <h2 id="what-is-fastapi">1. What Is FastAPI?</h2>
+
+        <p>FastAPI is a modern, high-performance web framework for building APIs with Python 3.7+ based on standard Python type hints. Created by Sebastian Ramirez and first released in 2018, it has become one of the most starred Python web frameworks on GitHub.</p>
+        <p><strong>Key features that set FastAPI apart:</strong></p>
+        <ul>
+            <li><strong>Speed</strong> &mdash; On par with Node.js and Go, thanks to Starlette and async support</li>
+            <li><strong>Automatic validation</strong> &mdash; Request data is validated using Pydantic models and Python type hints</li>
+            <li><strong>Auto-generated docs</strong> &mdash; Interactive Swagger UI at <code>/docs</code> and ReDoc at <code>/redoc</code></li>
+            <li><strong>Dependency injection</strong> &mdash; Built-in DI system for clean, testable code</li>
+            <li><strong>Async-first</strong> &mdash; Native <code>async</code>/<code>await</code> support without third-party extensions</li>
+            <li><strong>Standards-based</strong> &mdash; Built on OpenAPI 3.1 and JSON Schema</li>
+            <li><strong>Editor support</strong> &mdash; Excellent autocomplete and type checking in VS Code, PyCharm, and other IDEs</li>
+        </ul>
+        <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.95rem;">
+            <thead>
+                <tr style="background: #1a1d27;">
+                    <th style="padding: 0.75rem 1rem; text-align: left; border: 1px solid #2a2e3a; color: #3b82f6;">Feature</th>
+                    <th style="padding: 0.75rem 1rem; text-align: left; border: 1px solid #2a2e3a; color: #3b82f6;">FastAPI</th>
+                    <th style="padding: 0.75rem 1rem; text-align: left; border: 1px solid #2a2e3a; color: #3b82f6;">Flask</th>
+                    <th style="padding: 0.75rem 1rem; text-align: left; border: 1px solid #2a2e3a; color: #3b82f6;">Django REST</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Async support</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Native</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Limited</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Partial</td></tr>
+                <tr><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Auto docs</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Built-in</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Extensions</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Built-in</td></tr>
+                <tr><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Validation</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Pydantic (auto)</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Manual</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Serializers</td></tr>
+                <tr><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Type hints</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Core feature</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Optional</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Optional</td></tr>
+                <tr><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Performance</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Very high</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Moderate</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Moderate</td></tr>
+                <tr><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Dependency injection</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">Built-in</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">No</td><td style="padding: 0.75rem 1rem; border: 1px solid #2a2e3a; background: #1e2130;">No</td></tr>
+            </tbody>
+        </table>
+
+        <!-- ============================================ -->
+        <!-- 2. Installation & Setup                     -->
+        <!-- ============================================ -->
+        <h2 id="installation">2. Installation &amp; Setup</h2>
+
+        <p>Install FastAPI and Uvicorn (the ASGI server) in a virtual environment:</p>
+<pre><code class="language-bash"># Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+# venv\Scripts\activate   # Windows
+
+# Install FastAPI with all optional dependencies
+pip install "fastapi[standard]"
+
+# Or install just the essentials
+pip install fastapi uvicorn[standard]</code></pre>
+
+        <p>A clean project structure for a FastAPI application:</p>
+<pre><code class="language-text">my-api/
+  app/
+    __init__.py
+    main.py          # FastAPI app instance and startup
+    config.py         # Settings via pydantic-settings
+    models.py         # SQLAlchemy models
+    schemas.py        # Pydantic request/response schemas
+    database.py       # DB engine and session
+    dependencies.py   # Shared dependencies (auth, DB session)
+    routers/
+      __init__.py
+      users.py        # /users endpoints
+      items.py        # /items endpoints
+  tests/
+    test_users.py
+    test_items.py
+  requirements.txt
+  Dockerfile</code></pre>
+
+        <p>Create your first app in <code>app/main.py</code>:</p>
+<pre><code class="language-python">from fastapi import FastAPI
+
+# Create the FastAPI application instance
+app = FastAPI(
+    title="My API",
+    description="A production-ready FastAPI application",
+    version="1.0.0",
+)
+
+@app.get("/")
+async def root():
+    return {"message": "Hello, FastAPI!"}</code></pre>
+
+        <p>Run the development server:</p>
+<pre><code class="language-bash"># Start with auto-reload for development
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Visit http://localhost:8000/docs for interactive Swagger UI
+# Visit http://localhost:8000/redoc for ReDoc documentation</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 3. Path Operations                          -->
+        <!-- ============================================ -->
+        <h2 id="path-operations">3. Path Operations</h2>
+
+        <p>FastAPI uses decorators for each HTTP method. Path parameters are extracted from the URL, and query parameters are taken from function arguments that are not part of the path:</p>
+<pre><code class="language-python">from fastapi import FastAPI, Query, Path
+
+app = FastAPI()
+
+# GET with path parameters
+@app.get("/users/{user_id}")
+async def get_user(
+    user_id: int = Path(..., title="User ID", ge=1)
+):
+    return {"user_id": user_id}
+
+# GET with query parameters
+@app.get("/items/")
+async def list_items(
+    skip: int = Query(0, ge=0, description="Items to skip"),
+    limit: int = Query(20, ge=1, le=100, description="Max items"),
+    search: str | None = Query(None, min_length=1, max_length=100),
+):
+    # skip, limit, and search come from ?skip=0&limit=20&search=foo
+    return {"skip": skip, "limit": limit, "search": search}
+
+# POST to create a resource
+@app.post("/users/", status_code=201)
+async def create_user(name: str, email: str):
+    return {"name": name, "email": email}
+
+# PUT to update a resource
+@app.put("/users/{user_id}")
+async def update_user(user_id: int, name: str):
+    return {"user_id": user_id, "name": name}
+
+# DELETE a resource
+@app.delete("/users/{user_id}", status_code=204)
+async def delete_user(user_id: int):
+    return None</code></pre>
+
+        <p>The <code>Path()</code> and <code>Query()</code> functions add validation, metadata, and documentation. The first argument (<code>...</code>) means the parameter is required. Use a default value to make it optional.</p>
+
+        <!-- ============================================ -->
+        <!-- 4. Request Body & Pydantic Models            -->
+        <!-- ============================================ -->
+        <h2 id="request-body">4. Request Body &amp; Pydantic Models</h2>
+
+        <p>Pydantic models are the backbone of FastAPI's data validation. Define a model with type hints and FastAPI automatically validates incoming JSON, returns clear error messages, and generates schema documentation:</p>
+<pre><code class="language-python">from pydantic import BaseModel, Field, EmailStr
+from datetime import datetime
+
+# Request model for creating a user
+class UserCreate(BaseModel):
+    name: str = Field(
+        ..., min_length=1, max_length=100,
+        examples=["Alice Johnson"]
+    )
+    email: EmailStr  # Validates email format automatically
+    age: int = Field(..., ge=13, le=150, description="User age")
+    bio: str | None = Field(None, max_length=500)
+
+# Nested models for complex data
+class Address(BaseModel):
+    street: str
+    city: str
+    country: str = "US"
+    zip_code: str = Field(..., pattern=r"^\d{5}(-\d{4})?$")
+
+class UserWithAddress(BaseModel):
+    name: str
+    email: EmailStr
+    addresses: list[Address] = []  # List of nested objects
+
+# Use the model in an endpoint
+@app.post("/users/", status_code=201)
+async def create_user(user: UserCreate):
+    # user is already validated - if invalid, FastAPI returns 422
+    return {"id": 1, **user.model_dump()}</code></pre>
+
+        <p>When a client sends invalid data, FastAPI automatically returns a 422 response with details about every validation error:</p>
+<pre><code class="language-json">{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": ["body", "email"],
+      "msg": "value is not a valid email address",
+      "input": "not-an-email"
+    }
+  ]
+}</code></pre>
+
+        <p><strong>Custom validators</strong> let you add business logic to your models:</p>
+<pre><code class="language-python">from pydantic import BaseModel, field_validator, model_validator
+
+class OrderCreate(BaseModel):
+    product_id: int
+    quantity: int = Field(..., ge=1, le=1000)
+    discount_code: str | None = None
+
+    @field_validator("discount_code")
+    @classmethod
+    def validate_discount(cls, v):
+        if v and not v.startswith("PROMO-"):
+            raise ValueError("Discount codes must start with PROMO-")
+        return v.upper() if v else v
+
+    @model_validator(mode="after")
+    def check_order(self):
+        if self.quantity > 100 and not self.discount_code:
+            raise ValueError("Bulk orders over 100 need a discount code")
+        return self</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 5. Response Models                          -->
+        <!-- ============================================ -->
+        <h2 id="response-models">5. Response Models</h2>
+
+        <p>Use <code>response_model</code> to control what data is sent back to the client. This filters out internal fields like passwords and adds documentation to the OpenAPI schema:</p>
+<pre><code class="language-python">from pydantic import BaseModel, EmailStr
+
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str  # Sent by client, but never returned
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    is_active: bool = True
+
+    model_config = {"from_attributes": True}  # Read from ORM objects
+
+# response_model filters out the password field
+@app.post("/users/", response_model=UserResponse, status_code=201)
+async def create_user(user: UserCreate):
+    # Even if the db_user object has a password field,
+    # response_model ensures it is never sent to the client
+    db_user = save_to_db(user)
+    return db_user
+
+# Return a list of items
+@app.get("/users/", response_model=list[UserResponse])
+async def list_users():
+    return get_all_users()
+
+# Custom responses for different status codes
+from fastapi.responses import JSONResponse
+
+@app.get("/users/{user_id}", response_model=UserResponse)
+async def get_user(user_id: int):
+    user = find_user(user_id)
+    if not user:
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "User not found"}
+        )
+    return user</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 6. Dependency Injection                     -->
+        <!-- ============================================ -->
+        <h2 id="dependency-injection">6. Dependency Injection</h2>
+
+        <p>FastAPI's dependency injection system is one of its most powerful features. Use <code>Depends()</code> to inject shared logic &mdash; database sessions, authentication, pagination, rate limiting &mdash; into any endpoint:</p>
+<pre><code class="language-python">from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
+
+app = FastAPI()
+
+# Database session dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db  # yield makes this a generator dependency
+    finally:
+        db.close()  # Always close, even on errors
+
+# Pagination dependency (reusable across endpoints)
+class Pagination:
+    def __init__(
+        self,
+        skip: int = Query(0, ge=0),
+        limit: int = Query(20, ge=1, le=100),
+    ):
+        self.skip = skip
+        self.limit = limit
+
+# Use dependencies in endpoints
+@app.get("/users/")
+async def list_users(
+    db: Session = Depends(get_db),
+    pagination: Pagination = Depends(),
+):
+    users = db.query(User).offset(pagination.skip).limit(pagination.limit).all()
+    return users
+
+# Sub-dependencies: dependencies can depend on other dependencies
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
+    user = decode_token_and_find_user(token, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return user
+
+def get_admin_user(
+    current_user: User = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin required")
+    return current_user
+
+@app.delete("/users/{user_id}")
+async def delete_user(
+    user_id: int,
+    admin: User = Depends(get_admin_user),  # Chain of deps
+    db: Session = Depends(get_db),
+):
+    # Only admins reach this code
+    db.query(User).filter(User.id == user_id).delete()
+    db.commit()</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 7. Authentication                           -->
+        <!-- ============================================ -->
+        <h2 id="authentication">7. Authentication with JWT</h2>
+
+        <p>FastAPI provides built-in OAuth2 support. Here is a complete JWT authentication flow with password hashing:</p>
+<pre><code class="language-python">from datetime import datetime, timedelta
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from pydantic import BaseModel
+
+# Configuration
+SECRET_KEY = "your-secret-key-from-env"  # Use os.environ in production
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Password hashing with bcrypt
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# OAuth2 token URL (also creates the login button in Swagger UI)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+app = FastAPI()
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: str | None = None
+
+# Hash and verify passwords
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+# Create JWT tokens
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+# Dependency to get current user from token
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = get_user_from_db(username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+# Login endpoint
+@app.post("/token", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
+        )
+    access_token = create_access_token(
+        data={"sub": user.username},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+# Protected endpoint
+@app.get("/users/me")
+async def read_users_me(current_user = Depends(get_current_user)):
+    return current_user</code></pre>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Test your auth flow:</strong> Use the <a href="/tools/api-request-builder" style="color: #3b82f6;">API Request Builder</a> to send token requests and test protected endpoints. Format JWT payloads with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>.
+        </div>
+
+        <!-- ============================================ -->
+        <!-- 8. Database Integration                     -->
+        <!-- ============================================ -->
+        <h2 id="database">8. Database Integration</h2>
+
+        <p>FastAPI works with any database. The most common setup is SQLAlchemy with a session dependency. Here is the full pattern:</p>
+<pre><code class="language-python"># app/database.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
+
+SQLALCHEMY_DATABASE_URL = "postgresql://user:pass@localhost/mydb"
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+class Base(DeclarativeBase):
+    pass</code></pre>
+
+<pre><code class="language-python"># app/models.py
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from datetime import datetime
+from .database import Base
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String(100), nullable=False)
+    hashed_password = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationship: one user has many items
+    items = relationship("Item", back_populates="owner")
+
+class Item(Base):
+    __tablename__ = "items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(String)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+
+    owner = relationship("User", back_populates="items")</code></pre>
+
+<pre><code class="language-python"># app/routers/users.py - CRUD endpoints
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from .. import models, schemas
+from ..dependencies import get_db
+
+router = APIRouter(prefix="/users", tags=["users"])
+
+@router.post("/", response_model=schemas.UserResponse, status_code=201)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    # Check for existing email
+    existing = db.query(models.User).filter(
+        models.User.email == user.email
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    db_user = models.User(
+        email=user.email,
+        name=user.name,
+        hashed_password=get_password_hash(user.password),
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user</code></pre>
+
+        <p><strong>Async database access</strong> with SQLAlchemy 2.0:</p>
+<pre><code class="language-python"># Async engine with asyncpg
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+
+engine = create_async_engine(
+    "postgresql+asyncpg://user:pass@localhost/mydb",
+    pool_size=20,
+    max_overflow=10,
+)
+AsyncSession = async_sessionmaker(engine, expire_on_commit=False)
+
+async def get_db():
+    async with AsyncSession() as session:
+        yield session
+
+@router.get("/{user_id}", response_model=schemas.UserResponse)
+async def get_user(user_id: int, db = Depends(get_db)):
+    result = await db.execute(
+        select(models.User).where(models.User.id == user_id)
+    )
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 9. Middleware & CORS                        -->
+        <!-- ============================================ -->
+        <h2 id="middleware">9. Middleware &amp; CORS</h2>
+
+        <p>Middleware runs before and after every request. Use it for logging, timing, authentication checks, and CORS configuration:</p>
+<pre><code class="language-python">import time
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# CORS middleware - allow your frontend to call the API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",     # React dev server
+        "https://myapp.example.com", # Production frontend
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],   # Allow all HTTP methods
+    allow_headers=["*"],   # Allow all headers
+)
+
+# Custom middleware to log request duration
+@app.middleware("http")
+async def add_timing_header(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    duration = time.perf_counter() - start_time
+    response.headers["X-Response-Time"] = f"{duration:.4f}s"
+    return response
+
+# Trusted host middleware (prevent host header attacks)
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["myapp.example.com", "localhost"],
+)</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 10. Background Tasks                        -->
+        <!-- ============================================ -->
+        <h2 id="background-tasks">10. Background Tasks</h2>
+
+        <p>FastAPI's <code>BackgroundTasks</code> lets you run code after the response is sent &mdash; perfect for sending emails, processing uploads, or updating caches without making the client wait:</p>
+<pre><code class="language-python">from fastapi import BackgroundTasks, FastAPI
+
+app = FastAPI()
+
+# Background task function
+def send_welcome_email(email: str, name: str):
+    # This runs after the response is sent
+    print(f"Sending welcome email to {email}")
+    # smtp.send(to=email, subject="Welcome!", body=f"Hi {name}...")
+
+def write_audit_log(user_id: int, action: str):
+    # Log the action to a file or database
+    with open("audit.log", "a") as f:
+        f.write(f"{user_id}: {action}\n")
+
+@app.post("/users/", status_code=201)
+async def create_user(
+    name: str,
+    email: str,
+    background_tasks: BackgroundTasks,
+):
+    user = save_user_to_db(name, email)
+
+    # Queue multiple background tasks
+    background_tasks.add_task(send_welcome_email, email, name)
+    background_tasks.add_task(write_audit_log, user.id, "user_created")
+
+    # Response is sent immediately, tasks run after
+    return {"id": user.id, "name": name}</code></pre>
+
+        <p>For heavy or long-running tasks, use a proper task queue like Celery or arq instead of <code>BackgroundTasks</code>.</p>
+
+        <!-- ============================================ -->
+        <!-- 11. Testing                                 -->
+        <!-- ============================================ -->
+        <h2 id="testing">11. Testing</h2>
+
+        <p>FastAPI provides a <code>TestClient</code> built on httpx that lets you test endpoints without starting a server:</p>
+<pre><code class="language-python"># tests/test_users.py
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+from app.database import Base, engine
+from app.dependencies import get_db
+
+# Override the database dependency with a test database
+SQLALCHEMY_TEST_URL = "sqlite:///./test.db"
+test_engine = create_engine(SQLALCHEMY_TEST_URL)
+TestSession = sessionmaker(bind=test_engine)
+
+def override_get_db():
+    db = TestSession()
+    try:
+        yield db
+    finally:
+        db.close()
+
+app.dependency_overrides[get_db] = override_get_db
+
+# Create test client
+client = TestClient(app)
+
+@pytest.fixture(autouse=True)
+def setup_db():
+    Base.metadata.create_all(bind=test_engine)
+    yield
+    Base.metadata.drop_all(bind=test_engine)
+
+def test_create_user():
+    response = client.post("/users/", json={
+        "name": "Alice",
+        "email": "alice@example.com",
+        "password": "securepass123",
+    })
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == "Alice"
+    assert data["email"] == "alice@example.com"
+    assert "password" not in data  # response_model filters it
+
+def test_create_user_duplicate_email():
+    client.post("/users/", json={
+        "name": "Alice",
+        "email": "alice@example.com",
+        "password": "pass1",
+    })
+    response = client.post("/users/", json={
+        "name": "Bob",
+        "email": "alice@example.com",
+        "password": "pass2",
+    })
+    assert response.status_code == 400
+
+def test_get_user_not_found():
+    response = client.get("/users/999")
+    assert response.status_code == 404</code></pre>
+
+        <p><strong>Async testing</strong> with pytest-asyncio:</p>
+<pre><code class="language-python">import pytest
+from httpx import AsyncClient, ASGITransport
+from app.main import app
+
+@pytest.mark.anyio
+async def test_async_root():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Hello, FastAPI!"}</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 12. Deployment                              -->
+        <!-- ============================================ -->
+        <h2 id="deployment">12. Deployment</h2>
+
+        <p>For production, run Uvicorn behind Gunicorn for process management, and place a reverse proxy in front for SSL and static files:</p>
+<pre><code class="language-bash"># Production command: Gunicorn with Uvicorn workers
+gunicorn app.main:app \
+  -w 4 \
+  -k uvicorn.workers.UvicornWorker \
+  -b 0.0.0.0:8000 \
+  --access-logfile - \
+  --error-logfile -</code></pre>
+
+        <p><strong>Dockerfile</strong> for containerized deployment:</p>
+<pre><code class="language-dockerfile">FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install dependencies first (cached layer)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY ./app ./app
+
+# Create non-root user
+RUN adduser --disabled-password --no-create-home appuser
+USER appuser
+
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+
+# Start with Gunicorn + Uvicorn workers
+CMD ["gunicorn", "app.main:app", \
+     "-w", "4", \
+     "-k", "uvicorn.workers.UvicornWorker", \
+     "-b", "0.0.0.0:8000"]</code></pre>
+
+        <p><strong>Production settings checklist:</strong></p>
+
+        <ul>
+            <li>Set <code>debug=False</code> and remove <code>--reload</code></li>
+            <li>Use environment variables for secrets (never hardcode <code>SECRET_KEY</code>)</li>
+            <li>Set workers to <code>2 * CPU_CORES + 1</code> (or <code>2 * CPU_CORES</code> for I/O-bound apps)</li>
+            <li>Enable structured JSON logging for log aggregation</li>
+            <li>Add a <code>/health</code> endpoint for load balancer health checks</li>
+            <li>Configure connection pooling for your database</li>
+            <li>Place behind Nginx or Traefik for SSL termination</li>
+        </ul>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Containerize it:</strong> Follow our <a href="/blog/docker-complete-guide" style="color: #3b82f6;">Docker Complete Guide</a> and set up CI/CD with <a href="/blog/github-actions-cicd-complete-guide" style="color: #3b82f6;">GitHub Actions</a>.
+        </div>
+
+        <!-- ============================================ -->
+        <!-- 13. Performance Tips                        -->
+        <!-- ============================================ -->
+        <h2 id="performance">13. Performance Tips</h2>
+
+        <p>FastAPI is already fast, but these practices will squeeze out the best performance:</p>
+
+        <p><strong>Use async for I/O-bound operations.</strong> If your endpoint calls a database, external API, or file system, make it async:</p>
+<pre><code class="language-python"># Good: async for I/O-bound work
+@app.get("/data")
+async def get_data():
+    async with httpx.AsyncClient() as client:
+        response = await client.get("https://api.example.com/data")
+    return response.json()
+
+# Good: sync for CPU-bound work (FastAPI runs it in a thread pool)
+@app.get("/compute")
+def compute_heavy():
+    result = expensive_calculation()  # Blocking but in thread pool
+    return {"result": result}</code></pre>
+
+        <p><strong>Connection pooling</strong> is critical for database performance:</p>
+<pre><code class="language-python"># Configure SQLAlchemy pool for production
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=20,        # Max persistent connections
+    max_overflow=10,     # Extra connections when pool is full
+    pool_pre_ping=True,  # Test connections before use
+    pool_recycle=3600,   # Recycle connections after 1 hour
+)</code></pre>
+
+        <p><strong>Response caching</strong> with a simple in-memory cache:</p>
+<pre><code class="language-python">from functools import lru_cache
+from fastapi import FastAPI
+from fastapi.responses import ORJSONResponse
+
+# Use orjson for faster JSON serialization
+app = FastAPI(default_response_class=ORJSONResponse)
+
+# Cache configuration object (loaded once)
+@lru_cache
+def get_settings():
+    return Settings()  # Read from env vars once, cache forever
+
+# For HTTP caching, set Cache-Control headers
+@app.get("/public-data")
+async def public_data():
+    data = await fetch_public_data()
+    return ORJSONResponse(
+        content=data,
+        headers={"Cache-Control": "public, max-age=300"},
+    )</code></pre>
+
+        <p><strong>Additional tips:</strong></p>
+        <ul>
+            <li>Use <code>orjson</code> for 2&ndash;5x faster JSON serialization (<code>pip install orjson</code>)</li>
+            <li>Use <code>response_model_exclude_unset=True</code> to skip null fields in responses</li>
+            <li>Profile with <code>py-spy</code> to find actual bottlenecks before optimizing</li>
+            <li>Use Redis for caching frequent queries and rate limiting</li>
+            <li>Avoid global state &mdash; use dependency injection for shared resources</li>
+        </ul>
+
+        <!-- ============================================ -->
+        <!-- FAQ Section                                  -->
+        <!-- ============================================ -->
+        <div class="faq-section" id="faq">
+            <h2>Frequently Asked Questions</h2>
+
+            <details>
+                <summary>Is FastAPI faster than Flask and Django?</summary>
+                <p>Yes, FastAPI is significantly faster than both Flask and Django for API workloads. In benchmarks, FastAPI handles 2&ndash;3x more requests per second than Flask because it runs on ASGI (Uvicorn/Starlette) with native async support, while Flask and Django use synchronous WSGI. FastAPI's performance is comparable to Node.js and Go frameworks. The speed difference is most pronounced for I/O-bound workloads like database queries and external API calls, where async concurrency allows FastAPI to handle many requests simultaneously instead of blocking on each one.</p>
+            </details>
+
+            <details>
+                <summary>How does FastAPI compare to Flask?</summary>
+                <p>FastAPI and Flask serve similar purposes but differ in philosophy and features. FastAPI provides automatic request validation via Pydantic, auto-generated OpenAPI documentation, native async/await support, and dependency injection out of the box. Flask is a minimal micro-framework that requires you to add validation, documentation, and async support through extensions. FastAPI has better performance due to its ASGI foundation. Flask has a larger ecosystem of extensions and more community resources due to its longer history. Choose FastAPI for new API projects, especially if you need automatic docs and type safety. Choose Flask if you need server-side HTML rendering with Jinja2 or have an existing Flask codebase.</p>
+            </details>
+
+            <details>
+                <summary>Can I use FastAPI with a synchronous database like SQLAlchemy?</summary>
+                <p>Yes, FastAPI works with synchronous SQLAlchemy. Define your database functions as regular (non-async) functions and FastAPI will automatically run them in a thread pool so they do not block the event loop. Alternatively, use SQLAlchemy 2.0's async engine with asyncpg or aiosqlite for true async database access. For most applications, synchronous SQLAlchemy with FastAPI's thread pool is simpler and performs well. Switch to async SQLAlchemy only if you need maximum concurrency for database-heavy workloads.</p>
+            </details>
+
+            <details>
+                <summary>How do I deploy FastAPI to production?</summary>
+                <p>Deploy FastAPI with Uvicorn as the ASGI server, managed by Gunicorn for process management: run <code>gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker</code> with 2&ndash;4 workers per CPU core. Place a reverse proxy like Nginx or Traefik in front to handle SSL, static files, and load balancing. For containerized deployments, use the official Python slim image in Docker, install dependencies, and expose the Uvicorn port. Set environment variables for secrets and database URLs, enable structured JSON logging, and add health check endpoints.</p>
+            </details>
+
+            <details>
+                <summary>How do I handle authentication in FastAPI?</summary>
+                <p>FastAPI has built-in support for OAuth2 with the <code>OAuth2PasswordBearer</code> security scheme. The standard approach is JWT authentication: create a <code>/token</code> endpoint that validates credentials and returns a signed JWT, then use a dependency function to decode and verify the token on protected routes. Hash passwords with bcrypt via the passlib library. FastAPI's dependency injection makes it easy to create reusable auth dependencies like <code>get_current_user</code> that extract the user from the token. For OAuth2 with third-party providers, use authlib or httpx-oauth. FastAPI's automatic OpenAPI docs will show a login button for testing authenticated endpoints.</p>
+            </details>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- Conclusion                                   -->
+        <!-- ============================================ -->
+        <h2>Conclusion</h2>
+
+        <p>FastAPI gives you the speed of Go and Node.js with the readability and ecosystem of Python. Its combination of Pydantic validation, automatic OpenAPI docs, dependency injection, and native async support makes it the strongest choice for building modern Python APIs. Start with a single file to learn the patterns, then scale to a full project structure with routers, models, and dependencies as your application grows.</p>
+
+        <p>The patterns covered in this guide &mdash; type-safe models, injectable dependencies, token-based auth, and async database access &mdash; will carry you from prototype to production. FastAPI's documentation is excellent, and its growing community means answers to most questions are a search away.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Essential tools:</strong> Build and test API requests with the <a href="/tools/api-request-builder" style="color: #3b82f6;">API Request Builder</a>, mock endpoints with the <a href="/tools/api-mock-builder" style="color: #3b82f6;">API Mock Builder</a>, and format JSON responses with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>. If your API rollback PR is blocked by required code owner review, use the <a href="/blog/github-merge-queue-codeowners-approval-deadlock-guide" style="color: #3b82f6;">Merge Queue CODEOWNERS Approval Deadlock Guide</a>. If bypass expiry is approaching during incident rollback, follow the <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="color: #3b82f6;">Merge Queue Expiry Extension Reapproval Guide</a>. If a denied extension gets appealed, apply the <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide" style="color: #3b82f6;">Merge Queue Denial Appeal Escalation Path Guide</a>. If rollback incidents recur across API deploys, use the <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide" style="color: #3b82f6;">Merge Queue Closure Quality Metrics Dashboard Guide</a> to define escalation thresholds.
+        </div>
+
+        <h2>Related Resources</h2>
+
+        <section style="margin-top: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/tools/api-request-builder" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">API Request Builder</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Test your FastAPI endpoints interactively</div>
+            </a>
+            <a href="/tools/api-mock-builder" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">API Mock Builder</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Mock API responses for frontend development</div>
+            </a>
+            <a href="/blog/rest-api-design-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">REST API Design Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Best practices for designing RESTful API endpoints</div>
+            </a>
+            <a href="/blog/github-merge-queue-codeowners-approval-deadlock-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue CODEOWNERS Deadlock Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Incident runbook for API rollback PRs blocked by required owner approvals.</div>
+            </a>
+            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Expiry Extension Reapproval Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Reapprove API rollback bypass windows safely when validation runs outlast original expiry.</div>
+            </a>
+            <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Denial Appeal Escalation Path</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Run appeal escalation with strict timestamps when denied rollback extensions are challenged.</div>
+            </a>
+            <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Closure Quality Metrics Dashboard</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Measure recurring rollback incident risk with explicit KPI thresholds and trigger rules.</div>
+            </a>
+            <a href="/blog/python-django-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Django Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Compare FastAPI with Django's batteries-included approach</div>
+            </a>
+            <a href="/blog/flask-web-framework-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Flask Web Framework Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Learn Flask, Python's lightweight micro-framework</div>
+            </a>
+            <a href="/blog/nodejs-express-api-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Node.js Express API Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Compare FastAPI with Express for API development</div>
+            </a>
+        </div>
+        </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>DevToolbox &mdash; Free developer tools, no strings attached.</p>
+    </footer>
+
+    <script>
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            window.location.href = '/tools/';
+        }
+    });
+    </script>
+</body>
+</html>

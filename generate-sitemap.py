@@ -17,6 +17,7 @@ from pathlib import Path
 
 SITE_ROOT = Path("/var/www/web-ceo")
 BASE_URL = "https://devtoolbox.dedyn.io"
+REQUIRED_ROOT_FILES = ("google5ab7b13e25381f31.html",)
 
 
 @dataclass(frozen=True)
@@ -84,6 +85,13 @@ def write_sitemap(entries: list[SitemapEntry], output_path: Path) -> None:
 
 
 def main() -> None:
+    missing = [name for name in REQUIRED_ROOT_FILES if not (SITE_ROOT / name).exists()]
+    if missing:
+        names = ", ".join(missing)
+        raise FileNotFoundError(
+            f"Required root file(s) missing: {names}. Restore before publishing."
+        )
+
     entries: list[SitemapEntry] = []
 
     def add(loc_path: str, file_path: Path, changefreq: str, priority: str) -> None:
@@ -165,4 +173,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Merge Queue Closure Quality Metrics Dashboard: Recurring Incident Thresholds and Escalation Triggers (2026) | DevToolbox Blog</title>
+    <meta name="description" content="Define merge queue closure quality with dashboard metrics, recurring-incident thresholds, and explicit escalation triggers. Includes copy-paste weekly scorecard template.">
+    <meta name="keywords" content="github merge queue closure quality metrics, recurring incident threshold, rollback governance dashboard, merge queue escalation trigger, incident closure KPI">
+
+    <meta property="og:title" content="Merge Queue Closure Quality Metrics Dashboard (2026)">
+    <meta property="og:description" content="Use threshold-based metrics to detect recurring merge queue incidents before governance drift becomes normal.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide.png">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Merge Queue Closure Quality Dashboard (2026)">
+    <meta name="twitter:description" content="Dashboard-ready thresholds and escalation triggers for recurring merge queue incidents.">
+
+    <meta property="article:published_time" content="2026-02-17">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/track.js" defer></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "GitHub Merge Queue Closure Quality Metrics Dashboard: Recurring Incident Thresholds and Escalation Triggers (2026)",
+        "description": "Threshold-based closure quality dashboard for merge queue incidents with recurring-incident triggers and escalation rules.",
+        "datePublished": "2026-02-17",
+        "dateModified": "2026-02-17",
+        "url": "https://devtoolbox.dedyn.io/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide",
+        "author": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What does closure quality mean for merge queue incidents?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Closure quality means the incident is not only resolved in the moment, but also documented with owner-assigned corrective actions, baseline restoration proof, and measurable follow-up outcomes that reduce repeat incidents."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How many metrics should be on a closure quality dashboard?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Most teams can run an effective dashboard with 6 to 10 metrics: closure completeness, baseline restore lag, recurrence rate, follow-up completion, approval latency, and policy exception carryover."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "When should recurring incidents trigger escalation?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Escalate when the same incident class repeats within a short window, when closure completeness drops below target, or when unresolved corrective actions cross an agreed threshold and stay open beyond one review cycle."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Who owns closure dashboard reviews?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ownership is split: incident command owns immediate closure records, while platform governance or reliability leadership owns weekly threshold review and escalation decisions."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Merge Queue Closure Quality Metrics Dashboard Guide" }
+        ]
+    }
+    </script>
+
+    <style>
+        .tool-callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            line-height: 1.75;
+            color: #d1d5db;
+        }
+        .tool-callout a { color: #3b82f6; }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #d1fae5;
+        }
+
+        .warn-box {
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.25);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #fde68a;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+        .toc h3 { margin: 0 0 0.75rem 0; color: #e5e7eb; }
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc li { margin: 0.35rem 0; }
+        .toc a { color: #93c5fd; }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .mini-table th, .mini-table td {
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+            vertical-align: top;
+        }
+        .mini-table th { color: #e5e7eb; font-weight: 700; background: rgba(255,255,255,0.03); }
+        .mini-table td { color: #d1d5db; }
+        .mini-table tr:last-child td { border-bottom: 0; }
+
+        .checklist {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .checklist li { margin: 0.55rem 0; }
+
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .kpi-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+        }
+        .kpi-label { color: #9ca3af; font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .kpi-value { color: #e5e7eb; font-weight: 700; font-size: 1.05rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Merge Queue Closure Quality Metrics Dashboard Guide</span></nav>
+
+    <main class="blog-post">
+        <h1>GitHub Merge Queue Closure Quality Metrics Dashboard: Recurring Incident Thresholds and Escalation Triggers (2026)</h1>
+        <p class="meta">Published February 17, 2026 &middot; 12 min read</p>
+
+        <p>Most teams can close one merge queue incident. Fewer teams can prove that their closure quality is improving week over week. Without a metrics view, repeated incidents look like random noise until they become accepted operational debt.</p>
+
+        <p>This guide gives a practical <strong>closure quality dashboard</strong> for GitHub merge queue incidents: metric definitions, warning thresholds, escalation triggers, and a copy-paste weekly scorecard template.</p>
+
+        <div class="tool-callout">
+            <strong style="color:#3b82f6;">&#9881; Quick links:</strong>
+            <a href="/blog/github-merge-queue-approval-evidence-template-guide">Approval Evidence Template Guide</a> &middot;
+            <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide">Denial Appeal Escalation Path Guide</a> &middot;
+            <a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide">Deny Extension vs Restore Baseline Guide</a> &middot;
+            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide">Expiry Extension Reapproval Guide</a> &middot;
+            <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide">Appeal Outcome Closure Follow-Up Template Guide</a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of contents</h3>
+            <ol>
+                <li><a href="#why">Why closure quality needs its own dashboard</a></li>
+                <li><a href="#kpis">Core KPIs for closure quality</a></li>
+                <li><a href="#thresholds">Recurring-incident thresholds and escalation triggers</a></li>
+                <li><a href="#review">Weekly review workflow and owner model</a></li>
+                <li><a href="#template">Copy-paste weekly scorecard template</a></li>
+                <li><a href="#antipatterns">Anti-patterns and calibration rules</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <h2 id="why">1. Why closure quality needs its own dashboard</h2>
+
+        <p>Incident dashboards usually focus on detection, recovery time, and failed checks. Those are important, but they do not tell you whether the closure process itself prevented future incidents. Closure quality is a separate control surface.</p>
+
+        <div class="warn-box">
+            <strong>Signal to watch:</strong> If incident frequency is flat but closure completeness is dropping, you are building hidden governance debt. The team may feel faster while actually weakening rollback safety.
+        </div>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Observation</th>
+                    <th>What it usually means</th>
+                    <th>Immediate action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Incidents closed quickly, recurrence rising</td>
+                    <td>Closure checklist skipped or shallow</td>
+                    <td>Enforce closure completeness gate</td>
+                </tr>
+                <tr>
+                    <td>Follow-up actions created, rarely finished</td>
+                    <td>No ownership pressure after shift handoff</td>
+                    <td>Add due-date SLA and weekly review owner</td>
+                </tr>
+                <tr>
+                    <td>Repeated extensions for same root cause</td>
+                    <td>Escalation thresholds undefined</td>
+                    <td>Set automatic trigger criteria</td>
+                </tr>
+                <tr>
+                    <td>Bypass restored late after closure</td>
+                    <td>No baseline-restore lag metric</td>
+                    <td>Track restore lag with hard limit</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="kpis">2. Core KPIs for closure quality</h2>
+
+        <p>Start with a small metric set. The goal is fast weekly interpretation, not a perfect data warehouse. The dashboard below is enough for most platform teams.</p>
+
+        <div class="kpi-strip">
+            <div class="kpi-card">
+                <div class="kpi-label">Closure bundle completeness</div>
+                <div class="kpi-value">Target: &gt;= 95%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Baseline restore lag</div>
+                <div class="kpi-value">Target: &lt;= 15m</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Recurring incident rate (14d)</div>
+                <div class="kpi-value">Target: &lt;= 20%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Follow-up on-time completion</div>
+                <div class="kpi-value">Target: &gt;= 85%</div>
+            </div>
+        </div>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>KPI</th>
+                    <th>Definition</th>
+                    <th>How to collect</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Closure bundle completeness</td>
+                    <td>Percent of incidents with decision, evidence, owner, due dates, and restore proof all present</td>
+                    <td>PR timeline scan for required fields</td>
+                </tr>
+                <tr>
+                    <td>Baseline restore lag</td>
+                    <td>Minutes from decision timestamp to confirmed queue/policy restoration</td>
+                    <td>Decision comment vs restore verification timestamp</td>
+                </tr>
+                <tr>
+                    <td>Recurring incident rate (14d)</td>
+                    <td>Share of incidents matching an already-seen class within 14 days</td>
+                    <td>Incident taxonomy label + rolling window count</td>
+                </tr>
+                <tr>
+                    <td>Open corrective-action backlog</td>
+                    <td>Count of follow-up tasks past due</td>
+                    <td>Issue label query by due-date field</td>
+                </tr>
+                <tr>
+                    <td>Escalation lead time</td>
+                    <td>Minutes from threshold breach to escalation owner acknowledgment</td>
+                    <td>Threshold event timestamp vs owner comment timestamp</td>
+                </tr>
+                <tr>
+                    <td>Policy exception carryover</td>
+                    <td>Number of temporary exceptions still active after closure</td>
+                    <td>Branch-protection diff at 24h checkpoint</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tip-box">
+            <strong>Tip:</strong> Keep metric names stable for at least one quarter. Constant renaming destroys trend continuity and makes threshold tuning unreliable.
+        </div>
+
+        <h2 id="thresholds">3. Recurring-incident thresholds and escalation triggers</h2>
+
+        <p>Thresholds should be explicit enough that escalation is automatic, not debated ad hoc during every incident review.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Warning threshold</th>
+                    <th>Critical threshold</th>
+                    <th>Escalation trigger</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Recurring incident rate (14d)</td>
+                    <td>&gt; 25%</td>
+                    <td>&gt;= 35%</td>
+                    <td>Open governance review issue and assign platform lead within 24h</td>
+                </tr>
+                <tr>
+                    <td>Closure completeness</td>
+                    <td>&lt; 92%</td>
+                    <td>&lt; 85%</td>
+                    <td>Require second reviewer sign-off before next exception approval</td>
+                </tr>
+                <tr>
+                    <td>Past-due corrective actions</td>
+                    <td>&gt;= 5</td>
+                    <td>&gt;= 10</td>
+                    <td>Freeze new bypass extensions until backlog drops below warning</td>
+                </tr>
+                <tr>
+                    <td>Baseline restore lag</td>
+                    <td>&gt; 20m</td>
+                    <td>&gt; 30m</td>
+                    <td>Escalate to incident commander and reliability owner in same shift</td>
+                </tr>
+                <tr>
+                    <td>Exception carryover at 24h</td>
+                    <td>&gt; 0</td>
+                    <td>&gt;= 2</td>
+                    <td>Block closure state change until policy diff is zeroed</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="checklist">
+            <strong>Threshold policy rules:</strong>
+            <ul>
+                <li>Use rolling windows (7d or 14d) instead of calendar months to avoid blind spots.</li>
+                <li>Keep warning and critical tiers separate; warning is for early correction, critical is for governance intervention.</li>
+                <li>Define one owner role per trigger path to prevent escalation ping-pong.</li>
+                <li>Record every trigger event in PR timeline or issue thread with UTC timestamp.</li>
+            </ul>
+        </div>
+
+        <h2 id="review">4. Weekly review workflow and owner model</h2>
+
+        <p>Run one compact review each week. The objective is threshold triage, not a long retro. If metrics are green, end early. If a threshold breaches, assign action owners immediately.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Step</th>
+                    <th>Owner</th>
+                    <th>Output</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Collect dashboard snapshot</td>
+                    <td>Platform analyst or on-call delegate</td>
+                    <td>Weekly KPI table with 7d and 14d trend deltas</td>
+                </tr>
+                <tr>
+                    <td>Classify threshold breaches</td>
+                    <td>Reliability lead</td>
+                    <td>Warning or critical severity labels</td>
+                </tr>
+                <tr>
+                    <td>Assign corrective actions</td>
+                    <td>Incident governance owner</td>
+                    <td>Action list with due date and validation criteria</td>
+                </tr>
+                <tr>
+                    <td>Publish review note</td>
+                    <td>Meeting facilitator</td>
+                    <td>UTC-stamped summary comment in governance tracker</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="template">5. Copy-paste weekly scorecard template</h2>
+
+        <p>Use this directly in your governance issue or weekly review thread.</p>
+
+<pre><code>### Merge Queue Closure Quality Scorecard
+Week-Start-UTC: 2026-02-17T00:00:00Z
+Week-End-UTC: 2026-02-23T23:59:59Z
+Owner: @platform-governance
+Reviewer: @reliability-lead
+
+KPI Snapshot:
+- Closure completeness: 93% (target >= 95%) [WARNING]
+- Baseline restore lag p95: 19m (target <= 15m) [WARNING]
+- Recurring incident rate (14d): 31% (target <= 20%) [CRITICAL]
+- Past-due corrective actions: 7 (target <= 4) [WARNING]
+- Exception carryover at 24h: 1 (target = 0) [WARNING]
+
+Trigger Events:
+1) Recurring incident rate crossed critical threshold at 2026-02-21T09:40:00Z
+2) Governance escalation owner acknowledged at 2026-02-21T10:02:00Z
+
+Assigned Corrective Actions:
+1) Owner: @ci-owner | Due-UTC: 2026-02-25T18:00:00Z
+   Action: Remove flaky queue check path for merge_group jobs
+   Validation: 30 consecutive merge_group runs with no retry
+2) Owner: @repo-owner | Due-UTC: 2026-02-26T18:00:00Z
+   Action: Add closure checklist automation comment bot
+   Validation: 100% closure bundles include required fields for 7 days
+
+Decision:
+- Escalation status: active
+- New bypass extensions allowed: no (until backlog <= 4 and recurrence < 25%)
+</code></pre>
+
+        <h2 id="antipatterns">6. Anti-patterns and calibration rules</h2>
+
+        <p>Threshold systems fail when teams treat them as static. Calibrate thresholds quarterly and after major workflow changes.</p>
+
+        <div class="warn-box">
+            <strong>Anti-pattern:</strong> Reclassifying recurring incidents as "new" to avoid escalation. If labels are changing more than behavior, your dashboard is being gamed.
+        </div>
+
+        <div class="checklist">
+            <strong>Calibration checklist:</strong>
+            <ul>
+                <li>Review whether warning thresholds produce useful early action or too many false positives.</li>
+                <li>Compare recurring-incident classes with actual root-cause evidence, not just labels.</li>
+                <li>Adjust only one threshold family per cycle so impact remains attributable.</li>
+                <li>Document every threshold change with reason and expected effect window.</li>
+            </ul>
+        </div>
+
+        <h2 id="faq">7. FAQ</h2>
+
+        <h3>What does closure quality mean for merge queue incidents?</h3>
+        <p>It means closure records are complete, restoration is verified quickly, and follow-up work measurably reduces recurring incidents rather than just documenting them.</p>
+
+        <h3>How many metrics should be on a closure quality dashboard?</h3>
+        <p>Usually 6 to 10. More than that often slows weekly decisions and creates reporting noise.</p>
+
+        <h3>When should recurring incidents trigger escalation?</h3>
+        <p>Use explicit thresholds. A common trigger is recurrence above 25% for warning and above 35% for critical in a 14-day window.</p>
+
+        <h3>Who owns dashboard review versus incident closure?</h3>
+        <p>Incident command owns closure records in the moment. Platform governance or reliability ownership should run weekly threshold review and escalation.</p>
+
+        <h2>Related resources</h2>
+        <ul>
+            <li><a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide">Merge Queue Appeal Outcome Closure Follow-Up Template Guide</a> - convert final decision into owner-assigned follow-up checkpoints.</li>
+            <li><a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide">Merge Queue Denial Appeal Escalation Path Guide</a> - escalation matrix when extension denials are contested.</li>
+            <li><a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide">Merge Queue Deny Extension vs Restore Baseline Guide</a> - choose deny/restore actions with auditable criteria.</li>
+            <li><a href="/blog/github-merge-queue-expiry-extension-reapproval-guide">Merge Queue Expiry Extension Reapproval Guide</a> - time-box extension decisions for prolonged incidents.</li>
+            <li><a href="/blog/github-merge-queue-approval-evidence-template-guide">Merge Queue Approval Evidence Template Guide</a> - reusable approval evidence macros that feed closure metrics.</li>
+        </ul>
+    </main>
+
+    <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Appeal Outcome Closure Follow-Up Template</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Turn closure decisions into explicit owner assignments and review checkpoints.</div>
+            </a>
+            <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Denial Appeal Escalation Path Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Define tiered ownership and SLA checkpoints for contested decisions.</div>
+            </a>
+            <a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Deny Extension vs Restore Baseline Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Choose safe deny-or-restore actions with auditable evidence standards.</div>
+            </a>
+            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Expiry Extension Reapproval Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Reapproval guardrails for prolonged incidents with controlled risk windows.</div>
+            </a>
+            <a href="/blog/github-merge-queue-approval-evidence-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Approval Evidence Template Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Capture machine-readable approval evidence that feeds dashboard metrics.</div>
+            </a>
+            <a href="/blog/github-actions-cicd-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">GitHub Actions CI/CD Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Operational patterns for stable merge_group checks and faster recovery loops.</div>
+            </a>
+        </div>
+    </section>
+
+    <footer><p>DevToolbox - Free developer tools, no strings attached.</p></footer>
+</body>
+</html>

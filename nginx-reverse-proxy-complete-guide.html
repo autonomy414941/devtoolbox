@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nginx Reverse Proxy: The Complete Guide for 2026 | DevToolbox Blog</title>
+    <meta name="description" content="Master nginx reverse proxy configuration: load balancing, SSL termination, WebSocket proxying, caching, rate limiting, health checks, security headers, and production best practices with practical examples.">
+    <meta name="keywords" content="nginx reverse proxy, proxy_pass, upstream load balancing, ssl termination nginx, websocket proxy, nginx cache, rate limiting, nginx security, nginx virtual hosts, nginx http2, nginx troubleshooting">
+    <meta property="og:title" content="Nginx Reverse Proxy: The Complete Guide for 2026 | DevToolbox Blog">
+    <meta property="og:description" content="Master nginx reverse proxy configuration: load balancing, SSL termination, WebSocket proxying, caching, rate limiting, health checks, security headers, and production best practices.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/nginx-reverse-proxy-complete-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-nginx-reverse-proxy-complete-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Nginx Reverse Proxy: The Complete Guide for 2026 | DevToolbox Blog">
+    <meta name="twitter:description" content="Master nginx reverse proxy configuration: load balancing, SSL termination, WebSocket proxying, caching, rate limiting, and production best practices.">
+    <meta property="article:published_time" content="2026-02-12">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/nginx-reverse-proxy-complete-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Nginx Reverse Proxy: The Complete Guide for 2026",
+        "description": "Master nginx reverse proxy configuration: load balancing, SSL termination, WebSocket proxying, caching, rate limiting, health checks, security headers, and production best practices.",
+        "datePublished": "2026-02-12",
+        "dateModified": "2026-02-12",
+        "url": "https://devtoolbox.dedyn.io/blog/nginx-reverse-proxy-complete-guide",
+        "author": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        },
+        "publisher": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the difference between a forward proxy and a reverse proxy?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A forward proxy sits in front of clients and forwards their requests to the internet, hiding the client's identity from the server. A reverse proxy sits in front of backend servers and forwards client requests to the appropriate server, hiding the server's identity and infrastructure from the client. Nginx is primarily used as a reverse proxy: clients connect to nginx, and nginx forwards requests to your application servers. Reverse proxies provide load balancing, SSL termination, caching, and security benefits that forward proxies do not."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I fix a 502 Bad Gateway error in nginx?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A 502 Bad Gateway means nginx successfully received the client request but got an invalid response from the upstream server. Common causes: the backend application is not running (check with systemctl status or docker ps), the proxy_pass URL is wrong (wrong port or host), the backend is listening on a different address (127.0.0.1 vs 0.0.0.0), a firewall is blocking the connection, or the backend crashed during request processing. Check the nginx error log at /var/log/nginx/error.log for the specific error message — it will tell you whether the connection was refused, timed out, or returned an invalid response."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Should I terminate SSL at nginx or at the application?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Terminate SSL at nginx in most cases. SSL termination at the reverse proxy simplifies certificate management (one place to renew certs), offloads CPU-intensive TLS handshakes from your application servers, allows nginx to inspect and cache HTTP content, and lets you use HTTP/2 without modifying your application. The connection between nginx and your backend can use plain HTTP if they are on the same machine or a trusted private network. If you require end-to-end encryption for compliance, configure nginx to re-encrypt traffic to the backend using proxy_pass https:// with proxy_ssl_verify enabled."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How does nginx load balancing work with sticky sessions?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Nginx supports sticky sessions through the ip_hash directive, which routes all requests from the same client IP to the same backend server. This is essential for applications that store session state in memory rather than in a shared database or Redis. Add 'ip_hash;' inside your upstream block. The limitation is that all users behind the same NAT or corporate proxy will go to the same server. For more granular control, nginx Plus (commercial) offers sticky cookies and sticky routes. The better long-term solution is to make your application stateless by storing sessions in Redis or a database, which allows round-robin load balancing and easier scaling."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I proxy WebSocket connections through nginx?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "WebSocket connections require HTTP Upgrade headers that nginx does not forward by default. Add three directives to your location block: proxy_http_version 1.1 (WebSocket requires HTTP/1.1 for the upgrade), proxy_set_header Upgrade $http_upgrade (forwards the client's upgrade request), and proxy_set_header Connection 'upgrade' (tells nginx to switch protocols). Also increase proxy_read_timeout to a high value like 86400s because WebSocket connections are long-lived and nginx's default 60-second timeout will close idle connections. Without these settings, WebSocket handshakes will fail with a 400 or the connection will drop after 60 seconds of inactivity."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Nginx Reverse Proxy</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Blog",
+                        "item": "https://devtoolbox.dedyn.io/blog"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Nginx Reverse Proxy Complete Guide"
+                }
+        ]
+    }
+    </script>
+
+    <script src="/js/track.js" defer></script>
+
+    <style>
+        .faq-section {
+            margin-top: 3rem;
+        }
+
+        .faq-section details {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            padding: 0;
+        }
+
+        .faq-section summary {
+            color: #3b82f6;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .faq-section summary:hover {
+            color: #60a5fa;
+        }
+
+        .faq-section details > p {
+            padding: 0 1.5rem 1rem 1.5rem;
+            margin: 0;
+        }
+
+        .toc {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: #e4e4e7;
+        }
+
+        .toc ol {
+            margin-bottom: 0;
+            padding-left: 1.25rem;
+        }
+
+        .toc a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+    </style>
+
+    <main class="blog-post">
+        <h1>Nginx Reverse Proxy: The Complete Guide for 2026</h1>
+        <p class="meta">Published February 12, 2026 &middot; 30 min read</p>
+
+        <p>A reverse proxy sits between your clients and your backend servers. It receives every incoming request, decides which backend should handle it, forwards the request, and returns the response. Nginx is the most widely deployed reverse proxy on the internet &mdash; it powers over 30% of all web servers and handles reverse proxying for companies from small startups to Netflix and Cloudflare.</p>
+
+        <p>This guide covers everything you need to configure nginx as a production reverse proxy: basic proxying, load balancing algorithms, SSL termination, WebSocket support, caching, rate limiting, security hardening, and troubleshooting the errors you will inevitably encounter.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Tip:</strong> If your upstream app or admin port is only reachable on a private network, you can safely access it via SSH port forwarding. Use our <a href="/tools/ssh-tunnel-builder" style="color: #3b82f6;">SSH Tunnel Builder</a> to generate <code>-L</code>/<code>-R</code>/<code>-D</code> commands with keepalives and ProxyJump.
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+                <li><a href="#what-is">What Is a Reverse Proxy</a></li>
+                <li><a href="#installing">Installing Nginx</a></li>
+                <li><a href="#basic-proxy">Basic Reverse Proxy Configuration</a></li>
+                <li><a href="#upstream">Upstream Blocks and Load Balancing</a></li>
+                <li><a href="#ssl">SSL/TLS Termination with Let's Encrypt</a></li>
+                <li><a href="#websocket">WebSocket Proxying</a></li>
+                <li><a href="#caching">Caching</a></li>
+                <li><a href="#rate-limiting">Rate Limiting</a></li>
+                <li><a href="#health-checks">Health Checks</a></li>
+                <li><a href="#headers">Proxy Headers</a></li>
+                <li><a href="#security">Security Hardening</a></li>
+                <li><a href="#virtual-hosts">Multiple Virtual Hosts</a></li>
+                <li><a href="#http2-gzip">HTTP/2 and Gzip</a></li>
+                <li><a href="#troubleshooting">Common Troubleshooting</a></li>
+                <li><a href="#best-practices">Production Best Practices</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <!-- 1. What Is a Reverse Proxy -->
+        <h2 id="what-is">1. What Is a Reverse Proxy and Why Use Nginx</h2>
+
+        <p>A <strong>forward proxy</strong> hides clients from servers (like a VPN or corporate proxy). A <strong>reverse proxy</strong> hides servers from clients. Your users connect to nginx, not directly to your application. This provides several critical benefits:</p>
+
+        <ul>
+            <li><strong>Load balancing</strong> &mdash; distribute requests across multiple backend servers</li>
+            <li><strong>SSL termination</strong> &mdash; handle TLS encryption in one place instead of every backend</li>
+            <li><strong>Caching</strong> &mdash; serve repeated responses without hitting the backend</li>
+            <li><strong>Security</strong> &mdash; hide internal infrastructure, filter malicious requests, add rate limiting</li>
+            <li><strong>Compression</strong> &mdash; gzip responses before sending to clients</li>
+            <li><strong>Static file serving</strong> &mdash; serve assets directly without burdening the application</li>
+        </ul>
+
+        <p>Nginx excels as a reverse proxy because of its event-driven architecture. A single nginx worker process can handle thousands of concurrent connections with minimal memory. Apache uses a thread-per-connection model that consumes far more resources under load.</p>
+
+        <!-- 2. Installing Nginx -->
+        <h2 id="installing">2. Installing Nginx</h2>
+
+        <p>Use the official nginx repository for the latest stable version rather than your distribution's potentially outdated package.</p>
+
+        <pre><code># Ubuntu/Debian
+sudo apt update && sudo apt install -y nginx
+
+# RHEL/CentOS/Rocky
+sudo yum install -y epel-release && sudo yum install -y nginx
+
+# Verify, enable, and start
+nginx -v
+sudo systemctl enable --now nginx
+sudo nginx -t    # test configuration syntax</code></pre>
+
+        <!-- 3. Basic Reverse Proxy -->
+        <h2 id="basic-proxy">3. Basic Reverse Proxy Configuration</h2>
+
+        <p>The simplest reverse proxy forwards all requests to a single backend. The <code>proxy_pass</code> directive is the core of every nginx reverse proxy configuration.</p>
+
+        <pre><code># /etc/nginx/conf.d/app.conf
+server {
+    listen 80;
+    server_name app.example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}</code></pre>
+
+        <p><strong>Trailing slash matters.</strong> The behavior of <code>proxy_pass</code> changes based on whether the URI has a trailing slash:</p>
+
+        <pre><code># Request: GET /api/users
+
+# No URI in proxy_pass - passes the full original URI
+location /api/ {
+    proxy_pass http://backend;
+    # Forwards: GET /api/users -> backend receives /api/users
+}
+
+# URI in proxy_pass (trailing slash) - strips the location prefix
+location /api/ {
+    proxy_pass http://backend/;
+    # Forwards: GET /api/users -> backend receives /users
+}
+
+# Explicit path rewrite
+location /v2/ {
+    proxy_pass http://backend/api/v2/;
+    # Forwards: GET /v2/users -> backend receives /api/v2/users
+}</code></pre>
+
+        <!-- 4. Upstream and Load Balancing -->
+        <h2 id="upstream">4. Upstream Blocks and Load Balancing</h2>
+
+        <p>Upstream blocks define groups of backend servers. Nginx distributes requests across them using configurable algorithms.</p>
+
+        <pre><code># Round-robin (default) - equal distribution
+upstream backend {
+    server 10.0.0.1:3000;
+    server 10.0.0.2:3000;
+    server 10.0.0.3:3000;
+}
+
+# Weighted round-robin - send more traffic to stronger servers
+upstream backend {
+    server 10.0.0.1:3000 weight=5;   # gets 5x more requests
+    server 10.0.0.2:3000 weight=3;
+    server 10.0.0.3:3000 weight=1;   # least traffic
+}
+
+# Least connections - routes to server with fewest active connections
+upstream backend {
+    least_conn;
+    server 10.0.0.1:3000;
+    server 10.0.0.2:3000;
+    server 10.0.0.3:3000;
+}
+
+# IP hash - same client always goes to the same server (sticky sessions)
+upstream backend {
+    ip_hash;
+    server 10.0.0.1:3000;
+    server 10.0.0.2:3000;
+    server 10.0.0.3:3000;
+}
+
+# Server options
+upstream backend {
+    server 10.0.0.1:3000 max_fails=3 fail_timeout=30s;
+    server 10.0.0.2:3000 max_fails=3 fail_timeout=30s;
+    server 10.0.0.3:3000 backup;     # only used if all others are down
+    server 10.0.0.4:3000 down;       # temporarily disabled
+}
+
+server {
+    listen 80;
+    server_name app.example.com;
+
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}</code></pre>
+
+        <p><code>max_fails=3 fail_timeout=30s</code> means: if a server fails 3 times within 30 seconds, mark it as unavailable for 30 seconds before trying again. This provides basic passive health checking.</p>
+
+        <!-- 5. SSL/TLS Termination -->
+        <h2 id="ssl">5. SSL/TLS Termination with Let's Encrypt</h2>
+
+        <p>SSL termination at the reverse proxy means nginx handles all TLS encryption and decryption. Your backend servers receive plain HTTP, simplifying their configuration and offloading CPU-intensive cryptographic operations.</p>
+
+        <pre><code># Step 1: Install Certbot and obtain certificate
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d app.example.com
+
+# Step 2: Full SSL configuration
+server {
+    listen 80;
+    server_name app.example.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name app.example.com;
+
+    # Certificates from Let's Encrypt
+    ssl_certificate /etc/letsencrypt/live/app.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.example.com/privkey.pem;
+
+    # Modern TLS configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+
+    # OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_trusted_certificate /etc/letsencrypt/live/app.example.com/chain.pem;
+
+    # Session resumption for performance
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off;
+
+    # HSTS - tell browsers to always use HTTPS
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Auto-renewal (certbot adds a systemd timer automatically)
+# Verify: sudo systemctl list-timers | grep certbot</code></pre>
+
+        <!-- 6. WebSocket Proxying -->
+        <h2 id="websocket">6. WebSocket Proxying</h2>
+
+        <p>WebSocket connections start as an HTTP upgrade request. Nginx does not forward upgrade headers by default, so you must configure them explicitly.</p>
+
+        <pre><code># Map to handle both regular HTTP and WebSocket connections
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name app.example.com;
+
+    # ... SSL config ...
+
+    # WebSocket endpoint
+    location /ws/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+
+        # WebSocket connections are long-lived
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+
+    # Regular HTTP traffic
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}</code></pre>
+
+        <p>The <code>map</code> block sets <code>$connection_upgrade</code> to "upgrade" when the client sends an Upgrade header and to "close" for normal requests. The <code>proxy_read_timeout 86400s</code> (24 hours) prevents nginx from closing idle WebSocket connections.</p>
+
+        <!-- 7. Caching -->
+        <h2 id="caching">7. Caching</h2>
+
+        <p>Nginx can cache backend responses and serve them directly for subsequent requests, dramatically reducing backend load and response times.</p>
+
+        <pre><code># Define cache zone in http block (/etc/nginx/nginx.conf)
+http {
+    proxy_cache_path /var/cache/nginx levels=1:2
+                     keys_zone=app_cache:10m max_size=1g
+                     inactive=60m use_temp_path=off;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name app.example.com;
+
+    location /api/ {
+        proxy_pass http://backend;
+        proxy_cache app_cache;
+        proxy_cache_valid 200 10m;       # cache 200 responses for 10 min
+        proxy_cache_valid 404 1m;        # cache 404 for 1 min
+        proxy_cache_use_stale error timeout updating http_500 http_502;
+        proxy_cache_lock on;             # prevent cache stampede
+        proxy_cache_methods GET HEAD;    # never cache POST/PUT/DELETE
+
+        add_header X-Cache-Status $upstream_cache_status;
+        # HIT = from cache, MISS = from backend, STALE = stale content
+    }
+
+    # Bypass cache for authenticated requests
+    location /api/user/ {
+        proxy_pass http://backend;
+        proxy_cache app_cache;
+        proxy_cache_bypass $http_authorization;
+        proxy_no_cache $http_authorization;
+    }
+}</code></pre>
+
+        <!-- 8. Rate Limiting -->
+        <h2 id="rate-limiting">8. Rate Limiting</h2>
+
+        <p>Rate limiting protects your backend from abuse, brute-force attacks, and traffic spikes. Nginx uses the leaky bucket algorithm to smooth out bursts.</p>
+
+        <pre><code># Define rate limit zones in http block
+http {
+    limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=login_limit:10m rate=1r/s;
+    limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name app.example.com;
+
+    # General API rate limit with burst allowance
+    location /api/ {
+        limit_req zone=api_limit burst=20 nodelay;
+        limit_req_status 429;
+        proxy_pass http://backend;
+    }
+
+    # Strict rate limit for authentication endpoints
+    location /api/auth/ {
+        limit_req zone=login_limit burst=5 nodelay;
+        limit_req_status 429;
+        proxy_pass http://backend;
+    }
+
+    # Connection limit for downloads
+    location /downloads/ {
+        limit_conn conn_limit 5;
+        limit_conn_status 429;
+        proxy_pass http://backend;
+    }
+}</code></pre>
+
+        <p>The <code>burst</code> parameter allows temporary spikes above the rate limit. <code>nodelay</code> processes burst requests immediately rather than queuing them. Use stricter limits on authentication endpoints to prevent brute-force attacks.</p>
+
+        <!-- 9. Health Checks -->
+        <h2 id="health-checks">9. Health Checks</h2>
+
+        <p>Nginx open source provides passive health checks through <code>max_fails</code> and <code>fail_timeout</code>. The server is marked down only after real requests fail.</p>
+
+        <pre><code># Passive health checks (nginx open source)
+upstream backend {
+    server 10.0.0.1:3000 max_fails=3 fail_timeout=30s;
+    server 10.0.0.2:3000 max_fails=3 fail_timeout=30s;
+    server 10.0.0.3:3000 backup;
+}
+
+server {
+    location / {
+        proxy_pass http://backend;
+        proxy_next_upstream error timeout http_500 http_502 http_503;
+        proxy_next_upstream_tries 2;     # try max 2 servers before failing
+        proxy_next_upstream_timeout 10s; # spend max 10s on retries
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 30s;
+    }
+}
+
+# DIY active health check with a cron job or external tool
+# This script removes failed backends from an upstream config file
+#!/bin/bash
+# /usr/local/bin/healthcheck.sh
+for server in 10.0.0.1 10.0.0.2 10.0.0.3; do
+    if ! curl -sf --max-time 3 "http://${server}:3000/health" > /dev/null; then
+        echo "[$(date)] $server is DOWN" >> /var/log/nginx/healthcheck.log
+    fi
+done</code></pre>
+
+        <p><code>proxy_next_upstream</code> tells nginx to automatically retry the request on another server when the current one returns an error, times out, or returns a 500-series response. This gives your users transparent failover.</p>
+
+        <!-- 10. Headers -->
+        <h2 id="headers">10. Proxy Headers</h2>
+
+        <p>When nginx proxies a request, the backend sees nginx's IP address instead of the client's. Proxy headers preserve the original client information.</p>
+
+        <pre><code>location / {
+    proxy_pass http://backend;
+
+    # Essential headers
+    proxy_set_header Host $host;                              # original domain
+    proxy_set_header X-Real-IP $remote_addr;                  # client IP
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; # proxy chain
+    proxy_set_header X-Forwarded-Proto $scheme;               # http or https
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Port $server_port;
+
+    # Timeouts
+    proxy_connect_timeout 10s;    # establish connection to backend
+    proxy_send_timeout 30s;       # send request body to backend
+    proxy_read_timeout 30s;       # read response from backend
+
+    # Buffers
+    proxy_buffering on;
+    proxy_buffer_size 4k;         # response headers
+    proxy_buffers 8 16k;          # response body (8 x 16k)
+    proxy_busy_buffers_size 32k;
+}</code></pre>
+
+        <p>Your backend application should trust these headers to identify clients. In Express.js, set <code>app.set('trust proxy', true)</code>. In Django, configure <code>SECURE_PROXY_SSL_HEADER</code> and <code>USE_X_FORWARDED_HOST</code>. Without trusting the proxy, your app will see nginx's IP for every request.</p>
+
+        <!-- 11. Security -->
+        <h2 id="security">11. Security Hardening</h2>
+
+        <pre><code># Hide nginx version from responses and error pages
+server_tokens off;
+# Before: Server: nginx/1.26.2
+# After:  Server: nginx
+
+# Security headers
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+add_header Content-Security-Policy "default-src 'self'; script-src 'self'" always;
+
+# Deny access to hidden files and common attack paths
+location ~ /\. { deny all; return 404; }
+location ~* /(wp-admin|wp-login|xmlrpc\.php|phpmyadmin) { deny all; return 404; }
+
+# IP-based access control for admin endpoints
+location /admin/ {
+    allow 10.0.0.0/8;
+    allow 192.168.1.0/24;
+    deny all;
+    proxy_pass http://backend;
+}
+
+# CORS headers for API endpoints
+location /api/ {
+    if ($request_method = OPTIONS) {
+        add_header Access-Control-Allow-Origin "https://app.example.com";
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE";
+        add_header Access-Control-Allow-Headers "Authorization, Content-Type";
+        return 204;
+    }
+    add_header Access-Control-Allow-Origin "https://app.example.com" always;
+    proxy_pass http://backend;
+}</code></pre>
+
+        <!-- 12. Multiple Virtual Hosts -->
+        <h2 id="virtual-hosts">12. Multiple Virtual Hosts / Applications</h2>
+
+        <p>Nginx can proxy multiple applications from a single server using separate <code>server</code> blocks per domain or path-based routing on one domain.</p>
+
+        <pre><code># Path-based routing - multiple apps on one domain
+server {
+    listen 443 ssl http2;
+    server_name example.com;
+
+    # Frontend SPA
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+    }
+
+    # API backend
+    location /api/ {
+        proxy_pass http://127.0.0.1:4000;
+    }
+
+    # Admin panel - IP restricted
+    location /admin/ {
+        allow 10.0.0.0/8;
+        deny all;
+        proxy_pass http://127.0.0.1:5000;
+    }
+
+    # Static files served directly (no proxying)
+    location /static/ {
+        alias /var/www/static/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+}
+
+# Subdomain-based routing - separate server blocks per domain
+# /etc/nginx/conf.d/api.conf
+server {
+    listen 443 ssl http2;
+    server_name api.example.com;
+    ssl_certificate /etc/letsencrypt/live/api.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.example.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}</code></pre>
+
+        <!-- 13. HTTP/2 and Gzip -->
+        <h2 id="http2-gzip">13. HTTP/2 and Gzip Configuration</h2>
+
+        <pre><code># HTTP/2 is enabled by adding 'http2' to the listen directive
+# listen 443 ssl http2;
+# No other changes needed - nginx handles protocol negotiation
+
+# Gzip compression in http block
+http {
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;          # compress proxied responses too
+    gzip_comp_level 5;         # 1-9, 5 is good balance of speed vs size
+    gzip_min_length 256;       # don't compress tiny responses
+    gzip_types
+        text/plain
+        text/css
+        text/javascript
+        application/javascript
+        application/json
+        application/xml
+        application/xml+rss
+        image/svg+xml
+        text/xml;
+
+    # Disable gzip for old browsers
+    gzip_disable "msie6";
+}
+
+# For pre-compressed files (build step generates .gz files)
+location /static/ {
+    gzip_static on;    # serve .gz files if they exist
+    alias /var/www/static/;
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+}</code></pre>
+
+        <p><code>gzip_proxied any</code> is critical for reverse proxy setups. Without it, nginx will not compress responses received from backend servers, since those responses technically come from a proxy rather than directly from nginx.</p>
+
+        <!-- 14. Troubleshooting -->
+        <h2 id="troubleshooting">14. Common Troubleshooting</h2>
+
+        <h3>502 Bad Gateway</h3>
+        <p>Nginx received the request but could not get a valid response from the backend.</p>
+
+        <pre><code># Check if backend is running
+systemctl status myapp
+docker ps | grep myapp
+curl -v http://127.0.0.1:3000/health
+
+# Check nginx error log for the specific error
+sudo tail -50 /var/log/nginx/error.log
+# "connect() failed (111: Connection refused)" = backend is not running
+# "no live upstreams" = all upstream servers are down
+# "upstream prematurely closed connection" = backend crashed mid-request
+
+# Common fixes:
+# 1. Backend not listening on the right address
+#    App listens on 127.0.0.1:3000 but proxy_pass uses container IP
+# 2. Firewall blocking the connection
+sudo ufw allow from 127.0.0.1 to any port 3000
+# 3. SELinux blocking nginx from making network connections
+sudo setsebool -P httpd_can_network_connect 1</code></pre>
+
+        <h3>504 Gateway Timeout</h3>
+        <pre><code># Backend is too slow - increase timeouts
+location /api/reports/ {
+    proxy_pass http://backend;
+    proxy_connect_timeout 10s;
+    proxy_send_timeout 120s;
+    proxy_read_timeout 120s;   # increase for slow endpoints
+}</code></pre>
+
+        <h3>413 Request Entity Too Large</h3>
+        <pre><code># Increase client body size limit (default is 1MB)
+client_max_body_size 50m;    # in server or location block</code></pre>
+
+        <h3>Buffer Errors</h3>
+        <pre><code># "upstream sent too big header" errors
+proxy_buffer_size 8k;            # increase header buffer (default 4k)
+proxy_buffers 16 16k;            # more and larger body buffers
+proxy_busy_buffers_size 32k;
+
+# For very large responses (file downloads, exports)
+proxy_max_temp_file_size 1024m;  # allow large temp files
+# Or disable buffering entirely for streaming
+proxy_buffering off;</code></pre>
+
+        <h3>Debugging Tips</h3>
+        <pre><code># Test config before reloading
+sudo nginx -t
+
+# Reload without downtime (graceful)
+sudo nginx -s reload
+
+# Enable debug logging temporarily (very verbose - disable after)
+error_log /var/log/nginx/error.log debug;
+
+# Check loaded config and listening ports
+nginx -T | head -50
+sudo ss -tlnp | grep nginx</code></pre>
+
+        <!-- 15. Production Best Practices -->
+        <h2 id="best-practices">15. Production Best Practices</h2>
+
+        <pre><code># /etc/nginx/nginx.conf - production-ready base configuration
+user nginx;
+worker_processes auto;           # one worker per CPU core
+worker_rlimit_nofile 65535;      # max open files per worker
+pid /run/nginx.pid;
+
+events {
+    worker_connections 4096;     # max connections per worker
+    multi_accept on;             # accept all new connections at once
+    use epoll;                   # efficient event method on Linux
+}
+
+http {
+    # Basic settings
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    server_tokens off;
+    client_max_body_size 16m;
+
+    # Logging
+    log_format main '$remote_addr - $remote_user [$time_local] '
+                    '"$request" $status $body_bytes_sent '
+                    '"$http_referer" "$http_user_agent" '
+                    '$upstream_addr $upstream_response_time';
+    access_log /var/log/nginx/access.log main buffer=16k flush=5s;
+    error_log /var/log/nginx/error.log warn;
+
+    # Gzip
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 5;
+    gzip_min_length 256;
+    gzip_types text/plain text/css application/json application/javascript
+               text/xml application/xml image/svg+xml;
+
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
+
+    # Upstream keepalive - reuse connections to backend
+    upstream backend {
+        server 127.0.0.1:3000;
+        keepalive 32;            # keep 32 idle connections open
+    }
+
+    # Include per-site configs
+    include /etc/nginx/conf.d/*.conf;
+}</code></pre>
+
+        <p>Key settings: <code>worker_processes auto</code> uses all CPU cores. <code>keepalive 32</code> in upstream reuses backend TCP connections to reduce latency. <code>$upstream_response_time</code> in the log format tracks backend latency for identifying slow endpoints. Buffered access logs reduce disk I/O.</p>
+
+        <!-- FAQ -->
+        <h2 id="faq">Frequently Asked Questions</h2>
+
+        <div class="faq-section">
+            <details>
+                <summary>What is the difference between a forward proxy and a reverse proxy?</summary>
+                <p>A forward proxy sits in front of clients and forwards their requests to the internet, hiding the client's identity from the destination server. Corporate proxies and VPNs are forward proxies. A reverse proxy sits in front of backend servers and forwards client requests to the appropriate server, hiding your infrastructure from clients. Nginx is primarily used as a reverse proxy: clients connect to nginx, and nginx forwards requests to your application servers. Reverse proxies provide load balancing, SSL termination, caching, and security benefits that forward proxies do not.</p>
+            </details>
+            <details>
+                <summary>How do I fix a 502 Bad Gateway error in nginx?</summary>
+                <p>A 502 Bad Gateway means nginx received the client request but got an invalid response (or no response) from the upstream backend. Check these in order: (1) is the backend running? Use <code>systemctl status</code> or <code>docker ps</code>; (2) is <code>proxy_pass</code> pointing to the correct host and port? (3) is the backend listening on the right address &mdash; <code>127.0.0.1</code> vs <code>0.0.0.0</code> matters when nginx and the app are in different containers; (4) is a firewall or SELinux blocking the connection? Check <code>/var/log/nginx/error.log</code> for the specific error &mdash; "Connection refused" means the backend is not running, "upstream prematurely closed connection" means it crashed mid-request.</p>
+            </details>
+            <details>
+                <summary>Should I terminate SSL at nginx or at the application?</summary>
+                <p>Terminate SSL at nginx in almost all cases. It simplifies certificate management to one location, offloads CPU-intensive TLS operations from application servers, allows nginx to inspect and cache HTTP content, and enables HTTP/2 without modifying your app. The traffic between nginx and your backend travels over plain HTTP on your private network. If regulatory compliance requires end-to-end encryption, configure nginx to re-encrypt traffic to the backend using <code>proxy_pass https://</code> with <code>proxy_ssl_verify on</code> and <code>proxy_ssl_trusted_certificate</code>.</p>
+            </details>
+            <details>
+                <summary>How does nginx load balancing work with sticky sessions?</summary>
+                <p>The <code>ip_hash</code> directive routes all requests from the same client IP to the same backend server. This is essential when your application stores session state in server memory. Add <code>ip_hash;</code> inside your upstream block. The limitation is that users behind corporate NAT will all go to one server. The better long-term solution is to make your application stateless by storing sessions in Redis or a database, which allows standard round-robin load balancing and easier horizontal scaling.</p>
+            </details>
+            <details>
+                <summary>How do I proxy WebSocket connections through nginx?</summary>
+                <p>WebSocket requires HTTP Upgrade headers that nginx does not forward by default. Add these three directives to your location block: <code>proxy_http_version 1.1</code> (WebSocket needs HTTP/1.1 for the upgrade handshake), <code>proxy_set_header Upgrade $http_upgrade</code> (forwards the upgrade request), and <code>proxy_set_header Connection "upgrade"</code> (tells nginx to switch protocols). Also set <code>proxy_read_timeout 86400s</code> because WebSocket connections are long-lived and nginx's default 60-second timeout will close idle connections. Use a <code>map</code> block to conditionally set the Connection header so normal HTTP requests are not affected.</p>
+            </details>
+        </div>
+
+        <h2>Continue Learning</h2>
+
+        <ul>
+            <li><a href="/blog/nginx-configuration-complete-guide">Nginx Configuration: The Complete Guide</a> &mdash; deep dive into nginx directives, contexts, and configuration patterns</li>
+            <li><a href="/blog/docker-compose-complete-guide">Docker Compose: The Complete Guide</a> &mdash; orchestrate nginx with backend services in containers</li>
+            <li><a href="/blog/ssh-config-complete-guide">SSH Config: The Complete Guide</a> &mdash; secure remote access and tunneling for your servers</li>
+            <li><a href="/blog/github-merge-queue-merge-group-trigger-guide">GitHub Merge Queue merge_group Trigger Guide</a> &mdash; CI trigger runbook for rollback PRs that stay pending during production incidents</li>
+            <li><a href="/blog/github-merge-queue-flaky-required-checks-guide">GitHub Merge Queue Flaky Required Checks Guide</a> &mdash; stabilize random required-check failures during incident rollbacks</li>
+            <li><a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide">GitHub Merge Queue Required Checks Timed Out or Cancelled Guide</a> &mdash; incident workflow for timeout and cancellation loops blocking rollback PR merges</li>
+            <li><a href="/blog/github-merge-queue-required-check-name-mismatch-guide">GitHub Merge Queue Required Check Name Mismatch Guide</a> &mdash; fix waiting-for-status rollback deadlocks caused by required-check context drift</li>
+            <li><a href="/blog/github-merge-queue-stale-review-dismissal-guide">GitHub Merge Queue Stale Review Dismissal Guide</a> &mdash; resolve rollback PR approval-loss loops from stale review invalidation during queue updates</li>
+            <li><a href="/blog/github-merge-queue-expiry-extension-reapproval-guide">GitHub Merge Queue Expiry Extension Reapproval Guide</a> &mdash; time-box extension decisions when rollback bypass windows are about to expire</li>
+            <li><a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide">GitHub Merge Queue Denial Appeal Escalation Path Guide</a> &mdash; escalation workflow when extension denials are contested during production rollback incidents</li>
+            <li><a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide">GitHub Merge Queue Closure Quality Metrics Dashboard Guide</a> &mdash; KPI dashboard and trigger thresholds for recurring rollback incidents after initial closure</li>
+            <li><a href="/blog/docker-security-complete-guide">Docker Security: The Complete Guide</a> &mdash; harden your containerized applications behind the reverse proxy</li>
+        </ul>
+    </main>
+
+    <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/nginx-configuration-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Nginx Configuration Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Deep dive into nginx directives and configuration</div>
+            </a>
+            <a href="/blog/docker-compose-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Compose Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Orchestrate nginx with backend services</div>
+            </a>
+            <a href="/blog/docker-security-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Security Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Harden your containerized applications</div>
+            </a>
+            <a href="/blog/ssh-config-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">SSH Config Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Secure remote access and SSH tunneling</div>
+            </a>
+            <a href="/blog/github-merge-queue-merge-group-trigger-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue merge_group Trigger Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">When release rollback PR checks never start, fix workflow events without bypassing branch protection.</div>
+            </a>
+            <a href="/blog/github-merge-queue-flaky-required-checks-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Flaky Required Checks Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Practical steps to reduce intermittent CI failures that delay rollback deploys.</div>
+            </a>
+            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Timed Out or Cancelled</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Queue-safe rollback playbook for required checks cancelled by churn or timing out under load.</div>
+            </a>
+            <a href="/blog/github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Required Check Name Mismatch Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Align required-check names with emitted contexts when rollback PRs stay in waiting-for-status state.</div>
+            </a>
+            <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Stale Review Dismissal Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Incident playbook for rollback PR approvals repeatedly dismissed as stale after queue churn.</div>
+            </a>
+            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Expiry Extension Reapproval Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Keep bypass windows bounded with reapproval checkpoints during prolonged rollback recovery.</div>
+            </a>
+            <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Denial Appeal Escalation Path</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Handle contested denial requests with explicit owner tiers and strict UTC decision deadlines.</div>
+            </a>
+            <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Closure Quality Metrics Dashboard</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Set recurring-incident thresholds and escalation triggers for post-rollback governance.</div>
+            </a>
+        </div>
+    </section>
+
+    <footer><p>DevToolbox &mdash; Built for developers.</p></footer>
+</body>
+</html>
