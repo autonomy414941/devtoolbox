@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Compose: The Complete Guide for 2026 | DevToolbox Blog</title>
+    <meta name="description" content="Master Docker Compose in 2026: services, networks, volumes, environment variables, health checks, production deployment, and real-world multi-container examples.">
+    <meta name="keywords" content="docker compose, docker-compose.yml, multi-container, docker compose v2, docker services, container orchestration, docker networking, docker volumes">
+    <meta property="og:title" content="Docker Compose: The Complete Guide for 2026 | DevToolbox Blog">
+    <meta property="og:description" content="Master Docker Compose in 2026: services, networks, volumes, environment variables, health checks, production deployment, and real-world multi-container examples.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/docker-compose-complete-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-docker-compose-complete-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Docker Compose: The Complete Guide for 2026 | DevToolbox Blog">
+    <meta name="twitter:description" content="Master Docker Compose in 2026: services, networks, volumes, environment variables, health checks, production deployment, and real-world multi-container examples.">
+    <meta property="article:published_time" content="2026-02-11">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/docker-compose-complete-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Docker Compose: The Complete Guide for 2026",
+        "description": "Master Docker Compose in 2026: services, networks, volumes, environment variables, health checks, production deployment, and real-world multi-container examples.",
+        "datePublished": "2026-02-11",
+        "dateModified": "2026-02-11",
+        "url": "https://devtoolbox.dedyn.io/blog/docker-compose-complete-guide",
+        "author": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        },
+        "publisher": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Docker Compose: The Complete Guide</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Blog",
+                        "item": "https://devtoolbox.dedyn.io/blog"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Docker Compose: The Complete Guide"
+                }
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the difference between Docker Compose v1 and v2?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Docker Compose v1 was a standalone Python binary invoked as 'docker-compose' with a hyphen. Docker Compose v2 is a Go plugin integrated directly into the Docker CLI, invoked as 'docker compose' with a space. V2 is significantly faster, supports the Compose Specification standard, adds features like service profiles and GPU access, and is the only version receiving updates since v1 reached end of life in July 2023. The docker-compose.yml file format is largely compatible between versions, but v2 handles edge cases like dependency ordering and build contexts more reliably."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I pass environment variables to Docker Compose services?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Docker Compose supports several methods for environment variables. You can define them inline using the 'environment' key in your service definition. You can use a .env file in the same directory as your docker-compose.yml for variable substitution with ${VARIABLE} syntax. You can reference external env files per service using the 'env_file' key. Shell environment variables override .env file values, and you can use the --env-file flag to specify a different .env file. For production, use env_file to keep secrets out of version control and load different configurations per environment."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do health checks work in Docker Compose?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Health checks let Docker monitor whether a service is actually working, not just running. You define a test command, an interval between checks, a timeout for each check, a retry count, and an optional start_period grace window. Services can use 'depends_on' with 'condition: service_healthy' to wait for dependencies to pass health checks before starting. Common health check commands include 'curl -f http://localhost/health' for web servers, 'pg_isready' for PostgreSQL, and 'redis-cli ping' for Redis."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I use Docker Compose in production?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Docker Compose is a valid production deployment tool for single-server applications. Add restart policies (restart: unless-stopped or restart: always), resource limits via the deploy key, health checks for all services, named volumes for persistent data, and proper logging configuration. Many successful applications run on a single server with Compose behind a reverse proxy like Traefik or nginx. Compose becomes insufficient when you need multi-server orchestration, automatic scaling, or zero-downtime rolling deployments across a cluster — that is when Kubernetes or similar tools are needed."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do Docker Compose networks work?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Docker Compose automatically creates a default bridge network for each project and connects all services to it. Services can reach each other by service name as the hostname. You can define custom networks in the top-level 'networks' key to isolate groups of services — for example, a frontend network and a backend network where the database is only reachable from the API, not from the web server. Services can be attached to multiple networks. External networks let Compose services communicate with containers managed outside the Compose project."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <script src="/js/track.js" defer></script>
+
+    <style>
+        .faq-section { margin-top: 3rem; }
+        .faq-section details { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; margin-bottom: 1rem; padding: 0; }
+        .faq-section summary { color: #3b82f6; font-weight: bold; cursor: pointer; padding: 1rem 1.5rem; font-size: 1.1rem; }
+        .faq-section summary:hover { color: #60a5fa; }
+        .faq-section details > p { padding: 0 1.5rem 1rem 1.5rem; margin: 0; }
+        .toc { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 1.5rem 2rem; margin: 2rem 0; }
+        .toc h3 { margin-top: 0; color: #e4e4e7; }
+        .toc ol { margin-bottom: 0; padding-left: 1.25rem; }
+        .toc a { color: #3b82f6; text-decoration: none; }
+        .toc a:hover { color: #60a5fa; text-decoration: underline; }
+    </style>
+
+    <main class="blog-post">
+        <h1>Docker Compose: The Complete Guide for 2026</h1>
+        <p class="meta">Published February 11, 2026 &middot; 28 min read</p>
+
+        <p>Real-world applications are never a single container. A typical web application needs an application server, a database, a cache, and often a reverse proxy, a background worker, and a message queue. Managing each of these with individual <code>docker run</code> commands &mdash; remembering every port mapping, volume mount, network, and environment variable &mdash; is tedious and error-prone. Docker Compose solves this by letting you define your entire multi-container application in a single YAML file and manage it with simple commands.</p>
+
+        <p>This guide covers Docker Compose from first principles through production deployment. If you are new to Docker itself, start with our <a href="/blog/docker-containers-beginners-guide">Docker Containers for Beginners</a> guide and the <a href="/blog/docker-complete-guide">complete Docker guide</a> first.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Related:</strong> Validate your Compose files with the <a href="/tools/yaml-validator" style="color: #3b82f6;">YAML Validator</a> and keep our <a href="/cheatsheets/docker" style="color: #3b82f6;">Docker Cheat Sheet</a> open while reading.
+        </div>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Tool:</strong> Generate a clean <code>docker-compose.yml</code> faster with our <a href="/tools/docker-compose-generator" style="color: #3b82f6;">Docker Compose Generator</a>, then verify it with the <a href="/tools/docker-compose-validator" style="color: #3b82f6;">Compose Validator</a>.
+        </div>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Tip:</strong> When your containers expose a database or admin UI on <code>127.0.0.1</code> (or on a private subnet), use SSH tunneling to access it safely without opening firewall ports. Generate commands with our <a href="/tools/ssh-tunnel-builder" style="color: #3b82f6;">SSH Tunnel Builder</a>.
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+                <li><a href="#what-is-compose">What is Docker Compose and Why Use It</a></li>
+                <li><a href="#yml-syntax">docker-compose.yml Syntax and Structure</a></li>
+                <li><a href="#services-networks-volumes">Services, Networks, and Volumes</a></li>
+                <li><a href="#environment-variables">Environment Variables and .env Files</a></li>
+                <li><a href="#multi-container">Multi-Container Applications</a></li>
+                <li><a href="#health-checks">Health Checks</a></li>
+                <li><a href="#commands">Docker Compose Commands Reference</a></li>
+                <li><a href="#v2-vs-v1">Docker Compose v2 vs v1</a></li>
+                <li><a href="#production">Production Deployment Best Practices</a></li>
+                <li><a href="#real-world">Real-World Examples</a></li>
+                <li><a href="#debugging">Debugging and Troubleshooting</a></li>
+                <li><a href="#faq">Frequently Asked Questions</a></li>
+            </ol>
+        </div>
+
+        <!-- 1. What is Docker Compose -->
+        <h2 id="what-is-compose">1. What is Docker Compose and Why Use It</h2>
+
+        <p>Docker Compose is a tool for defining and running multi-container Docker applications. You describe your services, networks, and volumes in a <code>docker-compose.yml</code> file, then use <code>docker compose up</code> to start everything in the correct order. A single command replaces dozens of <code>docker run</code> invocations.</p>
+
+        <p>Consider what it takes to run a simple web application with a database and cache without Compose:</p>
+
+        <pre><code># Without Compose: 5 commands, easy to get wrong
+docker network create myapp-net
+docker volume create pgdata
+docker run -d --name db --network myapp-net \
+  -e POSTGRES_PASSWORD=secret -v pgdata:/var/lib/postgresql/data postgres:16-alpine
+docker run -d --name cache --network myapp-net redis:7-alpine
+docker run -d --name web --network myapp-net -p 3000:3000 \
+  -e DATABASE_URL=postgres://postgres:secret@db:5432/postgres \
+  -e REDIS_URL=redis://cache:6379 myapp:latest</code></pre>
+
+        <p>With Compose, this becomes a declarative YAML file and one command:</p>
+
+        <pre><code># docker-compose.yml
+services:
+  web:
+    image: myapp:latest
+    ports: ["3000:3000"]
+    environment:
+      DATABASE_URL: postgres://postgres:secret@db:5432/postgres
+      REDIS_URL: redis://cache:6379
+    depends_on: [db, cache]
+  db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_PASSWORD: secret }
+    volumes: [pgdata:/var/lib/postgresql/data]
+  cache:
+    image: redis:7-alpine
+volumes:
+  pgdata:
+
+# One command to start everything:
+# docker compose up -d</code></pre>
+
+        <p><strong>Why Compose matters:</strong></p>
+        <ul>
+            <li><strong>Declarative configuration</strong> &mdash; your infrastructure is version-controlled YAML, not a series of shell commands</li>
+            <li><strong>Reproducible environments</strong> &mdash; every developer runs the same stack with <code>docker compose up</code></li>
+            <li><strong>Dependency management</strong> &mdash; services start in the right order with health check awareness</li>
+            <li><strong>Isolated projects</strong> &mdash; each Compose project gets its own network, preventing port and name collisions</li>
+            <li><strong>Single-command lifecycle</strong> &mdash; start, stop, rebuild, and tear down the entire stack in one command</li>
+        </ul>
+
+        <!-- 2. YAML Syntax -->
+        <h2 id="yml-syntax">2. docker-compose.yml Syntax and Structure</h2>
+
+        <p>A Compose file has four top-level keys: <code>services</code>, <code>networks</code>, <code>volumes</code>, and optionally <code>configs</code> and <code>secrets</code>. The file uses standard YAML syntax &mdash; indentation matters, and colons separate keys from values.</p>
+
+        <pre><code># Complete structure of a docker-compose.yml
+services:        # Required: define your containers
+  web:
+    image: nginx:1.25-alpine
+    # ... service configuration
+
+  api:
+    build: ./backend
+    # ... service configuration
+
+networks:        # Optional: custom networks
+  frontend:
+  backend:
+
+volumes:         # Optional: named volumes for persistence
+  db-data:
+  cache-data:
+
+configs:         # Optional: configuration files
+  nginx-conf:
+    file: ./nginx.conf
+
+secrets:         # Optional: sensitive data
+  db-password:
+    file: ./db-password.txt</code></pre>
+
+        <p>Each service definition supports dozens of options. Here are the most important ones:</p>
+
+        <pre><code>services:
+  myservice:
+    # Image or build (one is required)
+    image: nginx:1.25-alpine          # Use a pre-built image
+    build:                             # Or build from a Dockerfile
+      context: ./app
+      dockerfile: Dockerfile.prod
+      target: production               # Multi-stage build target
+      args:
+        NODE_ENV: production
+
+    # Networking
+    ports:
+      - "8080:80"                      # host:container
+      - "127.0.0.1:9090:9090"         # bind to localhost only
+    expose:
+      - "3000"                         # expose to other services only
+    networks:
+      - frontend
+      - backend
+
+    # Data
+    volumes:
+      - db-data:/var/lib/data          # named volume
+      - ./src:/app/src                 # bind mount
+      - /app/node_modules              # anonymous volume
+
+    # Configuration
+    environment:                       # inline variables
+      NODE_ENV: production
+    env_file:                          # or from a file
+      - .env.production
+    command: ["npm", "start"]          # override CMD
+    entrypoint: ["/entrypoint.sh"]     # override ENTRYPOINT
+    working_dir: /app
+
+    # Lifecycle
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped            # no | always | on-failure | unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Resources
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M</code></pre>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Related:</strong> Convert JSON configs to YAML format for Compose with our <a href="/tools/json-to-yaml" style="color: #3b82f6;">JSON to YAML Converter</a>.
+        </div>
+
+        <!-- 3. Services, Networks, Volumes -->
+        <h2 id="services-networks-volumes">3. Services, Networks, and Volumes</h2>
+
+        <h3>Services</h3>
+        <p>Each service defines a container that Compose manages. A service can use a pre-built image from a registry or build from a local Dockerfile. Compose names containers using the pattern <code>&lt;project&gt;-&lt;service&gt;-&lt;number&gt;</code>, where the project name defaults to the directory name.</p>
+
+        <pre><code>services:
+  # Service using a pre-built image
+  db:
+    image: postgres:16-alpine
+
+  # Service built from local source
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # The image is built and tagged automatically</code></pre>
+
+        <h3>Networks</h3>
+        <p>Compose creates a default network for every project. All services join this network and can reach each other by service name. Custom networks let you isolate groups of services:</p>
+
+        <pre><code>services:
+  nginx:
+    image: nginx:1.25-alpine
+    networks: [frontend, backend]    # connected to both
+  api:
+    build: .
+    networks: [backend]              # only backend
+  db:
+    image: postgres:16-alpine
+    networks: [backend]              # only backend
+
+networks:
+  frontend:                          # nginx can talk to external clients
+  backend:                           # api and db are isolated from frontend
+
+# Result: nginx can reach api, api can reach db
+# But external traffic cannot reach db directly</code></pre>
+
+        <h3>Volumes</h3>
+        <p>Named volumes persist data beyond the container lifecycle. They are the correct way to handle database storage, file uploads, and any data that must survive restarts:</p>
+
+        <pre><code>services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data     # named volume for persistence
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro  # bind mount, read-only
+
+  web:
+    build: .
+    volumes:
+      - ./src:/app/src              # bind mount for live reloading (dev)
+      - /app/node_modules           # anonymous volume preserves container deps
+
+volumes:
+  pgdata:                           # Docker manages storage location
+    driver: local</code></pre>
+
+        <!-- 4. Environment Variables -->
+        <h2 id="environment-variables">4. Environment Variables and .env Files</h2>
+
+        <p>Compose supports multiple methods for injecting configuration into containers, from inline definitions to external files.</p>
+
+        <h3>Inline Environment Variables</h3>
+        <pre><code>services:
+  api:
+    image: myapp:latest
+    environment:
+      # Map syntax
+      NODE_ENV: production
+      PORT: "3000"
+      # Array syntax (equivalent)
+      # - NODE_ENV=production
+      # - PORT=3000</code></pre>
+
+        <h3>The .env File</h3>
+        <p>Compose automatically loads a <code>.env</code> file from the project directory. Variables from this file are used for <code>${VARIABLE}</code> substitution in the Compose file itself:</p>
+
+        <pre><code># .env (loaded automatically)
+POSTGRES_USER=appuser
+POSTGRES_PASSWORD=s3cretP@ss
+POSTGRES_DB=myapp
+APP_VERSION=2.3.1</code></pre>
+
+        <pre><code># docker-compose.yml uses ${VARIABLE} substitution
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+  api:
+    image: myapp:${APP_VERSION}
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}</code></pre>
+
+        <h3>Per-Service env_file</h3>
+        <pre><code>services:
+  api:
+    image: myapp:latest
+    env_file:
+      - .env.common          # shared across services
+      - .env.api             # api-specific variables
+
+  worker:
+    image: myapp:latest
+    command: ["node", "worker.js"]
+    env_file:
+      - .env.common
+      - .env.worker</code></pre>
+
+        <h3>Variable Precedence</h3>
+        <p>When the same variable is defined in multiple places, this order takes priority (highest first):</p>
+        <ol>
+            <li>Shell environment variables (already set in your terminal)</li>
+            <li><code>--env-file</code> flag on the CLI: <code>docker compose --env-file .env.prod up</code></li>
+            <li><code>environment:</code> key in the Compose file</li>
+            <li><code>env_file:</code> key in the Compose file</li>
+            <li>The project <code>.env</code> file</li>
+        </ol>
+
+        <!-- 5. Multi-Container Applications -->
+        <h2 id="multi-container">5. Multi-Container Applications</h2>
+
+        <p>The power of Compose is orchestrating services that work together. Here is a typical web application stack with a web server, API, database, and cache:</p>
+
+        <pre><code>services:
+  # Reverse proxy (entry point for all HTTP traffic)
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Application server
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}
+      REDIS_URL: redis://cache:6379
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Database
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Cache
+  cache:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redis-data:</code></pre>
+
+        <p>The <code>depends_on</code> key with <code>condition: service_healthy</code> ensures services start in the correct order: the database must pass its health check before the API starts, and the API must be healthy before nginx begins routing traffic to it.</p>
+
+        <!-- 6. Health Checks -->
+        <h2 id="health-checks">6. Health Checks</h2>
+
+        <p>Without health checks, Docker only knows if a process is running &mdash; not if it is actually working. A Node.js server might be running but returning 500 errors on every request. Health checks let Docker verify that a service is functioning correctly.</p>
+
+        <pre><code># Health check syntax
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+  interval: 30s       # time between checks
+  timeout: 10s        # max time for a single check
+  retries: 3          # failures before marking unhealthy
+  start_period: 40s   # grace period for startup (failures don't count)</code></pre>
+
+        <h3>Common Health Check Patterns</h3>
+        <pre><code># PostgreSQL
+healthcheck:
+  test: ["CMD-SHELL", "pg_isready -U postgres -d mydb"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+
+# MySQL
+healthcheck:
+  test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+
+# Redis
+healthcheck:
+  test: ["CMD", "redis-cli", "ping"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+
+# HTTP endpoint (Node.js, Python, Go, etc.)
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+# wget alternative (for Alpine images without curl)
+healthcheck:
+  test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3</code></pre>
+
+        <h3>Using Health Checks for Dependency Ordering</h3>
+        <pre><code>services:
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy     # wait until db passes health check
+      cache:
+        condition: service_started     # just wait until cache container starts
+      migrations:
+        condition: service_completed_successfully  # wait until migrations finish</code></pre>
+
+        <!-- 7. Commands Reference -->
+        <h2 id="commands">7. Docker Compose Commands Reference</h2>
+
+        <pre><code># Lifecycle
+docker compose up -d                  # start all services in background
+docker compose up -d --build          # rebuild images before starting
+docker compose down                   # stop and remove containers + networks
+docker compose down -v                # also remove volumes (destroys data!)
+docker compose stop                   # stop without removing
+docker compose start                  # start previously stopped services
+docker compose restart                # restart all services
+docker compose restart api            # restart a single service
+
+# Building
+docker compose build                  # build all images
+docker compose build api              # build a single service image
+docker compose build --no-cache       # force fresh build
+
+# Viewing
+docker compose ps                     # list running services
+docker compose ps -a                  # include stopped services
+docker compose logs                   # view all logs
+docker compose logs -f api            # follow logs for a service
+docker compose logs --tail 50 api     # last 50 lines
+docker compose top                    # running processes in each service
+
+# Running commands
+docker compose exec api sh            # shell into running service
+docker compose exec db psql -U user   # run psql in database container
+docker compose run --rm api npm test  # run one-off command (creates new container)
+
+# Scaling
+docker compose up -d --scale worker=5 # run 5 instances of worker service
+
+# Configuration
+docker compose config                 # validate and view resolved config
+docker compose config --services      # list service names
+docker compose config --volumes       # list volume names
+
+# Cleanup
+docker compose down --rmi all         # remove images too
+docker compose down --rmi local       # remove only locally built images</code></pre>
+
+        <!-- 8. v2 vs v1 -->
+        <h2 id="v2-vs-v1">8. Docker Compose v2 vs v1</h2>
+
+        <p>Docker Compose v1 (the Python-based <code>docker-compose</code> with a hyphen) reached end of life in July 2023. Docker Compose v2 is a Go-based plugin for the Docker CLI, invoked as <code>docker compose</code> with a space. If you are starting a new project, you are already using v2.</p>
+
+        <pre><code># v1 (deprecated, end of life)
+docker-compose up -d
+docker-compose down
+docker-compose logs
+
+# v2 (current, use this)
+docker compose up -d
+docker compose down
+docker compose logs</code></pre>
+
+        <h3>Key Differences</h3>
+        <ul>
+            <li><strong>Performance</strong> &mdash; v2 is significantly faster for large projects because it is written in Go and runs as a Docker CLI plugin rather than a separate process</li>
+            <li><strong>Container naming</strong> &mdash; v1 used underscores (<code>myproject_web_1</code>), v2 uses hyphens (<code>myproject-web-1</code>)</li>
+            <li><strong>Compose Specification</strong> &mdash; v2 follows the open Compose Specification standard, which adds features like <code>profiles</code>, <code>service_completed_successfully</code> condition, and GPU support</li>
+            <li><strong>No version field required</strong> &mdash; v2 does not require the <code>version:</code> key at the top of the file; it is ignored if present</li>
+            <li><strong>Build improvements</strong> &mdash; v2 uses BuildKit by default for faster, more efficient image builds</li>
+            <li><strong>Profiles</strong> &mdash; v2 adds service profiles for selectively starting groups of services</li>
+        </ul>
+
+        <h3>Profiles (v2 Feature)</h3>
+        <pre><code>services:
+  web:
+    image: myapp:latest
+    # no profile: always starts
+
+  db:
+    image: postgres:16-alpine
+    # no profile: always starts
+
+  debug:
+    image: busybox
+    profiles: ["debug"]              # only starts when profile is activated
+
+  monitoring:
+    image: prometheus:latest
+    profiles: ["monitoring"]
+
+# Start only default services:
+docker compose up -d
+
+# Start with debug tools:
+docker compose --profile debug up -d
+
+# Start with monitoring:
+docker compose --profile monitoring up -d</code></pre>
+
+        <!-- 9. Production Best Practices -->
+        <h2 id="production">9. Production Deployment Best Practices</h2>
+
+        <p>Docker Compose is a legitimate production deployment tool for single-server applications. These practices ensure reliability and security.</p>
+
+        <h3>Always Set Restart Policies</h3>
+        <pre><code>services:
+  api:
+    restart: unless-stopped    # restarts on crash, survives host reboot
+                               # does not restart if you manually stop it
+
+  # Other options:
+  # restart: "no"             # never restart (default)
+  # restart: always           # always restart, even after manual stop
+  # restart: on-failure       # only restart on non-zero exit code</code></pre>
+
+        <h3>Set Resource Limits</h3>
+        <pre><code>services:
+  api:
+    deploy:
+      resources:
+        limits:
+          memory: 512M         # hard cap
+          cpus: '1.0'
+        reservations:
+          memory: 256M         # guaranteed minimum
+          cpus: '0.25'</code></pre>
+
+        <h3>Use Specific Image Tags</h3>
+        <pre><code># BAD: mutable, unpredictable
+image: postgres:latest
+image: redis
+image: myapp
+
+# GOOD: pinned, reproducible
+image: postgres:16.2-alpine3.19
+image: redis:7.2-alpine
+image: myapp:v2.3.1-abc1234</code></pre>
+
+        <h3>Secure Your Secrets</h3>
+        <pre><code># Never commit .env files with real credentials to version control
+# Use .env.example as a template
+
+# .env.example (committed)
+POSTGRES_USER=appuser
+POSTGRES_PASSWORD=changeme
+POSTGRES_DB=myapp
+
+# .env (not committed, listed in .gitignore)
+POSTGRES_USER=appuser
+POSTGRES_PASSWORD=r3alS3cretP@ssw0rd
+POSTGRES_DB=myapp_production</code></pre>
+
+        <h3>Configure Logging</h3>
+        <pre><code>services:
+  api:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"        # rotate after 10MB
+        max-file: "3"          # keep 3 rotated files
+        tag: "{{.Name}}"       # tag logs with container name</code></pre>
+
+        <h3>Do Not Expose Database Ports</h3>
+        <pre><code>services:
+  db:
+    image: postgres:16-alpine
+    # NO ports: section! Only accessible within the Docker network
+    networks: [backend]
+
+  api:
+    build: .
+    ports: ["3000:3000"]       # only the API is exposed
+    networks: [backend]
+
+networks:
+  backend:</code></pre>
+
+        <!-- 10. Real-World Examples -->
+        <h2 id="real-world">10. Real-World Examples</h2>
+
+        <h3>WordPress + MySQL</h3>
+        <pre><code>services:
+  wordpress:
+    image: wordpress:6.4-apache
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${WP_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WP_DB_PASS}
+      WORDPRESS_DB_NAME: ${WP_DB_NAME}
+    volumes:
+      - wp-content:/var/www/html/wp-content
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASS}
+      MYSQL_DATABASE: ${WP_DB_NAME}
+      MYSQL_USER: ${WP_DB_USER}
+      MYSQL_PASSWORD: ${WP_DB_PASS}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  wp-content:
+  db-data:</code></pre>
+
+        <h3>Node.js + PostgreSQL + Redis</h3>
+        <pre><code>services:
+  api:
+    build:
+      context: .
+      target: production
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}
+      REDIS_URL: redis://cache:6379
+      NODE_ENV: production
+    depends_on:
+      db: { condition: service_healthy }
+      cache: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits: { memory: 512M, cpus: '1.0' }
+
+  worker:
+    build:
+      context: .
+      target: production
+    command: ["node", "worker.js"]
+    environment:
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}
+      REDIS_URL: redis://cache:6379
+    depends_on:
+      db: { condition: service_healthy }
+      cache: { condition: service_healthy }
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits: { memory: 1G, cpus: '2.0' }
+
+  cache:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redis-data:</code></pre>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Related:</strong> Working with Kubernetes? Generate K8s YAML manifests with our <a href="/tools/kubernetes-yaml-generator" style="color: #3b82f6;">Kubernetes YAML Generator</a>.
+        </div>
+
+        <!-- 11. Debugging and Troubleshooting -->
+        <h2 id="debugging">11. Debugging and Troubleshooting</h2>
+
+        <h3>Service Fails to Start</h3>
+        <pre><code># Check logs for the failing service
+docker compose logs api
+
+# Check if the container exited and why
+docker compose ps -a
+
+# Run the service interactively to debug
+docker compose run --rm api sh
+
+# Validate your Compose file syntax
+docker compose config</code></pre>
+
+        <h3>Database Connection Refused</h3>
+        <pre><code># The most common cause: API starts before database is ready
+# Fix: use health checks + depends_on condition
+depends_on:
+  db:
+    condition: service_healthy
+
+# Verify database is reachable from the API container
+docker compose exec api sh -c "nc -zv db 5432"
+
+# Check database logs
+docker compose logs db</code></pre>
+
+        <h3>Port Conflicts</h3>
+        <pre><code># Error: "Bind for 0.0.0.0:5432 failed: port is already allocated"
+# Another container or host process is using the port
+
+# Find what is using the port
+sudo lsof -i :5432
+
+# Solutions:
+# 1. Stop the conflicting process
+# 2. Change the host port mapping
+ports:
+  - "5433:5432"    # use host port 5433 instead
+# 3. Remove the port mapping if external access is not needed</code></pre>
+
+        <h3>Volume Permission Issues</h3>
+        <pre><code># Container runs as non-root but volume was created by root
+# Fix: set ownership in Dockerfile or entrypoint
+RUN mkdir -p /app/data && chown -R appuser:appgroup /app/data
+
+# Or use init containers to fix permissions
+services:
+  init-permissions:
+    image: alpine
+    command: chown -R 1000:1000 /data
+    volumes: [app-data:/data]
+    profiles: ["setup"]</code></pre>
+
+        <h3>Compose File Validation</h3>
+        <pre><code># Validate and print the resolved configuration
+docker compose config
+
+# This catches YAML syntax errors, invalid keys,
+# and shows the final resolved values after variable substitution
+
+# Check only service names
+docker compose config --services
+
+# Check only volume names
+docker compose config --volumes</code></pre>
+
+        <h3>Inspecting Networks</h3>
+        <pre><code># List project networks
+docker network ls --filter "name=myproject"
+
+# Inspect a network to see connected containers and IPs
+docker network inspect myproject_default
+
+# Test DNS resolution from inside a container
+docker compose exec api nslookup db
+docker compose exec api ping -c 3 db</code></pre>
+
+        <!-- 12. FAQ -->
+        <h2 id="faq">Frequently Asked Questions</h2>
+
+        <div class="faq-section">
+            <details>
+                <summary>What is the difference between Docker Compose v1 and v2?</summary>
+                <p>Docker Compose v1 was a standalone Python binary invoked as <code>docker-compose</code> with a hyphen. Docker Compose v2 is a Go plugin integrated directly into the Docker CLI, invoked as <code>docker compose</code> with a space. V2 is significantly faster, supports the Compose Specification standard, adds features like service profiles and GPU access, and is the only version receiving updates since v1 reached end of life in July 2023. The docker-compose.yml file format is largely compatible between versions, but v2 handles edge cases like dependency ordering and build contexts more reliably.</p>
+            </details>
+            <details>
+                <summary>How do I pass environment variables to Docker Compose services?</summary>
+                <p>Docker Compose supports several methods for environment variables. You can define them inline using the <code>environment</code> key in your service definition. You can use a <code>.env</code> file in the same directory as your docker-compose.yml for variable substitution with <code>${VARIABLE}</code> syntax. You can reference external env files per service using the <code>env_file</code> key. Shell environment variables override .env file values, and you can use the <code>--env-file</code> flag to specify a different .env file. For production, use env_file to keep secrets out of version control and load different configurations per environment.</p>
+            </details>
+            <details>
+                <summary>How do health checks work in Docker Compose?</summary>
+                <p>Health checks let Docker monitor whether a service is actually working, not just running. You define a test command, an interval between checks, a timeout for each check, a retry count, and an optional start_period grace window during which failures are not counted. Services can use <code>depends_on</code> with <code>condition: service_healthy</code> to wait for dependencies to pass health checks before starting. Common health check commands include <code>curl -f http://localhost/health</code> for web servers, <code>pg_isready</code> for PostgreSQL, and <code>redis-cli ping</code> for Redis.</p>
+            </details>
+            <details>
+                <summary>Can I use Docker Compose in production?</summary>
+                <p>Yes. Docker Compose is a valid production deployment tool for single-server applications. Add restart policies (<code>restart: unless-stopped</code> or <code>restart: always</code>), resource limits via the deploy key, health checks for all services, named volumes for persistent data, and proper logging configuration. Many successful applications run on a single server with Compose behind a reverse proxy like Traefik or nginx. Compose becomes insufficient when you need multi-server orchestration, automatic scaling, or zero-downtime rolling deployments across a cluster &mdash; that is when Kubernetes or similar tools are needed.</p>
+            </details>
+            <details>
+                <summary>How do Docker Compose networks work?</summary>
+                <p>Docker Compose automatically creates a default bridge network for each project and connects all services to it. Services can reach each other by service name as the hostname (for example, <code>postgres://db:5432</code> where <code>db</code> is the service name). You can define custom networks in the top-level <code>networks</code> key to isolate groups of services &mdash; for example, a frontend network and a backend network where the database is only reachable from the API, not from the web server. Services can be attached to multiple networks. External networks let Compose services communicate with containers managed outside the Compose project.</p>
+            </details>
+        </div>
+
+        <h2>Conclusion</h2>
+
+        <p>Docker Compose turns multi-container chaos into a single, declarative YAML file. Whether you are running a development environment with hot reloading or deploying a production stack with health checks and resource limits, Compose handles the orchestration so you can focus on your application code.</p>
+
+        <p>Start with a simple two-service setup (application plus database), get comfortable with the core commands (<code>up</code>, <code>down</code>, <code>logs</code>, <code>exec</code>), and incrementally add complexity: health checks, custom networks, multiple environments, and resource limits. For single-server deployments, Compose is often all you need.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Related:</strong> Validate Compose YAML with the <a href="/tools/yaml-validator" style="color: #3b82f6;">YAML Validator</a>, convert configs with <a href="/tools/json-to-yaml" style="color: #3b82f6;">JSON to YAML</a>, and generate Kubernetes manifests with the <a href="/tools/kubernetes-yaml-generator" style="color: #3b82f6;">Kubernetes YAML Generator</a>.
+        </div>
+
+        <h2>Learn More</h2>
+        <ul>
+            <li><a href="/blog/docker-complete-guide">Docker: The Complete Developer's Guide</a> &mdash; comprehensive Docker guide covering images, Dockerfiles, security, CI/CD, and performance</li>
+            <li><a href="/blog/docker-containers-beginners-guide">Docker Containers for Beginners</a> &mdash; hands-on introduction if you are new to containers</li>
+            <li><a href="/tools/kubernetes-yaml-generator">Kubernetes YAML Generator</a> &mdash; generate K8s manifests when you outgrow single-server Compose</li>
+            <li><a href="/cheatsheets/docker">Docker Cheat Sheet</a> &mdash; quick reference for Docker and Compose commands</li>
+            <li><a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">Merge Queue Threshold Breach Alert Routing Playbook</a> &mdash; severity-based owner handoff model for routing closure-threshold incidents</li>
+        </ul>
+    </main>
+
+    <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/docker-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker: The Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Images, Dockerfiles, security, CI/CD, and performance optimization</div>
+            </a>
+            <a href="/blog/docker-containers-beginners-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker for Beginners</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Practical beginner's guide to Docker containers</div>
+            </a>
+            <a href="/tools/kubernetes-yaml-generator" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Kubernetes YAML Generator</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Generate deployment, service, and ingress manifests</div>
+            </a>
+            <a href="/cheatsheets/docker" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Cheat Sheet</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Essential Docker and Compose commands quick reference</div>
+            </a>
+            <a href="/blog/github-merge-queue-checks-keep-restarting-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Keep Restarting</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Rollback requeue-loop playbook for CI churn, flaky checks, and protected branch queues</div>
+            </a>
+            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Timed Out or Cancelled</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Incident runbook for timeout and cancellation loops blocking rollback PR required checks</div>
+            </a>
+            <a href="/blog/github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Required Check Name Mismatch Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Unblock waiting-for-status rollback PRs by aligning required-check names and workflow contexts.</div>
+            </a>
+            <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Stale Review Dismissal Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Fix rollback PR approval loops triggered by stale-review dismissals during queue updates.</div>
+            </a>
+            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Emergency Bypass Governance</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Governance pattern for rollback incidents where queue-safe remediation cannot meet recovery deadlines.</div>
+            </a>
+            <a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Deny Extension vs Restore Baseline</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Decision checklist for refusing unsupported extension requests and restoring standard protections.</div>
+            </a>
+            <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Appeal Outcome Closure Template</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Close denial appeals with UTC checkpoints and owner-assigned post-incident follow-up actions.</div>
+            </a>
+            <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Threshold Breach Alert Routing Playbook</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Route closure-threshold incidents with severity-based ownership and escalation timers.</div>
+            </a>
+        </div>
+    </section>
+
+    <footer><p>DevToolbox &mdash; Free developer tools, no strings attached.</p></footer>
+</body>
+</html>

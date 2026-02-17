@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Systemd: The Complete Guide for 2026 | DevToolbox Blog</title>
+    <meta name="description" content="Master systemd for Linux service management. Learn unit files, service configuration, timers, targets, journalctl, socket activation, and systemd best practices with practical examples.">
+    <meta name="keywords" content="systemd tutorial, systemd service, systemd unit file, systemctl, journalctl, systemd timer, systemd linux, systemd guide, systemd socket activation, systemd best practices">
+    <meta property="og:title" content="Systemd: The Complete Guide for 2026">
+    <meta property="og:description" content="Master systemd for Linux service management. Learn unit files, service configuration, timers, targets, journalctl, and best practices.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/systemd-complete-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-systemd-complete-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Systemd: The Complete Guide for 2026">
+    <meta name="twitter:description" content="Master systemd for Linux service management. Learn unit files, service configuration, timers, targets, journalctl, and best practices.">
+    <meta property="article:published_time" content="2026-02-12">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/systemd-complete-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Systemd: The Complete Guide for 2026",
+        "description": "Master systemd for Linux service management. Learn unit files, service configuration, timers, targets, journalctl, socket activation, and best practices.",
+        "datePublished": "2026-02-12",
+        "dateModified": "2026-02-12",
+        "url": "https://devtoolbox.dedyn.io/blog/systemd-complete-guide",
+        "author": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        },
+        "publisher": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the difference between systemd enable and systemd start?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "systemctl start immediately starts a service right now, but it will not survive a reboot. systemctl enable creates symlinks so the service starts automatically at boot (or when its activation trigger fires), but does not start it immediately. To both start a service now and ensure it starts on boot, use systemctl enable --now myservice. Similarly, systemctl disable --now will stop the service and remove it from boot."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I replace a cron job with a systemd timer?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Create two files: a .service unit that defines what to run, and a .timer unit that defines when to run it. The timer file uses OnCalendar for calendar-based schedules (e.g., OnCalendar=*-*-* 02:00:00 for daily at 2 AM) or OnBootSec/OnUnitActiveSec for interval-based schedules. Place both in /etc/systemd/system/, run systemctl daemon-reload, then systemctl enable --now mytask.timer. Systemd timers offer advantages over cron: persistent timers that catch up on missed runs, randomized delays to avoid thundering herd, dependency management, and centralized logging via journalctl."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I view logs for a specific systemd service?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use journalctl -u servicename to see all logs for that service. Add -f to follow logs in real time (like tail -f). Use --since and --until for time ranges: journalctl -u nginx --since '1 hour ago'. Use -p err to filter by priority level. Use -b to see only logs from the current boot. Use --no-pager for scripting. Use -o json for JSON output. The journal stores logs in a binary format with full metadata including PID, timestamps, and structured fields, making it far more powerful than plain text log files."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What systemd security options should I use for my services?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "At minimum, add these to your [Service] section: ProtectSystem=strict (read-only filesystem except allowed paths), ProtectHome=yes (hide /home, /root, /run/user), PrivateTmp=yes (isolated /tmp), NoNewPrivileges=yes (prevent privilege escalation), and ProtectKernelTunables=yes. For network services, use PrivateNetwork=yes if the service does not need network access, or RestrictAddressFamilies=AF_INET AF_INET6 to limit to TCP/UDP. Use systemd-analyze security myservice to get a security score and recommendations for your specific service."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Why does my systemd service fail with status 203/EXEC or 217/USER?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Status 203/EXEC means systemd could not execute the binary specified in ExecStart. Common causes: the path is wrong, the file is not executable (chmod +x), or the shebang line is missing or incorrect in a script. Always use absolute paths in ExecStart. Status 217/USER means the User= specified in the unit file does not exist on the system. Create the user first with useradd --system --no-create-home myuser. Run systemctl status myservice and journalctl -u myservice -n 50 to see the full error details."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Systemd: The Complete Guide</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Blog",
+                        "item": "https://devtoolbox.dedyn.io/blog"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Systemd: The Complete Guide for 2026"
+                }
+        ]
+    }
+    </script>
+    <main class="blog-post">
+        <h1>Systemd: The Complete Guide for 2026</h1>
+        <div class="meta">February 12, 2026</div>
+
+        <p>Systemd is the init system and service manager that runs as PID 1 on nearly every modern Linux distribution. It manages every process on your system from boot to shutdown: starting services in the correct order, monitoring their health, restarting them on failure, collecting their logs, and controlling system state transitions. If you deploy anything on Linux &mdash; web servers, databases, background workers, scheduled tasks &mdash; you are using systemd whether you realize it or not.</p>
+
+        <p>This guide covers systemd from fundamentals to advanced production patterns. Every section includes practical unit file examples and commands you can use immediately. Whether you are deploying a Node.js application, hardening a production server, replacing cron jobs, or debugging boot failures, this is the reference you need.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Related guides:</strong> Use systemd timers as a modern cron alternative &mdash; see our <a href="/blog/bash-scripting-complete-guide" style="color: #3b82f6;">Bash Scripting Guide</a> for the scripts they run, and our <a href="/blog/linux-commands-complete-guide" style="color: #3b82f6;">Linux Commands Guide</a> for the foundation.
+        </div>
+
+        <style>
+        .toc {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+        }
+        .toc h3 {
+            margin-top: 0;
+            color: #e4e4e7;
+        }
+        .toc ol {
+            margin-bottom: 0;
+            padding-left: 1.25rem;
+        }
+        .toc a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+        .faq-section {
+            margin-top: 3rem;
+        }
+        .faq-section details {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            padding: 0;
+        }
+        .faq-section summary {
+            color: #3b82f6;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+        }
+        .faq-section summary:hover {
+            color: #60a5fa;
+        }
+        .faq-section details > p {
+            padding: 0 1.5rem 1rem 1.5rem;
+            margin: 0;
+        }
+        </style>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+                <li><a href="#what-is-systemd">What Is Systemd</a></li>
+                <li><a href="#core-concepts">Core Concepts: Units, Targets, Dependencies</a></li>
+                <li><a href="#systemctl">Essential systemctl Commands</a></li>
+                <li><a href="#unit-files">Writing Service Unit Files</a></li>
+                <li><a href="#service-types">Service Types Explained</a></li>
+                <li><a href="#environment">Environment Variables and Configuration</a></li>
+                <li><a href="#restart-policies">Restart Policies and Failure Handling</a></li>
+                <li><a href="#timers">Systemd Timers: Replacing Cron</a></li>
+                <li><a href="#socket-activation">Socket Activation</a></li>
+                <li><a href="#journalctl">journalctl: Log Management</a></li>
+                <li><a href="#targets">Targets and the Boot Process</a></li>
+                <li><a href="#security">Security Hardening</a></li>
+                <li><a href="#user-services">User Services</a></li>
+                <li><a href="#debugging">Debugging Systemd Issues</a></li>
+                <li><a href="#best-practices">Best Practices</a></li>
+                <li><a href="#faq">Frequently Asked Questions</a></li>
+            </ol>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- 1. What Is Systemd                           -->
+        <!-- ============================================ -->
+        <h2 id="what-is-systemd">1. What Is Systemd</h2>
+
+        <p>Systemd was created by Lennart Poettering and Kay Sievers, first released in 2010. It replaced SysVinit and Upstart as the default init system on Fedora (2011), RHEL/CentOS (7+), Debian (8+), Ubuntu (15.04+), Arch Linux, openSUSE, and virtually every mainstream distribution. It is the single most important piece of userspace software on a modern Linux system.</p>
+
+        <p>Systemd is not just an init system. It is a suite of tools that manages:</p>
+
+        <ul>
+            <li><strong>Service lifecycle</strong> &mdash; starting, stopping, restarting, and monitoring daemons</li>
+            <li><strong>Boot process</strong> &mdash; parallelized startup with dependency resolution</li>
+            <li><strong>Logging</strong> &mdash; the journal (journald) captures all output with structured metadata</li>
+            <li><strong>Timers</strong> &mdash; scheduled tasks with more features than cron</li>
+            <li><strong>Socket activation</strong> &mdash; on-demand service startup when connections arrive</li>
+            <li><strong>Device management</strong> &mdash; udev integration for hardware events</li>
+            <li><strong>Network configuration</strong> &mdash; systemd-networkd and systemd-resolved</li>
+            <li><strong>Temporary files</strong> &mdash; systemd-tmpfiles for managing /tmp and /run</li>
+        </ul>
+
+        <p>The architecture centers on PID 1 (the systemd process itself), which reads unit files that declare what to run, when to run it, and how it depends on other units. This declarative approach is fundamentally different from SysVinit's imperative shell scripts.</p>
+
+        <!-- ============================================ -->
+        <!-- 2. Core Concepts                             -->
+        <!-- ============================================ -->
+        <h2 id="core-concepts">2. Core Concepts: Units, Targets, Dependencies</h2>
+
+        <p>Everything systemd manages is a <strong>unit</strong>. Units are defined in configuration files and come in several types:</p>
+
+        <ul>
+            <li><strong>.service</strong> &mdash; a process or daemon (nginx, postgresql, your app)</li>
+            <li><strong>.timer</strong> &mdash; a scheduled trigger (replaces cron)</li>
+            <li><strong>.socket</strong> &mdash; a network or IPC socket for activation</li>
+            <li><strong>.target</strong> &mdash; a group of units (like runlevels)</li>
+            <li><strong>.mount</strong> / <strong>.automount</strong> &mdash; filesystem mount points</li>
+            <li><strong>.path</strong> &mdash; filesystem path monitoring</li>
+            <li><strong>.slice</strong> &mdash; resource management group (cgroups)</li>
+            <li><strong>.device</strong> &mdash; kernel device exposed to systemd</li>
+        </ul>
+
+        <p>Unit files live in three locations, in order of priority:</p>
+
+<pre><code>/etc/systemd/system/        # Admin-created and overrides (highest priority)
+/run/systemd/system/        # Runtime units (transient)
+/usr/lib/systemd/system/    # Package-installed units (lowest priority)</code></pre>
+
+        <p><strong>Dependencies</strong> control startup ordering. The key directives are:</p>
+
+<pre><code># Ordering (when to start relative to other units)
+After=network.target         # Start after network is up
+Before=httpd.service         # Start before Apache
+
+# Requirement strength
+Requires=postgresql.service  # Hard dependency: if postgres fails, this fails too
+Wants=redis.service          # Soft dependency: start redis, but don't fail if it's missing
+BindsTo=docker.service       # Like Requires, but also stops when docker stops
+
+# Conflict
+Conflicts=iptables.service   # Cannot run at the same time</code></pre>
+
+        <p>A <strong>target</strong> is a synchronization point that groups units. The most common targets map to traditional runlevels:</p>
+
+<pre><code>multi-user.target   # Full system, no GUI (runlevel 3)
+graphical.target    # Full system with GUI (runlevel 5)
+rescue.target       # Single-user mode (runlevel 1)
+emergency.target    # Minimal shell, no services
+reboot.target       # System reboot
+poweroff.target     # System shutdown</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 3. systemctl Commands                        -->
+        <!-- ============================================ -->
+        <h2 id="systemctl">3. Essential systemctl Commands</h2>
+
+        <p>systemctl is the primary command for interacting with systemd. Here are the commands you will use daily:</p>
+
+<pre><code># Service lifecycle
+sudo systemctl start nginx          # Start a service now
+sudo systemctl stop nginx           # Stop a service now
+sudo systemctl restart nginx        # Stop then start
+sudo systemctl reload nginx         # Reload config without restart (if supported)
+sudo systemctl reload-or-restart nginx  # Reload if possible, restart otherwise
+
+# Boot persistence
+sudo systemctl enable nginx         # Start at boot
+sudo systemctl disable nginx        # Don't start at boot
+sudo systemctl enable --now nginx   # Enable AND start immediately
+sudo systemctl disable --now nginx  # Disable AND stop immediately
+
+# Status and inspection
+systemctl status nginx              # Show status, recent logs, PID, memory
+systemctl is-active nginx           # Returns "active" or "inactive"
+systemctl is-enabled nginx          # Returns "enabled" or "disabled"
+systemctl is-failed nginx           # Returns "failed" or not
+systemctl show nginx                # Show all properties (machine-readable)
+systemctl cat nginx                 # Print the unit file contents
+
+# Listing units
+systemctl list-units                # All loaded and active units
+systemctl list-units --failed       # Only failed units
+systemctl list-unit-files           # All installed unit files with state
+systemctl list-timers               # All active timers with schedule info
+
+# System-wide
+sudo systemctl daemon-reload        # Reload unit files after editing
+sudo systemctl daemon-reexec        # Re-execute the systemd manager
+systemctl get-default               # Show default boot target
+sudo systemctl set-default multi-user.target  # Set boot target
+
+# Dependencies
+systemctl list-dependencies nginx   # Show dependency tree
+systemctl list-dependencies --reverse nginx  # Show who depends on nginx</code></pre>
+
+        <p>The <code>daemon-reload</code> command is essential. After creating or modifying any unit file, you must run it before systemd will see the changes.</p>
+
+        <!-- ============================================ -->
+        <!-- 4. Writing Service Unit Files                -->
+        <!-- ============================================ -->
+        <h2 id="unit-files">4. Writing Service Unit Files</h2>
+
+        <p>A service unit file has three sections: <code>[Unit]</code>, <code>[Service]</code>, and <code>[Install]</code>. Here is a complete example for a Node.js application:</p>
+
+<pre><code># /etc/systemd/system/myapp.service
+[Unit]
+Description=My Node.js Application
+Documentation=https://github.com/myorg/myapp
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=myapp
+Group=myapp
+WorkingDirectory=/opt/myapp
+ExecStart=/usr/bin/node /opt/myapp/server.js
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=myapp
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=512M
+CPUQuota=80%
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+        <p>Breakdown of each section:</p>
+
+        <p><strong>[Unit]</strong> describes the unit and its relationships. <code>Description</code> appears in logs and status output. <code>After</code> controls startup ordering. <code>Wants</code> expresses a soft dependency.</p>
+
+        <p><strong>[Service]</strong> defines how the service runs. <code>Type</code> tells systemd how to track the process. <code>User/Group</code> set the runtime identity. <code>ExecStart</code> is the command to run (must be an absolute path). <code>Restart</code> controls automatic restart behavior.</p>
+
+        <p><strong>[Install]</strong> defines what happens on <code>systemctl enable</code>. <code>WantedBy=multi-user.target</code> means the service starts during normal multi-user boot.</p>
+
+        <p>The same pattern works for any language. For Python with Gunicorn, use <code>ExecStart=/opt/app/venv/bin/gunicorn --workers 4 --bind 0.0.0.0:8000 wsgi:app</code> with <code>EnvironmentFile=/opt/app/.env</code> for configuration.</p>
+
+        <!-- ============================================ -->
+        <!-- 5. Service Types                             -->
+        <!-- ============================================ -->
+        <h2 id="service-types">5. Service Types Explained</h2>
+
+        <p>The <code>Type=</code> directive tells systemd how the service signals readiness:</p>
+
+        <p><strong>simple</strong> (default) &mdash; systemd considers the service started as soon as <code>ExecStart</code> begins. Use this for processes that stay in the foreground:</p>
+
+<pre><code>Type=simple
+ExecStart=/usr/bin/node /opt/app/server.js</code></pre>
+
+        <p><strong>forking</strong> &mdash; the process forks and the parent exits. Systemd waits for the parent to exit and tracks the child. Use <code>PIDFile</code> to help systemd find the main process:</p>
+
+<pre><code>Type=forking
+PIDFile=/run/nginx.pid
+ExecStart=/usr/sbin/nginx</code></pre>
+
+        <p><strong>oneshot</strong> &mdash; the process runs and exits. Systemd waits for it to finish before considering the unit active. Ideal for initialization scripts:</p>
+
+<pre><code>Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/setup-iptables.sh</code></pre>
+
+        <p><strong>notify</strong> &mdash; the process sends a readiness notification via <code>sd_notify()</code>. This is the most precise method. Used by services that need time to initialize:</p>
+
+<pre><code>Type=notify
+ExecStart=/usr/sbin/httpd -DFOREGROUND
+NotifyAccess=main</code></pre>
+
+        <p><strong>idle</strong> &mdash; like simple, but systemd delays execution until all jobs are dispatched. Useful for console output ordering during boot.</p>
+
+        <!-- ============================================ -->
+        <!-- 6. Environment Variables                     -->
+        <!-- ============================================ -->
+        <h2 id="environment">6. Environment Variables and Configuration</h2>
+
+        <p>There are several ways to pass environment variables to a service:</p>
+
+<pre><code># Inline in the unit file (small number of variables)
+[Service]
+Environment=DATABASE_URL=postgres://localhost:5432/mydb
+Environment=REDIS_URL=redis://localhost:6379
+Environment="SECRET_KEY=value with spaces"
+
+# From a file (recommended for secrets and many variables)
+[Service]
+EnvironmentFile=/etc/myapp/config.env
+EnvironmentFile=-/etc/myapp/local.env   # "-" means don't fail if missing</code></pre>
+
+        <p>The environment file format is simple key=value pairs:</p>
+
+<pre><code># /etc/myapp/config.env
+DATABASE_URL=postgres://localhost:5432/mydb
+REDIS_URL=redis://localhost:6379
+SECRET_KEY=your-secret-key-here
+LOG_LEVEL=info
+WORKERS=4</code></pre>
+
+        <p>You can also use drop-in overrides to modify a unit without editing the original file:</p>
+
+<pre><code># Create override directory
+sudo mkdir -p /etc/systemd/system/myapp.service.d/
+
+# Create override file
+# /etc/systemd/system/myapp.service.d/override.conf
+[Service]
+Environment=LOG_LEVEL=debug
+MemoryMax=1G
+
+# Or use the built-in editor (creates the override for you)
+sudo systemctl edit myapp</code></pre>
+
+        <p>Drop-in overrides are the correct way to customize package-installed services. Never edit files in <code>/usr/lib/systemd/system/</code> directly because package updates will overwrite your changes.</p>
+
+        <!-- ============================================ -->
+        <!-- 7. Restart Policies                          -->
+        <!-- ============================================ -->
+        <h2 id="restart-policies">7. Restart Policies and Failure Handling</h2>
+
+        <p>The <code>Restart=</code> directive controls when systemd restarts a failed service:</p>
+
+<pre><code>Restart=no              # Never restart (default)
+Restart=on-failure      # Restart only on non-zero exit code, signal, or timeout
+Restart=on-abnormal     # Restart on signal, timeout, or watchdog
+Restart=on-abort        # Restart only on signal (crash)
+Restart=always          # Always restart regardless of exit reason
+
+RestartSec=5            # Wait 5 seconds before restarting
+StartLimitIntervalSec=300   # Rate-limit window (5 minutes)
+StartLimitBurst=5           # Max restarts within the window</code></pre>
+
+        <p>For production services, <code>Restart=on-failure</code> is usually the right choice. It restarts on crashes but not on clean shutdowns (exit code 0). Use <code>Restart=always</code> for critical services that must never be down.</p>
+
+        <p>You can specify which exit codes count as success:</p>
+
+<pre><code>[Service]
+Restart=on-failure
+RestartSec=3
+SuccessExitStatus=143       # Treat SIGTERM (143) as clean shutdown
+RestartPreventExitStatus=1  # Don't restart on exit code 1 (config error)</code></pre>
+
+        <p>For rate limiting, if the service restarts more than <code>StartLimitBurst</code> times within <code>StartLimitIntervalSec</code>, systemd marks it as failed and stops trying. To recover, run <code>systemctl reset-failed myapp</code> then <code>systemctl start myapp</code>.</p>
+
+        <p>Watchdog support lets systemd detect hung services:</p>
+
+<pre><code>[Service]
+WatchdogSec=30          # Service must ping systemd every 30 seconds
+WatchdogSignal=SIGABRT  # Send this signal if watchdog times out</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 8. Timers                                    -->
+        <!-- ============================================ -->
+        <h2 id="timers">8. Systemd Timers: Replacing Cron</h2>
+
+        <p>Systemd timers are a modern replacement for cron jobs. They support calendar schedules, monotonic intervals, persistent scheduling (catch up on missed runs), randomized delays, and full dependency management.</p>
+
+        <p>A timer requires two files: a <code>.timer</code> unit and a matching <code>.service</code> unit:</p>
+
+<pre><code># /etc/systemd/system/backup.service
+[Unit]
+Description=Daily database backup
+
+[Service]
+Type=oneshot
+User=backup
+ExecStart=/opt/scripts/backup-database.sh
+StandardOutput=journal
+
+# /etc/systemd/system/backup.timer
+[Unit]
+Description=Run database backup daily at 2 AM
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target</code></pre>
+
+        <p>Enable the timer (not the service):</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Build it faster:</strong> Use our <a href="/tools/systemd-timer-generator" style="color: #3b82f6;">Systemd Timer Generator</a> to convert cron schedules to <code>OnCalendar</code> and generate the matching <code>.timer</code> + <code>.service</code> unit files.
+        </div>
+
+<pre><code>sudo systemctl daemon-reload
+sudo systemctl enable --now backup.timer
+systemctl list-timers        # Verify it appears</code></pre>
+
+        <p><strong>OnCalendar</strong> uses a flexible syntax:</p>
+
+<pre><code>OnCalendar=hourly                  # Every hour
+OnCalendar=daily                   # Every day at midnight
+OnCalendar=weekly                  # Every Monday at midnight
+OnCalendar=monthly                 # First day of month at midnight
+OnCalendar=*-*-* 06:00:00         # Every day at 6 AM
+OnCalendar=Mon-Fri *-*-* 09:30:00 # Weekdays at 9:30 AM
+OnCalendar=*-*-01 00:00:00        # First of every month
+OnCalendar=*:0/15                  # Every 15 minutes</code></pre>
+
+        <p>Test your calendar expressions with <code>systemd-analyze calendar</code>:</p>
+
+<pre><code>$ systemd-analyze calendar "Mon-Fri *-*-* 09:30:00"
+  Original form: Mon-Fri *-*-* 09:30:00
+Normalized form: Mon..Fri *-*-* 09:30:00
+    Next elapse: Mon 2026-02-16 09:30:00 UTC</code></pre>
+
+        <p>For interval-based timers (not calendar-based):</p>
+
+<pre><code>[Timer]
+OnBootSec=5min              # 5 minutes after boot
+OnUnitActiveSec=1h          # 1 hour after the service last ran
+OnStartupSec=30s            # 30 seconds after systemd starts</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 9. Socket Activation                         -->
+        <!-- ============================================ -->
+        <h2 id="socket-activation">9. Socket Activation</h2>
+
+        <p>Socket activation lets systemd listen on a port and start the service only when a connection arrives. This reduces boot time, saves resources for rarely-used services, and allows zero-downtime restarts.</p>
+
+<pre><code># /etc/systemd/system/myapp.socket
+[Unit]
+Description=My App Socket
+
+[Socket]
+ListenStream=8080
+Accept=no
+BindIPv6Only=both
+
+[Install]
+WantedBy=sockets.target
+
+# /etc/systemd/system/myapp.service
+[Unit]
+Description=My Application
+Requires=myapp.socket
+After=myapp.socket
+
+[Service]
+Type=simple
+User=myapp
+ExecStart=/opt/myapp/server --fd 3
+NonBlocking=true
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+        <p>Enable the socket (not the service directly):</p>
+
+<pre><code>sudo systemctl enable --now myapp.socket</code></pre>
+
+        <p>When a connection arrives on port 8080, systemd starts <code>myapp.service</code> and passes the socket as file descriptor 3. The application must be written to accept sockets from systemd (using <code>sd_listen_fds()</code> in C, or the <code>python-systemd</code> library, or the <code>SD_LISTEN_FDS_START</code> environment variable).</p>
+
+        <!-- ============================================ -->
+        <!-- 10. journalctl                               -->
+        <!-- ============================================ -->
+        <h2 id="journalctl">10. journalctl: Log Management</h2>
+
+        <p>The systemd journal replaces traditional syslog with a structured, indexed binary log. journalctl is the tool to query it:</p>
+
+<pre><code># View all logs
+journalctl
+
+# Follow logs in real time (like tail -f)
+journalctl -f
+
+# Logs for a specific service
+journalctl -u nginx
+journalctl -u nginx -f               # Follow nginx logs
+
+# Time-based filtering
+journalctl --since "2026-02-12 10:00"
+journalctl --since "1 hour ago"
+journalctl --since "yesterday" --until "today"
+journalctl -u myapp --since "5 min ago"
+
+# Priority filtering (0=emerg to 7=debug)
+journalctl -p err                     # Errors and above
+journalctl -p warning -u myapp        # Warnings from myapp
+
+# Boot-based filtering
+journalctl -b                         # Current boot only
+journalctl -b -1                      # Previous boot
+journalctl --list-boots               # List all recorded boots
+
+# Output formats
+journalctl -u myapp -o json           # JSON output
+journalctl -u myapp -o json-pretty    # Pretty JSON
+journalctl -u myapp -o short-iso      # ISO timestamps
+journalctl -u myapp -o cat            # Message only (no metadata)
+
+# Useful options
+journalctl -u myapp -n 50             # Last 50 lines
+journalctl -u myapp --no-pager        # Don't use pager
+journalctl --disk-usage               # Show journal disk usage
+journalctl -k                         # Kernel messages only (dmesg)
+journalctl _PID=1234                  # Logs from specific PID</code></pre>
+
+        <p>Configure journal retention in <code>/etc/systemd/journald.conf</code> with <code>Storage=persistent</code>, <code>SystemMaxUse=500M</code>, <code>MaxRetentionSec=1month</code>, and <code>Compress=yes</code>.</p>
+
+        <!-- ============================================ -->
+        <!-- 11. Targets and Boot Process                 -->
+        <!-- ============================================ -->
+        <h2 id="targets">11. Targets and the Boot Process</h2>
+
+        <p>The boot process follows a dependency chain from <code>default.target</code> (usually <code>multi-user.target</code> on servers) backward through its dependencies. Systemd parallelizes wherever possible:</p>
+
+<pre><code># View the default target
+systemctl get-default
+
+# Change the default target
+sudo systemctl set-default multi-user.target
+
+# Boot process analysis
+systemd-analyze                       # Total boot time
+systemd-analyze blame                 # Time taken by each unit
+systemd-analyze critical-chain        # Critical path visualization
+systemd-analyze plot > boot.svg       # SVG timeline of entire boot</code></pre>
+
+        <p>Creating a custom target to group your application services:</p>
+
+<pre><code># /etc/systemd/system/mystack.target
+[Unit]
+Description=My Application Stack
+Requires=myapp.service
+Requires=myworker.service
+Requires=myscheduler.service
+After=myapp.service myworker.service myscheduler.service
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+        <p>Now you can manage the entire stack with one command:</p>
+
+<pre><code>sudo systemctl start mystack.target    # Start everything
+sudo systemctl stop mystack.target     # Stop everything
+systemctl status mystack.target        # See overall status</code></pre>
+
+        <p>Emergency and rescue modes are accessible at boot via kernel parameters or at runtime:</p>
+
+<pre><code>sudo systemctl rescue       # Drop to single-user mode
+sudo systemctl emergency    # Minimal emergency shell</code></pre>
+
+        <!-- ============================================ -->
+        <!-- 12. Security Hardening                       -->
+        <!-- ============================================ -->
+        <h2 id="security">12. Security Hardening</h2>
+
+        <p>Systemd provides powerful sandboxing directives. A hardened service unit looks like this:</p>
+
+<pre><code>[Service]
+# Run as non-root
+User=myapp
+Group=myapp
+
+# Filesystem restrictions
+ProtectSystem=strict           # Mount / read-only (except /dev, /proc, /sys)
+ProtectHome=yes                # Hide /home, /root, /run/user
+PrivateTmp=yes                 # Isolated /tmp and /var/tmp
+ReadWritePaths=/var/lib/myapp  # Allow writes only here
+
+# Privilege restrictions
+NoNewPrivileges=yes            # Prevent privilege escalation
+PrivateDevices=yes             # No access to physical devices
+ProtectKernelTunables=yes      # Read-only /proc and /sys tunables
+ProtectKernelModules=yes       # Cannot load kernel modules
+ProtectControlGroups=yes       # Read-only cgroup filesystem
+
+# Network restrictions
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+# System call filtering
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+
+# Other hardening
+LockPersonality=yes            # Prevent changing execution domain
+MemoryDenyWriteExecute=yes     # Prevent W+X memory mappings
+RestrictRealtime=yes           # No realtime scheduling
+RestrictSUIDSGID=yes           # Prevent setuid/setgid files
+CapabilityBoundingSet=         # Drop all capabilities</code></pre>
+
+        <p>Audit your service with <code>systemd-analyze security myapp</code> to get a score and specific recommendations. Start with the basics and progressively add more restrictions, testing after each change.</p>
+
+        <!-- ============================================ -->
+        <!-- 13. User Services                            -->
+        <!-- ============================================ -->
+        <h2 id="user-services">13. User Services</h2>
+
+        <p>Non-root users can manage their own services without sudo. Unit files go in <code>~/.config/systemd/user/</code>:</p>
+
+<pre><code># ~/.config/systemd/user/dev-server.service
+[Unit]
+Description=Local Development Server
+
+[Service]
+Type=simple
+WorkingDirectory=%h/projects/myapp
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+Environment=PORT=3000
+
+[Install]
+WantedBy=default.target</code></pre>
+
+        <p>Manage user services with <code>systemctl --user</code>:</p>
+
+<pre><code>systemctl --user daemon-reload
+systemctl --user enable --now dev-server
+systemctl --user status dev-server
+journalctl --user -u dev-server -f</code></pre>
+
+        <p>By default, user services only run while the user is logged in. To keep them running after logout:</p>
+
+<pre><code>sudo loginctl enable-linger username</code></pre>
+
+        <p>This is useful for running persistent background tasks like syncthing, custom notifications, or development services without needing root access. The <code>%h</code> specifier in the unit file expands to the user's home directory.</p>
+
+        <!-- ============================================ -->
+        <!-- 14. Debugging                                -->
+        <!-- ============================================ -->
+        <h2 id="debugging">14. Debugging Systemd Issues</h2>
+
+        <p>When a service fails, follow this systematic approach:</p>
+
+<pre><code># Step 1: Check the status (shows exit code, signal, recent logs)
+systemctl status myapp
+
+# Step 2: Read full logs for the service
+journalctl -u myapp -n 100 --no-pager
+
+# Step 3: Verify the unit file syntax
+systemd-analyze verify /etc/systemd/system/myapp.service
+
+# Step 4: Check if dependencies are running
+systemctl list-dependencies myapp
+
+# Step 5: Test the ExecStart command manually
+sudo -u myapp /opt/myapp/start.sh
+
+# Step 6: Check file permissions
+ls -la /opt/myapp/
+namei -l /opt/myapp/server.js      # Check every path component
+
+# Step 7: Check for resource limits
+systemctl show myapp | grep -i limit
+systemctl show myapp | grep -i memory</code></pre>
+
+        <p>Common error codes and their meanings:</p>
+
+<pre><code>203/EXEC    - Cannot execute the binary (wrong path, not executable, bad shebang)
+217/USER    - Specified User= does not exist
+200/CHDIR   - WorkingDirectory= does not exist
+226/NAMESPACE - Namespace setup failed (check ProtectSystem/PrivateTmp)
+209/STDOUT   - Failed to set up stdout (check StandardOutput)
+210/STDERR   - Failed to set up stderr (check StandardError)</code></pre>
+
+        <p>If a service keeps failing and hitting the rate limit:</p>
+
+<pre><code>sudo systemctl reset-failed myapp    # Clear the failed state
+sudo systemctl start myapp           # Try again</code></pre>
+
+        <p>For boot problems, add <code>systemd.log_level=debug</code> to the kernel command line (in GRUB) to get verbose systemd output during boot.</p>
+
+        <!-- ============================================ -->
+        <!-- 15. Best Practices                           -->
+        <!-- ============================================ -->
+        <h2 id="best-practices">15. Best Practices</h2>
+
+        <ul>
+            <li><strong>Always use absolute paths</strong> in ExecStart, ExecStop, and other Exec directives. Systemd does not use PATH to resolve binaries.</li>
+            <li><strong>Run daemon-reload after every edit</strong>. Forgetting this is the number one cause of "my changes aren't working."</li>
+            <li><strong>Use drop-in overrides</strong> instead of editing vendor unit files. Run <code>systemctl edit myservice</code> to create override files that survive package updates.</li>
+            <li><strong>Set appropriate Restart policy</strong>. Use <code>Restart=on-failure</code> for most services. Use <code>Restart=always</code> only for critical services that must never be down.</li>
+            <li><strong>Use EnvironmentFile for secrets</strong> rather than inline Environment directives. Set restrictive permissions (0600) on the env file.</li>
+            <li><strong>Add security hardening progressively</strong>. Start with ProtectSystem, ProtectHome, PrivateTmp, and NoNewPrivileges. Run <code>systemd-analyze security</code> and add more restrictions.</li>
+            <li><strong>Use Type=notify when possible</strong>. It gives systemd the most accurate picture of service readiness. Many modern daemons support it (nginx, PostgreSQL, systemd-aware applications).</li>
+            <li><strong>Set resource limits</strong>. Use MemoryMax, CPUQuota, and LimitNOFILE to prevent runaway services from affecting the entire system.</li>
+            <li><strong>Prefer timers over cron</strong>. Systemd timers have better logging, dependency management, randomized delays, and persistent scheduling.</li>
+            <li><strong>Log to journal</strong>. Set <code>StandardOutput=journal</code> and <code>StandardError=journal</code> so all output is captured with full metadata. Avoid logging to files when journal integration is available.</li>
+            <li><strong>Use systemctl cat and systemctl show</strong> to inspect the effective configuration of any service, including all overrides and defaults.</li>
+            <li><strong>Document your units</strong>. Use Description and Documentation directives. Future you (and your team) will be grateful.</li>
+        </ul>
+
+        <!-- ============================================ -->
+        <!-- FAQ Section                                  -->
+        <!-- ============================================ -->
+        <h2 id="faq">Frequently Asked Questions</h2>
+
+        <div class="faq-section">
+            <details>
+                <summary>What is the difference between systemctl enable and systemctl start?</summary>
+                <p><code>systemctl start</code> immediately starts a service right now, but it will not survive a reboot. <code>systemctl enable</code> creates symlinks so the service starts automatically at boot, but does not start it immediately. To both start a service now and ensure it starts on boot, use <code>systemctl enable --now myservice</code>. Similarly, <code>systemctl disable --now</code> will stop the service and remove it from boot.</p>
+            </details>
+            <details>
+                <summary>How do I replace a cron job with a systemd timer?</summary>
+                <p>Create two files: a <code>.service</code> unit that defines what to run, and a <code>.timer</code> unit that defines when to run it. The timer file uses <code>OnCalendar</code> for calendar-based schedules or <code>OnBootSec/OnUnitActiveSec</code> for interval-based schedules. Place both in <code>/etc/systemd/system/</code>, run <code>systemctl daemon-reload</code>, then <code>systemctl enable --now mytask.timer</code>. Timers offer advantages over cron: persistent timers that catch up on missed runs, randomized delays, dependency management, and centralized logging via journalctl.</p>
+            </details>
+            <details>
+                <summary>How do I view logs for a specific systemd service?</summary>
+                <p>Use <code>journalctl -u servicename</code> to see all logs for that service. Add <code>-f</code> to follow logs in real time. Use <code>--since</code> and <code>--until</code> for time ranges: <code>journalctl -u nginx --since '1 hour ago'</code>. Use <code>-p err</code> to filter by priority level. Use <code>-b</code> for current boot only. Use <code>-o json</code> for JSON output. The journal stores logs in a binary format with full metadata, making it far more powerful than plain text log files.</p>
+            </details>
+            <details>
+                <summary>What systemd security options should I use for my services?</summary>
+                <p>At minimum, add <code>ProtectSystem=strict</code>, <code>ProtectHome=yes</code>, <code>PrivateTmp=yes</code>, and <code>NoNewPrivileges=yes</code> to your [Service] section. For network services, use <code>RestrictAddressFamilies=AF_INET AF_INET6</code> to limit socket types. Use <code>systemd-analyze security myservice</code> to get a security score and specific recommendations. Add restrictions progressively and test after each change.</p>
+            </details>
+            <details>
+                <summary>Why does my systemd service fail with status 203/EXEC or 217/USER?</summary>
+                <p>Status 203/EXEC means systemd could not execute the binary specified in ExecStart. Common causes: the path is wrong, the file is not executable (<code>chmod +x</code>), or the shebang line is missing in a script. Always use absolute paths in ExecStart. Status 217/USER means the <code>User=</code> specified in the unit file does not exist. Create the user with <code>useradd --system --no-create-home myuser</code>. Check <code>systemctl status</code> and <code>journalctl -u myservice</code> for full details.</p>
+            </details>
+        </div>
+
+        <h2>Related Resources</h2>
+
+        <ul>
+            <li><a href="/blog/linux-commands-complete-guide">Linux Commands: The Complete Guide</a> &mdash; foundational commands every sysadmin needs alongside systemd</li>
+            <li><a href="/blog/docker-complete-guide">Docker: The Complete Guide</a> &mdash; containerize services that systemd manages on the host</li>
+            <li><a href="/blog/nginx-configuration-complete-guide">Nginx Configuration: The Complete Guide</a> &mdash; configure the web server that systemd starts and monitors</li>
+            <li><a href="/blog/github-merge-queue-merge-group-trigger-guide">GitHub Merge Queue merge_group Trigger Guide</a> &mdash; incident rollback fix when CI checks never start in queue context</li>
+            <li><a href="/blog/github-merge-queue-flaky-required-checks-guide">GitHub Merge Queue Flaky Required Checks Guide</a> &mdash; reduce rollback delays from intermittent required-check failures</li>
+            <li><a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide">GitHub Merge Queue Required Checks Timed Out or Cancelled Guide</a> &mdash; unblock rollback PRs when required checks timeout or cancel repeatedly</li>
+            <li><a href="/blog/github-merge-queue-required-check-name-mismatch-guide">GitHub Merge Queue Required Check Name Mismatch Guide</a> &mdash; resolve waiting-for-status deadlocks caused by required-check name drift</li>
+            <li><a href="/blog/github-merge-queue-stale-review-dismissal-guide">GitHub Merge Queue Stale Review Dismissal Guide</a> &mdash; fix rollback PR approval loops when stale-review rules invalidate approvals after queue churn</li>
+            <li><a href="/blog/github-merge-queue-emergency-bypass-governance-guide">GitHub Merge Queue Emergency Bypass Governance Guide</a> &mdash; controlled approval model for incident rollback when queue-safe path cannot meet recovery SLA</li>
+            <li><a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide">GitHub Merge Queue Deny Extension vs Restore Baseline Guide</a> &mdash; checklist for rejecting weak extension requests and restoring default protections with audit evidence</li>
+            <li><a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide">GitHub Merge Queue Appeal Outcome Closure Follow-Up Template Guide</a> &mdash; finalize appeal outcomes with explicit owners and 24h/7d/30d follow-up checkpoints</li>
+            <li><a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">GitHub Merge Queue Closure Threshold Breach Alert Routing Playbook</a> &mdash; route threshold breaches with severity ownership, escalation SLAs, and explicit handoff evidence</li>
+            <li><a href="/blog/bash-scripting-complete-guide">Bash Scripting: The Complete Guide</a> &mdash; write the scripts that systemd timers and services execute</li>
+        </ul>
+    </main>
+
+    <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/linux-commands-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Linux Commands Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Essential commands every Linux sysadmin needs</div>
+            </a>
+            <a href="/blog/docker-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Containerize applications and orchestrate deployments</div>
+            </a>
+            <a href="/blog/nginx-configuration-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Nginx Configuration Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Configure the web server systemd manages</div>
+            </a>
+            <a href="/blog/github-merge-queue-merge-group-trigger-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue merge_group Trigger Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Useful incident runbook when deploy rollback checks stay pending in GitHub merge queue.</div>
+            </a>
+            <a href="/blog/github-merge-queue-flaky-required-checks-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Flaky Required Checks Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Stabilize intermittent required checks before they extend incident rollback windows.</div>
+            </a>
+            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Timed Out or Cancelled</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Operational runbook for rollback PR checks that exceed time budgets or get cancelled by queue churn.</div>
+            </a>
+            <a href="/blog/github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Required Check Name Mismatch Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Repair required-check naming drift when rollback PR status stays expected but never arrives.</div>
+            </a>
+            <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Stale Review Dismissal Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Approval policy runbook for rollback PRs that repeatedly lose approval after queue updates.</div>
+            </a>
+            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Emergency Bypass Governance</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Use dual approval, expiry, and restoration ownership when emergency rollback bypass is unavoidable.</div>
+            </a>
+            <a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Deny Extension vs Restore Baseline</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Use an audit-first checklist to deny low-evidence extensions and return to baseline protections.</div>
+            </a>
+            <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Appeal Outcome Closure Template</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Post-incident closure template to lock ownership and due dates after appeal decisions.</div>
+            </a>
+            <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Threshold Breach Alert Routing Playbook</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Severity-based routing playbook for threshold breaches and owner escalation handoffs.</div>
+            </a>
+            <a href="/blog/bash-scripting-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Bash Scripting Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Write scripts for systemd timers and services</div>
+            </a>
+            <a href="/cheatsheets/linux" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Linux Cheat Sheet</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Quick reference for Linux commands and systemd</div>
+            </a>
+        </div>
+    </section>
+
+    <footer><p>DevToolbox &mdash; Free developer tools, no strings attached.</p></footer>
+    <script src="/js/track.js" defer></script>
+</body>
+</html>

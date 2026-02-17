@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Rebase: The Complete Guide for 2026 | DevToolbox Blog</title>
+    <meta name="description" content="Master git rebase with this complete tutorial. Learn interactive rebase, git squash commits, rebase vs merge, rebase workflow, --onto, conflict resolution, autosquash, and reflog recovery.">
+    <meta name="keywords" content="git rebase tutorial, git rebase vs merge, interactive rebase, git squash commits, rebase workflow, git rebase onto, git pull rebase, git reflog, autosquash, fixup commits">
+    <meta property="og:title" content="Git Rebase: The Complete Guide for 2026">
+    <meta property="og:description" content="Master git rebase: interactive rebase, squash commits, rebase vs merge, conflict resolution, autosquash, and real-world workflows.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/git-rebase-complete-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-git-rebase-complete-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Git Rebase: The Complete Guide for 2026">
+    <meta name="twitter:description" content="Master git rebase: interactive rebase, squash commits, rebase vs merge, conflict resolution, autosquash, and real-world workflows.">
+    <meta property="article:published_time" content="2026-02-12">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/git-rebase-complete-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Git Rebase: The Complete Guide for 2026",
+        "description": "Master git rebase with this complete tutorial covering interactive rebase, squash commits, rebase vs merge, conflict resolution, autosquash, and real-world team workflows.",
+        "datePublished": "2026-02-12",
+        "dateModified": "2026-02-12",
+        "url": "https://devtoolbox.dedyn.io/blog/git-rebase-complete-guide",
+        "author": { "@type": "Organization", "name": "DevToolbox" },
+        "publisher": { "@type": "Organization", "name": "DevToolbox" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the difference between git rebase and git merge?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Git merge creates a new merge commit that joins two branch histories together, preserving the exact chronological order of commits. Git rebase replays your commits on top of another branch, creating a linear history. Merge is non-destructive and keeps the full context. Rebase produces a cleaner log but rewrites commit hashes. Use rebase for local feature branches; use merge for shared or public branches."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is it safe to rebase a branch that has been pushed to a remote?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Only if you are the sole person working on that branch. Rebasing rewrites commit hashes, so anyone who has based work on the old commits will face conflicts. If others have pulled your branch, use merge instead. If you must rebase a pushed branch that only you use, follow up with git push --force-with-lease (never --force) to update the remote safely."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I squash multiple commits into one using interactive rebase?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Run git rebase -i HEAD~N where N is the number of commits to squash. In the editor, change the word 'pick' to 'squash' (or 's') for every commit you want to fold into the one above it. Leave the first commit as 'pick'. Save and close, then write a new combined commit message when prompted. Use 'fixup' instead of 'squash' if you want to discard the folded commit messages entirely."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I undo a rebase that went wrong?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use git reflog to find the commit hash your branch pointed to before the rebase. The reflog records every HEAD movement, so you will see an entry like 'rebase (start)' or the commit message from before the rebase. Then run git reset --hard <hash> to restore your branch. If you are mid-rebase and want to stop, run git rebase --abort to return to the pre-rebase state."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Should I use git pull --rebase instead of git pull?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, for most workflows. A regular git pull creates a merge commit every time your local branch has diverged from the remote, cluttering the history with meaningless merge commits. git pull --rebase replays your local commits on top of the fetched changes, keeping the history linear. Set it as default with git config --global pull.rebase true. Use git pull --rebase=merges if you want to preserve intentional local merge commits."
+                }
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Git Rebase: The Complete Guide for 2026" }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Git Rebase Complete Guide</span></nav>
+
+    <main class="blog-post">
+        <h1>Git Rebase: The Complete Guide for 2026</h1>
+        <p class="meta">Published February 12, 2026 &middot; 28 min read</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Decision guide:</strong> Not sure whether to preserve branch context or keep history linear? Read <a href="/blog/git-merge-vs-rebase" style="color: #3b82f6;">Git Merge vs Rebase</a>. If a rebased commit is already pushed and needs rollback, use <a href="/blog/git-revert-complete-guide" style="color: #3b82f6;">Git Revert</a> instead of reset. For a fast copy/paste rollback path, use <a href="/blog/git-undo-pushed-commit-guide" style="color: #3b82f6;">Git Undo Pushed Commit</a>. If merge rollback parent selection went wrong, use <a href="/blog/git-revert-wrong-mainline-parent-guide" style="color: #3b82f6;">Wrong Mainline Parent Recovery</a>. If rollback PRs are blocked by required checks in merge queue, follow <a href="/blog/github-merge-queue-rollback-required-checks-guide" style="color: #3b82f6;">Merge Queue Rollback Checks Guide</a>. If rollback PRs remain pending after approvals, use <a href="/blog/github-merge-queue-rollback-stuck-guide" style="color: #3b82f6;">Merge Queue Rollback Stuck Guide</a>. If required checks never start, use <a href="/blog/github-merge-queue-pending-checks-rollback-guide" style="color: #3b82f6;">Merge Queue Pending Checks Guide</a>. If the root cause is missing workflow events, use <a href="/blog/github-merge-queue-merge-group-trigger-guide" style="color: #3b82f6;">Merge Queue merge_group Trigger Guide</a>. If rollback approvals keep getting dismissed, use <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="color: #3b82f6;">Merge Queue Stale Review Dismissal Guide</a>.
+        </div>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#x1F6DF; Rescue guide:</strong> If a rebase went wrong and you think you lost commits, follow <a href="/blog/git-reflog-recover-lost-commits-guide" style="color: #3b82f6;">Git Reflog: Recover Lost Commits</a>.
+        </div>
+
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Decision guide:</strong> Not sure whether to copy a fix or undo a bad change? Read <a href="/blog/git-cherry-pick-vs-revert" style="color: #3b82f6;">Git Cherry-Pick vs Revert</a>.
+        </div>
+
+
+        <p>Rebase is the most powerful and most misunderstood command in Git. Used well, it gives you a clean, linear project history that is easy to read, bisect, and revert. Used carelessly, it can rewrite shared history and create chaos for your team. This guide covers everything: how rebase works internally, when to use it instead of merge, interactive rebase for surgical commit editing, conflict handling, autosquash workflows, and the golden rule that keeps your team safe.</p>
+
+        <p>Whether you are cleaning up a feature branch before a pull request or trying to understand why your colleague insists on <code>git pull --rebase</code>, you will find practical, copy-paste examples for every scenario here.</p>
+
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#what-is-rebase">What Is Rebasing?</a></li>
+            <li><a href="#rebase-vs-merge">Rebase vs Merge</a></li>
+            <li><a href="#basic-rebase">Basic Rebase: git rebase main</a></li>
+            <li><a href="#interactive-rebase">Interactive Rebase: git rebase -i</a></li>
+            <li><a href="#rebase-workflow">Rebase Workflow for Feature Branches</a></li>
+            <li><a href="#rebase-onto">Rebase Onto: Moving Commits Between Branches</a></li>
+            <li><a href="#handling-conflicts">Handling Rebase Conflicts</a></li>
+            <li><a href="#pull-rebase">git pull --rebase</a></li>
+            <li><a href="#autosquash">Autosquash with Fixup Commits</a></li>
+            <li><a href="#golden-rule">The Golden Rule: Never Rebase Published Branches</a></li>
+            <li><a href="#reflog-recovery">Recovering from Bad Rebases with git reflog</a></li>
+            <li><a href="#team-workflows">Real-World Team Workflows</a></li>
+            <li><a href="#common-mistakes">Common Mistakes and How to Avoid Them</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+
+        <!-- ==================== WHAT IS REBASE ==================== -->
+        <h2 id="what-is-rebase">What Is Rebasing?</h2>
+
+        <p>Rebasing means taking a series of commits from one branch and replaying them on top of another base commit. Instead of joining two branches with a merge commit, rebase moves your entire branch so that it starts from the tip of the target branch. The result is a straight, linear history.</p>
+
+        <p>Here is what happens visually. Suppose you have a feature branch that diverged from <code>main</code>:</p>
+
+<pre><code>Before rebase:
+
+          A---B---C  feature
+         /
+    D---E---F---G  main</code></pre>
+
+        <p>After running <code>git rebase main</code> while on the feature branch:</p>
+
+<pre><code>After rebase:
+
+                  A'--B'--C'  feature
+                 /
+    D---E---F---G  main</code></pre>
+
+        <p>Commits A, B, and C are replayed as new commits A', B', and C' on top of G. The original commits are abandoned (though still recoverable via reflog). The prime notation (A') indicates these are new commits with different hashes but the same changes.</p>
+
+        <p>Internally, Git does this: it finds the common ancestor (E), generates a diff for each commit on your branch, checks out the target branch tip (G), and applies each diff in order, creating a new commit for each one. If any diff cannot be applied cleanly, you get a conflict to resolve before continuing.</p>
+
+        <!-- ==================== REBASE VS MERGE ==================== -->
+        <h2 id="rebase-vs-merge">Rebase vs Merge</h2>
+
+        <p>Both commands integrate changes from one branch into another, but they do it differently. Here is a merge of the same scenario:</p>
+
+<pre><code>After merge:
+
+          A---B---C
+         /         \
+    D---E---F---G---M  main (M = merge commit)</code></pre>
+
+        <p>Merge preserves the branch topology. Rebase flattens it. Neither approach is universally "better" &mdash; they serve different purposes.</p>
+
+        <h3>When to Use Rebase</h3>
+        <ul>
+            <li><strong>Updating a feature branch</strong> &mdash; Rebase your feature onto the latest <code>main</code> to stay current without cluttering history with merge commits</li>
+            <li><strong>Cleaning up before a pull request</strong> &mdash; Squash WIP commits, reword messages, and reorder changes so reviewers see a clean story</li>
+            <li><strong>Keeping <code>git log</code> linear</strong> &mdash; A linear history is easier to read, <code>git bisect</code>, and <code>git revert</code></li>
+            <li><strong>Solo branches</strong> &mdash; When you are the only person working on a branch, there is no risk of rewriting someone else's history</li>
+        </ul>
+
+        <h3>When to Use Merge</h3>
+        <ul>
+            <li><strong>Shared branches</strong> &mdash; When multiple people commit to the same branch, merge preserves everyone's work without rewriting hashes</li>
+            <li><strong>Preserving context</strong> &mdash; Merge commits record exactly when a feature was integrated, which can be valuable for auditing</li>
+            <li><strong>Release branches</strong> &mdash; You want a clear record of what was merged and when</li>
+            <li><strong>Large, long-running integrations</strong> &mdash; If a branch has been shared for weeks, rebasing it creates too many conflicts</li>
+        </ul>
+
+        <h3>Quick Comparison</h3>
+
+        <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border);">
+                    <th style="text-align: left; padding: 0.75rem; color: var(--primary);">Aspect</th>
+                    <th style="text-align: left; padding: 0.75rem; color: var(--primary);">Rebase</th>
+                    <th style="text-align: left; padding: 0.75rem; color: var(--primary);">Merge</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid var(--border);"><td style="padding: 0.75rem;">History</td><td style="padding: 0.75rem;">Linear</td><td style="padding: 0.75rem;">Branch topology preserved</td></tr>
+                <tr style="border-bottom: 1px solid var(--border);"><td style="padding: 0.75rem;">Commit hashes</td><td style="padding: 0.75rem;">Rewritten</td><td style="padding: 0.75rem;">Preserved</td></tr>
+                <tr style="border-bottom: 1px solid var(--border);"><td style="padding: 0.75rem;">Merge commits</td><td style="padding: 0.75rem;">None</td><td style="padding: 0.75rem;">One per merge</td></tr>
+                <tr style="border-bottom: 1px solid var(--border);"><td style="padding: 0.75rem;">Safe for shared branches</td><td style="padding: 0.75rem;">No</td><td style="padding: 0.75rem;">Yes</td></tr>
+                <tr style="border-bottom: 1px solid var(--border);"><td style="padding: 0.75rem;">Conflict resolution</td><td style="padding: 0.75rem;">Per commit</td><td style="padding: 0.75rem;">Once</td></tr>
+                <tr><td style="padding: 0.75rem;">Bisect / revert friendliness</td><td style="padding: 0.75rem;">Excellent</td><td style="padding: 0.75rem;">Good</td></tr>
+            </tbody>
+        </table>
+        </div>
+
+        <p>For a deeper dive into branch management, see our <a href="/blog/git-branching-strategies-guide">Git Branching Strategies Guide</a>.</p>
+
+        <!-- ==================== BASIC REBASE ==================== -->
+        <h2 id="basic-rebase">Basic Rebase: git rebase main</h2>
+
+        <p>The simplest form of rebase updates your current branch so it starts from the tip of another branch. Here is the complete workflow:</p>
+
+<pre><code># Start on your feature branch
+git checkout feature/user-auth
+
+# Fetch the latest changes from remote
+git fetch origin
+
+# Rebase onto the updated main branch
+git rebase origin/main</code></pre>
+
+        <p>If there are no conflicts, Git replays each of your commits and you are done. Your branch now has a clean, linear history on top of the latest <code>main</code>.</p>
+
+        <p>You can also rebase without switching branches first:</p>
+
+<pre><code># Rebase feature branch onto main without checking it out
+git rebase main feature/user-auth</code></pre>
+
+        <p>This is equivalent to checking out <code>feature/user-auth</code> and then running <code>git rebase main</code>.</p>
+
+        <!-- ==================== INTERACTIVE REBASE ==================== -->
+        <h2 id="interactive-rebase">Interactive Rebase: git rebase -i</h2>
+
+        <p>Interactive rebase is where rebase becomes a precision tool. It lets you rewrite, combine, reorder, or delete commits before they become part of the shared history. This is what separates a messy branch full of "WIP" and "fix typo" commits from a clean, reviewable pull request.</p>
+
+<pre><code># Interactively rebase the last 5 commits
+git rebase -i HEAD~5</code></pre>
+
+        <p>Git opens your editor with a list of commits (oldest first):</p>
+
+<pre><code>pick a1b2c3d Add user authentication model
+pick e4f5g6h Add login endpoint
+pick i7j8k9l Fix typo in login response
+pick m0n1o2p Add session middleware
+pick q3r4s5t WIP: debug logging</code></pre>
+
+        <h3>The Commands</h3>
+
+        <p>Replace the word <code>pick</code> with any of these commands to control what happens to each commit:</p>
+
+        <ul>
+            <li><strong><code>pick</code> (p)</strong> &mdash; Keep the commit as-is</li>
+            <li><strong><code>reword</code> (r)</strong> &mdash; Keep the changes but edit the commit message</li>
+            <li><strong><code>edit</code> (e)</strong> &mdash; Pause after applying this commit so you can amend it (add files, split it, etc.)</li>
+            <li><strong><code>squash</code> (s)</strong> &mdash; Fold this commit into the previous one and combine both messages</li>
+            <li><strong><code>fixup</code> (f)</strong> &mdash; Fold this commit into the previous one but discard this commit's message</li>
+            <li><strong><code>drop</code> (d)</strong> &mdash; Delete this commit entirely</li>
+        </ul>
+
+        <h3>Example: Squashing Commits</h3>
+
+        <p>The most common use of interactive rebase is squashing related commits together. Here we fold the typo fix and WIP debug logging into the commits they belong to:</p>
+
+<pre><code>pick a1b2c3d Add user authentication model
+pick e4f5g6h Add login endpoint
+fixup i7j8k9l Fix typo in login response
+pick m0n1o2p Add session middleware
+drop q3r4s5t WIP: debug logging</code></pre>
+
+        <p>After saving, the typo fix is silently folded into "Add login endpoint" and the WIP debug commit is deleted. The result is three clean, meaningful commits.</p>
+
+        <h3>Example: Reordering and Rewording</h3>
+
+<pre><code>reword m0n1o2p Add session middleware
+pick a1b2c3d Add user authentication model
+pick e4f5g6h Add login endpoint</code></pre>
+
+        <p>This reorders the commits and prompts you to write a new message for the first one. Use this when the logical order of changes matters to reviewers.</p>
+
+        <h3>Example: Splitting a Commit with edit</h3>
+
+        <p>Sometimes a commit does too much. The <code>edit</code> command lets you pause the rebase so you can break it apart:</p>
+
+<pre><code>edit a1b2c3d Add auth model and migration and seed data</code></pre>
+
+        <p>Git pauses after applying that commit. Now you can:</p>
+
+<pre><code># Undo the commit but keep the changes staged
+git reset HEAD~1
+
+# Stage and commit the model separately
+git add app/models/user.rb
+git commit -m "Add user authentication model"
+
+# Stage and commit the migration
+git add db/migrate/
+git commit -m "Add users table migration"
+
+# Stage and commit the seed data
+git add db/seeds.rb
+git commit -m "Add default admin user seed"
+
+# Continue the rebase
+git rebase --continue</code></pre>
+
+        <!-- ==================== REBASE WORKFLOW ==================== -->
+        <h2 id="rebase-workflow">Rebase Workflow for Feature Branches</h2>
+
+        <p>Here is a complete, real-world workflow for developing a feature using rebase. This is the pattern most teams adopt once they are comfortable with rebase:</p>
+
+<pre><code># 1. Create a feature branch from the latest main
+git checkout main
+git pull origin main
+git checkout -b feature/payment-processing
+
+# 2. Do your work, making as many commits as you need
+git add .
+git commit -m "Add Stripe SDK integration"
+# ... more work ...
+git commit -m "Add payment form component"
+# ... more work ...
+git commit -m "Fix amount calculation bug"
+git commit -m "Add payment confirmation page"
+
+# 3. Before opening a PR, update your branch
+git fetch origin
+git rebase origin/main
+
+# 4. Clean up your commits with interactive rebase
+git rebase -i origin/main
+
+# 5. Force-push your cleaned-up branch (safe because it is your branch)
+git push --force-with-lease origin feature/payment-processing
+
+# 6. Open your pull request</code></pre>
+
+        <p>The key insight is that you rebase <em>before</em> opening the PR, not after. Once the PR is open and teammates are reviewing, switch to merge-based updates if needed.</p>
+
+        <p>For more on team branch workflows, see our <a href="/blog/git-workflow-automation-guide">Git Workflow Automation Guide</a>.</p>
+
+        <!-- ==================== REBASE ONTO ==================== -->
+        <h2 id="rebase-onto">Rebase Onto: Moving Commits Between Branches</h2>
+
+        <p><code>git rebase --onto</code> is the Swiss Army knife of rebase. It lets you transplant a range of commits from one base to another. The syntax is:</p>
+
+<pre><code>git rebase --onto &lt;new-base&gt; &lt;old-base&gt; &lt;branch&gt;</code></pre>
+
+        <p>This means: take all commits between <code>&lt;old-base&gt;</code> and <code>&lt;branch&gt;</code> and replay them onto <code>&lt;new-base&gt;</code>.</p>
+
+        <h3>Scenario 1: Move a Branch to a Different Base</h3>
+
+        <p>You accidentally branched off <code>develop</code> instead of <code>main</code>:</p>
+
+<pre><code>Before:
+
+    D---E---F  main
+         \
+          G---H  develop
+               \
+                I---J  feature (branched from develop by mistake)
+
+# Move feature's commits (I, J) onto main instead
+git rebase --onto main develop feature
+
+After:
+
+    D---E---F  main
+         \    \
+          \    I'--J'  feature (now based on main)
+           \
+            G---H  develop</code></pre>
+
+        <h3>Scenario 2: Remove Commits from the Middle</h3>
+
+        <p>Suppose commits B and C introduced a broken experiment and you want to remove them:</p>
+
+<pre><code>Before:
+
+    A---B---C---D---E  feature
+
+# Remove B and C by rebasing D..E onto A
+git rebase --onto A C feature
+
+After:
+
+    A---D'--E'  feature</code></pre>
+
+        <h3>Scenario 3: Extract Commits to a New Base</h3>
+
+<pre><code># You have a long branch and want to move just the last 3 commits
+# onto a release branch
+git rebase --onto release HEAD~3 feature</code></pre>
+
+        <!-- ==================== HANDLING CONFLICTS ==================== -->
+        <h2 id="handling-conflicts">Handling Rebase Conflicts Step by Step</h2>
+
+        <p>Rebase applies commits one at a time, so you might hit conflicts at any point during the replay. Here is the exact process for resolving them:</p>
+
+<pre><code># Start a rebase
+git rebase origin/main
+
+# Git stops at a conflict:
+# CONFLICT (content): Merge conflict in src/api/auth.js
+# error: could not apply a1b2c3d... Add login endpoint
+# Resolve all conflicts and then run:
+#   git rebase --continue</code></pre>
+
+        <p><strong>Step 1:</strong> See which files have conflicts:</p>
+
+<pre><code>git status
+# Unmerged paths:
+#   both modified:   src/api/auth.js</code></pre>
+
+        <p><strong>Step 2:</strong> Open the file and resolve the conflict markers:</p>
+
+<pre><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+const token = jwt.sign({ userId: user.id }, SECRET, { expiresIn: '24h' });
+=======
+const token = jwt.sign({ id: user.id, role: user.role }, SECRET);
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; a1b2c3d (Add login endpoint)</code></pre>
+
+        <p>Edit the file to keep what you need:</p>
+
+<pre><code>const token = jwt.sign({ userId: user.id, role: user.role }, SECRET, { expiresIn: '24h' });</code></pre>
+
+        <p><strong>Step 3:</strong> Mark the conflict as resolved and continue:</p>
+
+<pre><code>git add src/api/auth.js
+git rebase --continue</code></pre>
+
+        <p>If there are more commits to replay, Git may stop again with new conflicts. Repeat the process for each one.</p>
+
+        <h3>Rebase Escape Hatches</h3>
+
+<pre><code># Abort the rebase entirely and go back to where you started
+git rebase --abort
+
+# Skip the current commit (discard it) and continue
+git rebase --skip</code></pre>
+
+        <p>Use <code>--abort</code> generously. There is no shame in aborting a rebase, figuring out the situation, and starting again.</p>
+
+        <p>For visualizing diffs during conflict resolution, try our <a href="/tools/git-diff-viewer">Git Diff Viewer</a>.</p>
+
+        <!-- ==================== PULL REBASE ==================== -->
+        <h2 id="pull-rebase">git pull --rebase</h2>
+
+        <p>A regular <code>git pull</code> is actually <code>git fetch</code> + <code>git merge</code>. When your local branch has commits that are not on the remote, this creates a merge commit even though nobody intended to "merge" anything. Over time, these accumulate into a noisy log full of "Merge branch 'main' of github.com/..." messages.</p>
+
+        <p><code>git pull --rebase</code> replaces the merge step with a rebase. Your local commits are replayed on top of the fetched changes:</p>
+
+<pre><code># Instead of this (creates merge commits):
+git pull origin main
+
+# Do this (linear history):
+git pull --rebase origin main</code></pre>
+
+        <h3>Make It the Default</h3>
+
+<pre><code># Set rebase as the default pull strategy globally
+git config --global pull.rebase true
+
+# Now every 'git pull' automatically uses rebase
+git pull  # equivalent to git pull --rebase</code></pre>
+
+        <h3>Preserve Merge Commits</h3>
+
+        <p>If your local branch has intentional merge commits you want to keep:</p>
+
+<pre><code># Rebase but preserve local merge commits
+git pull --rebase=merges origin main
+
+# Or set as default
+git config --global pull.rebase merges</code></pre>
+
+        <!-- ==================== AUTOSQUASH ==================== -->
+        <h2 id="autosquash">Autosquash with Fixup Commits</h2>
+
+        <p>Autosquash is a workflow that lets you mark a commit as a fix for a previous commit at the time you create it. When you later run interactive rebase, Git automatically reorders and marks these commits for squashing.</p>
+
+<pre><code># You already committed "Add payment form component"
+# Now you realize you forgot to handle the error state.
+# Instead of making a vague "fix" commit, do this:
+
+git add src/components/PaymentForm.tsx
+git commit --fixup=HEAD~2  # targets "Add payment form component"
+
+# The commit message is automatically set to:
+# fixup! Add payment form component</code></pre>
+
+        <p>Now when you run interactive rebase with <code>--autosquash</code>:</p>
+
+<pre><code>git rebase -i --autosquash origin/main</code></pre>
+
+        <p>Git automatically reorders the fixup commit right after its target and marks it with <code>fixup</code>:</p>
+
+<pre><code>pick a1b2c3d Add Stripe SDK integration
+pick e4f5g6h Add payment form component
+fixup x9y8z7w fixup! Add payment form component
+pick m0n1o2p Add payment confirmation page</code></pre>
+
+        <p>Save without changing anything and the fixup is folded in automatically.</p>
+
+        <h3>Make Autosquash the Default</h3>
+
+<pre><code># Always use --autosquash with interactive rebase
+git config --global rebase.autoSquash true</code></pre>
+
+        <p>With this set, you never need to pass <code>--autosquash</code> manually. Every <code>git rebase -i</code> will automatically reorder fixup and squash commits.</p>
+
+        <h3>Targeting Specific Commits</h3>
+
+<pre><code># Fix a specific commit by its hash
+git commit --fixup=abc1234
+
+# Fix the commit that last touched a specific file
+git commit --fixup=$(git log -1 --format="%H" -- src/utils/price.ts)
+
+# Create a squash commit (prompts for message editing)
+git commit --squash=abc1234</code></pre>
+
+        <!-- ==================== GOLDEN RULE ==================== -->
+        <h2 id="golden-rule">The Golden Rule: Never Rebase Published Branches</h2>
+
+        <p>This is the single most important rule for using rebase in a team:</p>
+
+        <p style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; font-size: 1.05rem;"><strong>Never rebase commits that exist on a branch someone else might have pulled.</strong></p>
+
+        <p>Rebase rewrites commit hashes. If Alice has pulled your branch and based her work on commit <code>abc1234</code>, and you rebase and push, that commit no longer exists in the remote. Alice now has orphaned commits that reference a parent that does not exist. When she pulls, she gets duplicate commits and a tangled mess.</p>
+
+<pre><code># Safe: rebase your own unpublished feature branch
+git rebase main feature/my-private-work
+
+# Safe: rebase before pushing for the first time
+git rebase -i main  # clean up, then push
+
+# DANGEROUS: rebase main or develop or any shared branch
+git checkout main
+git rebase feature/something  # DO NOT DO THIS
+
+# DANGEROUS: rebase after others have pulled
+git checkout feature/shared-work  # Alice already pulled this
+git rebase main  # Rewrites hashes Alice depends on</code></pre>
+
+        <h3>When You Must Rebase a Pushed Branch</h3>
+
+        <p>If you are the only person working on a pushed feature branch (a common pattern), rebase is safe as long as you force-push carefully:</p>
+
+<pre><code># --force-with-lease fails if someone else pushed to the branch
+# This is safer than --force which overwrites unconditionally
+git push --force-with-lease origin feature/my-branch</code></pre>
+
+        <p>Never use <code>--force</code>. Always use <code>--force-with-lease</code>. It checks that the remote ref matches your expectation before overwriting, protecting against accidentally clobbering a colleague's push.</p>
+
+        <!-- ==================== REFLOG RECOVERY ==================== -->
+        <h2 id="reflog-recovery">Recovering from Bad Rebases with git reflog</h2>
+
+        <p>Messed up a rebase? The reflog is your safety net. Git records every movement of HEAD, even through rebases. Nothing is truly lost until the garbage collector runs (usually 90 days later).</p>
+
+<pre><code># View the reflog
+git reflog
+
+# Output:
+a1b2c3d (HEAD -> feature) HEAD@{0}: rebase (finish): ...
+f9e8d7c HEAD@{1}: rebase (pick): Add payment form
+b6a5c4d HEAD@{2}: rebase (start): checkout origin/main
+x1y2z3w HEAD@{3}: commit: Add payment confirmation page
+m4n5o6p HEAD@{4}: commit: Fix amount calculation bug
+...</code></pre>
+
+        <p>The entry at <code>HEAD@{3}</code> is where your branch was before the rebase started. Reset to it:</p>
+
+<pre><code># Hard reset to the pre-rebase state
+git reset --hard HEAD@{3}
+
+# Or use the hash directly
+git reset --hard x1y2z3w</code></pre>
+
+        <p>Your branch is now exactly where it was before the rebase, with all original commits intact.</p>
+
+        <h3>Recovery During a Rebase</h3>
+
+<pre><code># If you are in the middle of a rebase and want to stop
+git rebase --abort
+
+# This restores the branch to its pre-rebase state
+# No reflog surgery needed</code></pre>
+
+        <h3>Creating a Backup Branch</h3>
+
+        <p>For complex rebases, create a backup first:</p>
+
+<pre><code># Save current state before rebasing
+git branch backup/feature-before-rebase
+
+# Now rebase with confidence
+git rebase -i origin/main
+
+# If everything goes wrong
+git checkout feature/payment-processing
+git reset --hard backup/feature-before-rebase
+git branch -d backup/feature-before-rebase</code></pre>
+
+        <p>See our <a href="/blog/git-commands-every-developer-should-know">Git Commands Guide</a> for more essential recovery techniques.</p>
+
+        <!-- ==================== TEAM WORKFLOWS ==================== -->
+        <h2 id="team-workflows">Real-World Team Workflows Using Rebase</h2>
+
+        <h3>Workflow 1: Rebase + Squash Merge (GitHub/GitLab Style)</h3>
+
+        <p>This is the most popular workflow for teams that want clean history:</p>
+
+<pre><code># Developer workflow:
+git checkout -b feature/new-api-endpoint
+# ... make commits, messy history is fine ...
+
+# Before PR: update and clean up
+git fetch origin
+git rebase origin/main
+git rebase -i origin/main  # squash WIP commits
+git push --force-with-lease origin feature/new-api-endpoint
+
+# PR reviewer merges with "Squash and merge" button
+# Result: one clean commit on main per feature</code></pre>
+
+        <h3>Workflow 2: Rebase + Fast-Forward Merge (Linear History)</h3>
+
+        <p>For teams that want every commit on main to be meaningful:</p>
+
+<pre><code># Enforce linear history on the repository
+# (GitHub: Settings -> Require linear history)
+
+# Developer cleans up commits before merging
+git rebase -i origin/main
+git push --force-with-lease
+
+# Merge is a fast-forward (no merge commit)
+git checkout main
+git merge --ff-only feature/new-api-endpoint</code></pre>
+
+        <h3>Workflow 3: Continuous Rebase (Trunk-Based Development)</h3>
+
+<pre><code># Short-lived branches, rebased frequently
+git checkout -b fix/login-timeout
+# ... make 1-3 commits ...
+
+# Rebase onto main multiple times per day
+git fetch origin
+git rebase origin/main
+
+# Merge quickly (branch lives hours, not days)
+git checkout main
+git merge --ff-only fix/login-timeout
+git push origin main
+git branch -d fix/login-timeout</code></pre>
+
+        <h3>Recommended Team Configuration</h3>
+
+<pre><code># Every developer should set these
+git config --global pull.rebase true
+git config --global rebase.autoSquash true
+git config --global rebase.autoStash true
+
+# rebase.autoStash: automatically stashes uncommitted changes
+# before rebase and pops them after, so you do not have to
+# manually stash first</code></pre>
+
+        <p>For branch protection and CI integration, see our <a href="/blog/git-branching-strategies-guide">Git Branching Strategies Guide</a>.</p>
+
+        <!-- ==================== COMMON MISTAKES ==================== -->
+        <h2 id="common-mistakes">Common Mistakes and How to Avoid Them</h2>
+
+        <h3>Mistake 1: Rebasing a Shared Branch</h3>
+        <p><strong>Problem:</strong> You rebase <code>main</code> or <code>develop</code>, rewriting commits that others depend on.</p>
+        <p><strong>Fix:</strong> Only rebase branches that you own. If in doubt, merge instead.</p>
+
+        <h3>Mistake 2: Using --force Instead of --force-with-lease</h3>
+        <p><strong>Problem:</strong> <code>git push --force</code> overwrites the remote unconditionally. If a colleague pushed a commit, you destroy it.</p>
+        <p><strong>Fix:</strong> Always use <code>--force-with-lease</code>. It fails safely if the remote has changed.</p>
+
+<pre><code># Create a git alias to prevent accidents
+git config --global alias.pushf "push --force-with-lease"
+# Now use: git pushf origin feature/my-branch</code></pre>
+
+        <h3>Mistake 3: Resolving the Same Conflict Repeatedly</h3>
+        <p><strong>Problem:</strong> You keep rebasing and hitting the same conflict because the same commits clash each time.</p>
+        <p><strong>Fix:</strong> Enable <code>rerere</code> (reuse recorded resolution). Git remembers how you resolved a conflict and applies the same fix automatically next time:</p>
+
+<pre><code>git config --global rerere.enabled true</code></pre>
+
+        <h3>Mistake 4: Rebasing an Enormous Branch</h3>
+        <p><strong>Problem:</strong> Your branch has 50 commits spanning 3 weeks. Rebasing onto <code>main</code> produces conflicts in every third commit.</p>
+        <p><strong>Fix:</strong> Rebase frequently (daily or after every PR merge to main). Short-lived branches with frequent rebases almost never have conflicts. If you are stuck with a large branch, consider doing a merge instead of a rebase.</p>
+
+        <h3>Mistake 5: Forgetting to Update Before Rebasing</h3>
+        <p><strong>Problem:</strong> You run <code>git rebase main</code> but your local <code>main</code> is weeks behind. You rebase onto stale code and still have conflicts when merging.</p>
+        <p><strong>Fix:</strong> Always rebase onto the remote tracking branch:</p>
+
+<pre><code># Do this:
+git fetch origin
+git rebase origin/main
+
+# Not this (uses your local, possibly stale, main):
+git rebase main</code></pre>
+
+        <h3>Mistake 6: Losing Track of What Was Rebased</h3>
+        <p><strong>Problem:</strong> After a complex interactive rebase, you are not sure what you changed.</p>
+        <p><strong>Fix:</strong> Compare the before and after using the reflog:</p>
+
+<pre><code># After rebasing, compare with pre-rebase state
+git diff HEAD@{1}..HEAD
+
+# Or see the commit log difference
+git log --oneline HEAD@{1}..HEAD</code></pre>
+
+        <p>For more Git best practices, see our <a href="/blog/git-complete-guide">Complete Guide to Git</a>.</p>
+
+        <!-- ==================== FAQ ==================== -->
+        <h2 id="faq">Frequently Asked Questions</h2>
+
+        <div style="margin-top: 1rem;">
+            <details style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                <summary style="font-weight: 600; cursor: pointer;">What is the difference between git rebase and git merge?</summary>
+                <p style="margin-top: 0.75rem;">Git merge creates a new merge commit that joins two branch histories together, preserving the exact chronological order of commits. Git rebase replays your commits on top of another branch, creating a linear history. Merge is non-destructive and keeps the full context. Rebase produces a cleaner log but rewrites commit hashes. Use rebase for local feature branches; use merge for shared or public branches.</p>
+            </details>
+            <details style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                <summary style="font-weight: 600; cursor: pointer;">Is it safe to rebase a branch that has been pushed to a remote?</summary>
+                <p style="margin-top: 0.75rem;">Only if you are the sole person working on that branch. Rebasing rewrites commit hashes, so anyone who has based work on the old commits will face conflicts. If others have pulled your branch, use merge instead. If you must rebase a pushed branch that only you use, follow up with <code>git push --force-with-lease</code> (never <code>--force</code>) to update the remote safely.</p>
+            </details>
+            <details style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                <summary style="font-weight: 600; cursor: pointer;">How do I squash multiple commits into one using interactive rebase?</summary>
+                <p style="margin-top: 0.75rem;">Run <code>git rebase -i HEAD~N</code> where N is the number of commits to squash. In the editor, change the word "pick" to "squash" (or "s") for every commit you want to fold into the one above it. Leave the first commit as "pick". Save and close, then write a new combined commit message when prompted. Use "fixup" instead of "squash" if you want to discard the folded commit messages entirely.</p>
+            </details>
+            <details style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                <summary style="font-weight: 600; cursor: pointer;">How do I undo a rebase that went wrong?</summary>
+                <p style="margin-top: 0.75rem;">Use <code>git reflog</code> to find the commit hash your branch pointed to before the rebase. The reflog records every HEAD movement, so you will see an entry like "rebase (start)" or the commit message from before the rebase. Then run <code>git reset --hard &lt;hash&gt;</code> to restore your branch. If you are mid-rebase and want to stop, run <code>git rebase --abort</code> to return to the pre-rebase state.</p>
+            </details>
+            <details style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                <summary style="font-weight: 600; cursor: pointer;">Should I use git pull --rebase instead of git pull?</summary>
+                <p style="margin-top: 0.75rem;">Yes, for most workflows. A regular <code>git pull</code> creates a merge commit every time your local branch has diverged from the remote, cluttering the history with meaningless merge commits. <code>git pull --rebase</code> replays your local commits on top of the fetched changes, keeping the history linear. Set it as default with <code>git config --global pull.rebase true</code>. Use <code>git pull --rebase=merges</code> if you want to preserve intentional local merge commits.</p>
+            </details>
+        </div>
+
+        <!-- ==================== CROSS LINKS ==================== -->
+        <h2>Continue Learning</h2>
+        <p>This guide is part of our Git deep-dive series. Explore the related guides to build a complete understanding of Git workflows:</p>
+        <ul>
+            <li><a href="/blog/git-complete-guide">The Complete Guide to Git</a> &mdash; Fundamentals through advanced workflows</li>
+            <li><a href="/blog/git-commands-every-developer-should-know">Git Commands Every Developer Should Know</a> &mdash; Essential command reference</li>
+            <li><a href="/blog/git-branching-strategies-guide">Git Branching Strategies Guide</a> &mdash; Git Flow, GitHub Flow, and Trunk-Based Development</li>
+            <li><a href="/blog/git-revert-complete-guide">Git Revert Complete Guide</a> &mdash; Safe rollback workflows for pushed commits</li>
+            <li><a href="/blog/git-undo-pushed-commit-guide">Git Undo Pushed Commit Guide</a> &mdash; Quick commands to revert pushed commits safely</li>
+            <li><a href="/blog/github-merge-queue-rollback-stuck-guide">GitHub Merge Queue Rollback Stuck Guide</a> &mdash; Queue triage workflow when rollback PRs are approved but not landing</li>
+            <li><a href="/blog/github-merge-queue-pending-checks-rollback-guide">GitHub Merge Queue Pending Checks Guide</a> &mdash; Pending-check incident runbook for rollback PRs in merge queue</li>
+            <li><a href="/blog/github-merge-queue-merge-group-trigger-guide">GitHub Merge Queue merge_group Trigger Guide</a> &mdash; fix queue checks that never start because workflow events are misconfigured</li>
+            <li><a href="/blog/github-merge-queue-stale-review-dismissal-guide">GitHub Merge Queue Stale Review Dismissal Guide</a> &mdash; rollback incident runbook for approvals repeatedly dismissed by stale-review policy</li>
+            <li><a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">GitHub Merge Queue Closure Threshold Breach Alert Routing Playbook</a> &mdash; route threshold incidents with severity ownership and escalation handoffs before repeat failures spread</li>
+            <li><a href="/blog/git-blame-complete-guide">Git Blame Complete Guide</a> &mdash; Find who changed a line (ranges, renames, moved code, ignore-revs)</li>
+            <li><a href="/blog/git-log-complete-guide">Git Log Complete Guide</a> &mdash; Pretty graphs, filters, ranges, and searching history</li>
+            <li><a href="/blog/git-workflow-automation-guide">Git Workflow Automation Guide</a> &mdash; Hooks, CI/CD, and automation patterns</li>
+        </ul>
+    </main>
+
+    <section style="max-width: 800px; margin: 2rem auto; padding: 0 1.5rem;">
+        <h2 style="font-size: 1.3rem; margin-bottom: 1rem;">Related Tools</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
+            <a href="/tools/git-diff-viewer" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Diff Viewer</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Visualize and compare diffs in the browser</div>
+            </a>
+            <a href="/tools/json-formatter" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">JSON Formatter</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Format and validate JSON data instantly</div>
+            </a>
+            <a href="/tools/regex-tester" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Regex Tester</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Test regular expressions with live matching</div>
+            </a>
+            <a href="/cheatsheets/git" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Git Cheat Sheet</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">One-page quick reference for all Git commands</div>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <p>DevToolbox &mdash; Free tools for developers</p>
+        <p><a href="/">Home</a> &middot; <a href="/tools/">Tools</a> &middot; <a href="/cheatsheets/">Cheat Sheets</a> &middot; <a href="/blog/">Blog</a></p>
+    </footer>
+    <script src="/js/track.js" defer></script>
+</body>
+</html>

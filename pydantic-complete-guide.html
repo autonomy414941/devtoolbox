@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pydantic: The Complete Guide for 2026 | DevToolbox Blog</title>
+    <meta name="description" content="Master Pydantic v2 for Python data validation. Learn BaseModel, Field constraints, custom validators, nested models, serialization, generic models, computed fields, pydantic-settings, and FastAPI integration with practical code examples.">
+    <meta name="keywords" content="pydantic tutorial, pydantic v2, pydantic basemodel, pydantic validation, pydantic settings, python data validation, pydantic field, pydantic model, pydantic validator, pydantic serialization">
+    <meta property="og:title" content="Pydantic: The Complete Guide for 2026">
+    <meta property="og:description" content="Master Pydantic v2 for Python data validation. Learn BaseModel, Field constraints, custom validators, nested models, serialization, pydantic-settings, and FastAPI integration.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/pydantic-complete-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-pydantic-complete-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Pydantic: The Complete Guide for 2026">
+    <meta name="twitter:description" content="Master Pydantic v2 for Python data validation. Learn BaseModel, Field constraints, custom validators, nested models, serialization, pydantic-settings, and FastAPI integration.">
+    <meta property="article:published_time" content="2026-02-12">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/pydantic-complete-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Pydantic: The Complete Guide for 2026",
+        "description": "Master Pydantic v2 for Python data validation. Learn BaseModel, Field constraints, custom validators, nested models, serialization, generic models, computed fields, pydantic-settings, and FastAPI integration with practical code examples.",
+        "datePublished": "2026-02-12",
+        "dateModified": "2026-02-12",
+        "url": "https://devtoolbox.dedyn.io/blog/pydantic-complete-guide",
+        "author": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        },
+        "publisher": {
+                "@type": "Organization",
+                "name": "DevToolbox"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is Pydantic and why should I use it?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Pydantic is a Python data validation library that uses type hints to validate, parse, and serialize data. It enforces type safety at runtime, catching invalid data before it causes bugs deep in your application. Pydantic is the most widely used validation library in Python, powering frameworks like FastAPI, LangChain, and SQLModel. Use it whenever you handle external data: API requests, config files, database records, or user input."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What changed between Pydantic v1 and v2?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Pydantic v2 is a complete rewrite with a Rust-based core (pydantic-core) that makes validation 5-50x faster. Key API changes: @validator becomes @field_validator, @root_validator becomes @model_validator, .dict() becomes .model_dump(), .json() becomes .model_dump_json(), .parse_obj() becomes .model_validate(), and Config class becomes model_config dict. V2 also adds strict mode, computed fields, better JSON Schema generation, and more flexible serialization. V1-style APIs still work with deprecation warnings but will be removed in v3."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the difference between Pydantic and Python dataclasses?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Python dataclasses generate __init__, __repr__, and __eq__ methods but perform zero runtime validation. If you pass a string where an int is expected, dataclasses silently accept it. Pydantic validates and coerces every field at runtime, raises clear errors for invalid data, and provides serialization methods like model_dump() and model_dump_json(). Pydantic also supports nested validation, custom validators, JSON Schema export, and settings management. Use dataclasses for simple internal data containers. Use Pydantic when data crosses a trust boundary: APIs, config files, user input, or database results."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do Pydantic validators work?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Pydantic v2 provides two decorator types: @field_validator for single fields and @model_validator for cross-field logic. Field validators receive the field value and can run in 'before' mode (before type coercion), 'after' mode (after coercion, the default), or 'wrap' mode (control whether inner validation runs). Model validators receive the entire model and run before or after all field validation. Validators raise ValueError or AssertionError to reject data, and return the validated value to accept or transform it."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I use pydantic-settings for configuration?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Install pydantic-settings and create a class that inherits from BaseSettings. Each field maps to an environment variable (case-insensitive by default). Set model_config with env_file='.env' to load from dotenv files. Pydantic validates all settings on instantiation, catching missing or invalid config immediately. You can set env_prefix to namespace variables (e.g., APP_DATABASE_URL), use env_nested_delimiter for nested settings, and define SecretStr fields to prevent secrets from appearing in logs or repr output."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Pydantic Complete Guide</span></nav>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "https://devtoolbox.dedyn.io/"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Blog",
+                        "item": "https://devtoolbox.dedyn.io/blog"
+                },
+                {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "Pydantic Complete Guide"
+                }
+        ]
+    }
+    </script>
+
+    <script src="/js/track.js" defer></script>
+
+    <style>
+        .faq-section { margin-top: 3rem; }
+        .faq-section details { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; margin-bottom: 1rem; padding: 0; }
+        .faq-section summary { color: #3b82f6; font-weight: bold; cursor: pointer; padding: 1rem 1.5rem; font-size: 1.1rem; }
+        .faq-section summary:hover { color: #60a5fa; }
+        .faq-section details > p { padding: 0 1.5rem 1rem 1.5rem; margin: 0; }
+        .toc { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 1.5rem 2rem; margin: 2rem 0; }
+        .toc h3 { margin-top: 0; color: #e4e4e7; }
+        .toc ol { margin-bottom: 0; line-height: 2; }
+        .toc a { color: #3b82f6; text-decoration: none; }
+        .toc a:hover { color: #60a5fa; text-decoration: underline; }
+    </style>
+
+    <main class="blog-post">
+        <article>
+        <h1>Pydantic: The Complete Guide for 2026</h1>
+        <div class="blog-meta" style="color: #9ca3af; margin-bottom: 2rem;">
+            <span>February 12, 2026</span> &mdash; <span>22 min read</span>
+        </div>
+
+        <p>Pydantic is the standard for data validation in Python. It uses type hints to validate, coerce, and serialize data at runtime &mdash; catching bad data at the boundary instead of letting it silently corrupt your application. With its v2 rewrite powered by a Rust core, Pydantic is now 5&ndash;50x faster than v1 and is used by FastAPI, LangChain, SQLModel, Prefect, and thousands of production systems.</p>
+
+        <p>This guide covers everything from basic models to advanced patterns: field constraints, custom validators, nested models, serialization, generics, computed fields, settings management, and FastAPI integration. All examples use Pydantic v2 syntax.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Related resources:</strong> Format your data with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>, validate JSON schemas with the <a href="/tools/json-validator" style="color: #3b82f6;">JSON Validator</a>, and learn API design in our <a href="/blog/fastapi-complete-guide" style="color: #3b82f6;">FastAPI Complete Guide</a>.
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+                <li><a href="#what-is-pydantic">What Is Pydantic</a></li>
+                <li><a href="#basemodel-basics">BaseModel Basics</a></li>
+                <li><a href="#field-validation">Field Validation</a></li>
+                <li><a href="#custom-validators">Custom Validators</a></li>
+                <li><a href="#nested-models">Nested Models and Complex Types</a></li>
+                <li><a href="#serialization">Serialization</a></li>
+                <li><a href="#generic-models">Generic Models</a></li>
+                <li><a href="#computed-fields">Computed Fields</a></li>
+                <li><a href="#settings-management">Settings Management</a></li>
+                <li><a href="#pydantic-fastapi">Pydantic with FastAPI</a></li>
+                <li><a href="#comparison">Pydantic vs Dataclasses vs Attrs</a></li>
+                <li><a href="#performance">Performance in V2</a></li>
+                <li><a href="#best-practices">Common Patterns and Best Practices</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <h2 id="what-is-pydantic">1. What Is Pydantic</h2>
+
+        <p>Pydantic is a data validation library that enforces type hints at runtime. You define a model class with annotated fields, and Pydantic validates every value when you create an instance. Invalid data raises a clear <code>ValidationError</code> with the exact field and reason. Valid data is coerced to the correct type and stored as a model instance with attribute access, serialization, and JSON Schema generation built in.</p>
+
+<pre><code class="language-bash">pip install pydantic</code></pre>
+
+<pre><code class="language-python">from pydantic import BaseModel, ValidationError
+
+class User(BaseModel):
+    name: str
+    age: int
+    email: str
+
+# Valid data - coerces age from string to int
+user = User(name="Alice", age="30", email="alice@example.com")
+print(user.age)       # 30 (int, not str)
+print(type(user.age)) # &lt;class 'int'&gt;
+
+# Invalid data - raises ValidationError
+try:
+    User(name="Bob", age="not a number", email="bob@example.com")
+except ValidationError as e:
+    print(e.error_count())  # 1
+    print(e.errors()[0]["msg"])  # "Input should be a valid integer..."</code></pre>
+
+        <p>Pydantic validates at the boundary &mdash; where external data enters your system. Once you have a model instance, every field is guaranteed to have the correct type. This eliminates entire categories of runtime bugs.</p>
+
+        <h2 id="basemodel-basics">2. BaseModel Basics</h2>
+
+        <p>Every Pydantic model inherits from <code>BaseModel</code>. Define fields with type annotations. Use <code>=</code> for defaults, <code>Optional</code> for nullable fields, and <code>list</code>/<code>dict</code> for collection types:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
+
+class Product(BaseModel):
+    name: str
+    price: float
+    quantity: int = 0                    # Default value
+    tags: list[str] = []                 # Default empty list
+    metadata: dict[str, str] = {}        # Default empty dict
+    description: Optional[str] = None    # Nullable field
+    created_at: datetime = datetime.now  # Callable default
+
+# Create from keyword arguments
+p = Product(name="Widget", price=9.99, tags=["sale"])
+
+# Create from a dictionary
+data = {"name": "Gadget", "price": 19.99, "quantity": 5}
+p2 = Product(**data)
+
+# Access fields as attributes
+print(p.name)   # "Widget"
+print(p.tags)   # ["sale"]
+
+# Models are immutable by default in v2
+# p.price = 12.99  # raises AttributeError unless you configure it</code></pre>
+
+        <p>To allow mutation, set <code>model_config</code>:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel, ConfigDict
+
+class MutableProduct(BaseModel):
+    model_config = ConfigDict(frozen=False)
+
+    name: str
+    price: float
+
+p = MutableProduct(name="Widget", price=9.99)
+p.price = 12.99  # Works now</code></pre>
+
+        <h2 id="field-validation">3. Field Validation</h2>
+
+        <p>The <code>Field()</code> function adds constraints, metadata, and documentation to individual fields. It replaces raw default values with rich validation rules:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel, Field
+
+class User(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    age: int = Field(ge=0, le=150)           # >= 0, <= 150
+    email: str = Field(pattern=r'^[\w.+-]+@[\w-]+\.[\w.]+$')
+    score: float = Field(gt=0, lt=100.0)     # exclusive bounds
+    tags: list[str] = Field(default_factory=list, max_length=10)
+
+# Numeric constraints
+class Order(BaseModel):
+    quantity: int = Field(gt=0, description="Must order at least 1")
+    price: float = Field(ge=0.01, le=999999.99)
+    discount: float = Field(default=0, ge=0, le=1)  # 0-100%
+
+# String constraints
+class Article(BaseModel):
+    title: str = Field(min_length=5, max_length=200)
+    slug: str = Field(pattern=r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
+    body: str = Field(min_length=50)
+
+# Field with alias (useful for JSON keys that aren't valid Python names)
+class ApiResponse(BaseModel):
+    status_code: int = Field(alias="statusCode")
+    error_message: str = Field(alias="errorMessage", default="")
+
+resp = ApiResponse(**{"statusCode": 200, "errorMessage": ""})
+print(resp.status_code)  # 200</code></pre>
+
+        <p>Field constraints are enforced during validation. If any constraint fails, Pydantic raises a <code>ValidationError</code> with the field name, the value that failed, and which constraint was violated.</p>
+
+        <h2 id="custom-validators">4. Custom Validators</h2>
+
+        <p>When built-in constraints are not enough, use <code>@field_validator</code> for single fields and <code>@model_validator</code> for cross-field logic:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel, field_validator, model_validator
+
+class Signup(BaseModel):
+    username: str
+    password: str
+    password_confirm: str
+    email: str
+
+    @field_validator("username")
+    @classmethod
+    def username_alphanumeric(cls, v: str) -> str:
+        if not v.isalnum():
+            raise ValueError("Username must be alphanumeric")
+        return v.lower()  # Transform: normalize to lowercase
+
+    @field_validator("password")
+    @classmethod
+    def password_strength(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        if not any(c.isupper() for c in v):
+            raise ValueError("Password must contain an uppercase letter")
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Password must contain a digit")
+        return v
+
+    @model_validator(mode="after")
+    def passwords_match(self) -> "Signup":
+        if self.password != self.password_confirm:
+            raise ValueError("Passwords do not match")
+        return self</code></pre>
+
+        <h3>Before, After, and Wrap Modes</h3>
+
+        <p>Validators run at different stages. <code>mode="before"</code> runs before type coercion (you get the raw input). <code>mode="after"</code> runs after coercion (you get the typed value). <code>mode="wrap"</code> lets you control whether inner validation runs at all:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel, field_validator
+
+class FlexibleDate(BaseModel):
+    date: str
+
+    @field_validator("date", mode="before")
+    @classmethod
+    def normalize_date(cls, v):
+        """Runs before type validation - can transform raw input."""
+        if isinstance(v, int):
+            # Convert Unix timestamp to ISO string
+            from datetime import datetime, timezone
+            return datetime.fromtimestamp(v, tz=timezone.utc).isoformat()
+        return v
+
+class Temperature(BaseModel):
+    celsius: float
+
+    @field_validator("celsius", mode="after")
+    @classmethod
+    def reasonable_temp(cls, v: float) -> float:
+        """Runs after coercion - v is already a float."""
+        if v < -273.15:
+            raise ValueError("Temperature below absolute zero")
+        return round(v, 2)</code></pre>
+
+        <h2 id="nested-models">5. Nested Models and Complex Types</h2>
+
+        <p>Pydantic models compose naturally. Use one model as a field type in another, and Pydantic validates the entire tree recursively:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel, Field
+from typing import Optional
+from enum import Enum
+
+class AddressType(str, Enum):
+    HOME = "home"
+    WORK = "work"
+    BILLING = "billing"
+
+class Address(BaseModel):
+    street: str
+    city: str
+    state: str = Field(min_length=2, max_length=2)
+    zip_code: str = Field(pattern=r'^\d{5}(-\d{4})?$')
+    type: AddressType = AddressType.HOME
+
+class Company(BaseModel):
+    name: str
+    address: Address  # Nested model
+
+class Employee(BaseModel):
+    name: str
+    email: str
+    company: Company                     # Nested 2 levels deep
+    addresses: list[Address] = []        # List of nested models
+    manager: Optional["Employee"] = None # Self-referencing model
+
+# Pydantic validates the entire nested structure
+emp = Employee(
+    name="Alice",
+    email="alice@corp.com",
+    company={
+        "name": "Acme",
+        "address": {"street": "123 Main", "city": "NY", "state": "NY", "zip_code": "10001"}
+    },
+    addresses=[
+        {"street": "456 Oak", "city": "LA", "state": "CA", "zip_code": "90001", "type": "home"}
+    ]
+)</code></pre>
+
+        <p>Use <code>typing.Union</code> for discriminated unions and <code>typing.Literal</code> for fixed values:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel
+from typing import Literal, Union
+
+class CreditCard(BaseModel):
+    type: Literal["credit_card"]
+    card_number: str
+    expiry: str
+
+class BankTransfer(BaseModel):
+    type: Literal["bank_transfer"]
+    account_number: str
+    routing_number: str
+
+class Payment(BaseModel):
+    amount: float
+    method: Union[CreditCard, BankTransfer] = Field(discriminator="type")</code></pre>
+
+        <h2 id="serialization">6. Serialization</h2>
+
+        <p>Pydantic v2 provides <code>model_dump()</code> for dictionaries, <code>model_dump_json()</code> for JSON strings, and <code>model_validate()</code> to parse data back into models:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel
+from datetime import datetime
+
+class Event(BaseModel):
+    name: str
+    start: datetime
+    tags: list[str] = []
+    internal_id: int = 0
+
+event = Event(name="Launch", start="2026-03-01T10:00:00", tags=["product"])
+
+# To dictionary
+d = event.model_dump()
+# {'name': 'Launch', 'start': datetime(...), 'tags': ['product'], 'internal_id': 0}
+
+# Exclude fields
+d = event.model_dump(exclude={"internal_id"})
+# Exclude unset fields (only include fields explicitly passed)
+d = event.model_dump(exclude_unset=True)
+# {'name': 'Launch', 'start': datetime(...), 'tags': ['product']}
+
+# Include only specific fields
+d = event.model_dump(include={"name", "start"})
+
+# To JSON string (uses Rust serializer - very fast)
+json_str = event.model_dump_json(indent=2)
+
+# Parse back from dict or JSON
+event2 = Event.model_validate({"name": "Demo", "start": "2026-04-01T14:00:00"})
+event3 = Event.model_validate_json('{"name":"Demo","start":"2026-04-01T14:00:00"}')
+
+# Generate JSON Schema
+schema = Event.model_json_schema()
+print(schema)
+# {'properties': {'name': {'title': 'Name', 'type': 'string'}, ...}}</code></pre>
+
+        <p>Use <code>model_dump(mode="json")</code> to get a JSON-compatible dictionary where datetimes become strings and enums become values.</p>
+
+        <h2 id="generic-models">7. Generic Models</h2>
+
+        <p>Generic models let you create reusable wrappers with type-safe contents. This is ideal for API response envelopes, paginated results, and container types:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel
+from typing import Generic, TypeVar, Optional
+
+T = TypeVar("T")
+
+class ApiResponse(BaseModel, Generic[T]):
+    success: bool
+    data: Optional[T] = None
+    error: Optional[str] = None
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    items: list[T]
+    total: int
+    page: int
+    page_size: int
+
+class User(BaseModel):
+    id: int
+    name: str
+
+# Type-safe instantiation
+response = ApiResponse[User](success=True, data=User(id=1, name="Alice"))
+page = PaginatedResponse[User](
+    items=[User(id=1, name="Alice"), User(id=2, name="Bob")],
+    total=50, page=1, page_size=20
+)
+
+# The generic parameter is validated
+# ApiResponse[User](success=True, data={"invalid": "data"})  # ValidationError</code></pre>
+
+        <h2 id="computed-fields">8. Computed Fields</h2>
+
+        <p>Computed fields are derived from other fields. They appear in serialization output but are not part of the input schema. Use the <code>@computed_field</code> decorator:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel, computed_field
+
+class Rectangle(BaseModel):
+    width: float
+    height: float
+
+    @computed_field
+    @property
+    def area(self) -> float:
+        return self.width * self.height
+
+    @computed_field
+    @property
+    def perimeter(self) -> float:
+        return 2 * (self.width + self.height)
+
+rect = Rectangle(width=5, height=3)
+print(rect.area)       # 15.0
+print(rect.perimeter)  # 16.0
+
+# Computed fields appear in serialization
+print(rect.model_dump())
+# {'width': 5.0, 'height': 3.0, 'area': 15.0, 'perimeter': 16.0}
+
+class User(BaseModel):
+    first_name: str
+    last_name: str
+
+    @computed_field
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"</code></pre>
+
+        <h2 id="settings-management">9. Settings Management</h2>
+
+        <p>The <code>pydantic-settings</code> package lets you define application configuration as a Pydantic model. Each field maps to an environment variable, with full validation on startup:</p>
+
+<pre><code class="language-bash">pip install pydantic-settings</code></pre>
+
+<pre><code class="language-python">from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import SecretStr, Field
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",           # Load from .env file
+        env_file_encoding="utf-8",
+        env_prefix="APP_",         # APP_DATABASE_URL, APP_DEBUG, etc.
+        case_sensitive=False,
+    )
+
+    database_url: str
+    redis_url: str = "redis://localhost:6379"
+    secret_key: SecretStr                      # Hidden in repr/logs
+    debug: bool = False
+    allowed_hosts: list[str] = ["localhost"]
+    max_connections: int = Field(default=10, ge=1, le=100)
+
+# Environment variables or .env file:
+# APP_DATABASE_URL=postgresql://user:pass@localhost/mydb
+# APP_SECRET_KEY=super-secret-key-here
+# APP_DEBUG=true
+# APP_ALLOWED_HOSTS=["example.com","api.example.com"]
+
+settings = Settings()
+print(settings.database_url)               # "postgresql://..."
+print(settings.secret_key.get_secret_value())  # "super-secret-key-here"
+print(settings.secret_key)                 # SecretStr('**********')
+print(settings.debug)                      # True (coerced from string)</code></pre>
+
+        <p>For nested settings, use <code>env_nested_delimiter</code>:</p>
+
+<pre><code class="language-python">class DatabaseSettings(BaseModel):
+    host: str = "localhost"
+    port: int = 5432
+    name: str = "mydb"
+
+class AppSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_nested_delimiter="__")
+    db: DatabaseSettings = DatabaseSettings()
+
+# Set via: DB__HOST=prod-db.example.com DB__PORT=5433</code></pre>
+
+        <h2 id="pydantic-fastapi">10. Pydantic with FastAPI</h2>
+
+        <p>FastAPI is built on Pydantic. Request bodies, query parameters, response models, and dependency injection all use Pydantic models. FastAPI automatically validates input, serializes output, and generates OpenAPI documentation from your models:</p>
+
+<pre><code class="language-python">from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional
+
+app = FastAPI()
+
+class UserCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    email: EmailStr
+    age: int = Field(ge=13, le=150)
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+
+@app.post("/users/", response_model=UserResponse, status_code=201)
+async def create_user(user: UserCreate):
+    # user is already validated by Pydantic
+    db_user = save_to_db(user.model_dump())
+    return db_user
+
+@app.get("/users/", response_model=list[UserResponse])
+async def list_users(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    search: Optional[str] = None,
+):
+    return get_users(skip=skip, limit=limit, search=search)</code></pre>
+
+        <p>Separate your create, update, and response models. Use a base model for shared fields:</p>
+
+<pre><code class="language-python">class UserBase(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    email: EmailStr
+
+class UserCreate(UserBase):
+    password: str = Field(min_length=8)
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    email: Optional[EmailStr] = None
+
+class UserResponse(UserBase):
+    id: int
+    created_at: datetime</code></pre>
+
+        <h2 id="comparison">11. Pydantic vs Dataclasses vs Attrs</h2>
+
+        <table style="width:100%; border-collapse:collapse; margin:1.5rem 0;">
+            <thead>
+                <tr style="border-bottom:2px solid var(--border); text-align:left;">
+                    <th style="padding:0.75rem;">Feature</th>
+                    <th style="padding:0.75rem;">Pydantic</th>
+                    <th style="padding:0.75rem;">dataclasses</th>
+                    <th style="padding:0.75rem;">attrs</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.75rem;">Runtime validation</td>
+                    <td style="padding:0.75rem;">Yes (automatic)</td>
+                    <td style="padding:0.75rem;">No</td>
+                    <td style="padding:0.75rem;">Optional (validators)</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.75rem;">Type coercion</td>
+                    <td style="padding:0.75rem;">Yes ("30" &rarr; 30)</td>
+                    <td style="padding:0.75rem;">No</td>
+                    <td style="padding:0.75rem;">No</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.75rem;">JSON serialization</td>
+                    <td style="padding:0.75rem;">Built-in (fast Rust)</td>
+                    <td style="padding:0.75rem;">Manual</td>
+                    <td style="padding:0.75rem;">Via cattrs</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.75rem;">JSON Schema</td>
+                    <td style="padding:0.75rem;">Built-in</td>
+                    <td style="padding:0.75rem;">No</td>
+                    <td style="padding:0.75rem;">No</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.75rem;">Settings / env vars</td>
+                    <td style="padding:0.75rem;">pydantic-settings</td>
+                    <td style="padding:0.75rem;">No</td>
+                    <td style="padding:0.75rem;">No</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.75rem;">Stdlib</td>
+                    <td style="padding:0.75rem;">No (pip install)</td>
+                    <td style="padding:0.75rem;">Yes (3.7+)</td>
+                    <td style="padding:0.75rem;">No (pip install)</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.75rem;">Performance</td>
+                    <td style="padding:0.75rem;">Fast (Rust core)</td>
+                    <td style="padding:0.75rem;">Fastest (no validation)</td>
+                    <td style="padding:0.75rem;">Fast (C slots)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>When to use each:</strong> Use <strong>Pydantic</strong> for external data (APIs, configs, user input) where validation matters. Use <strong>dataclasses</strong> for internal data structures where you trust the types. Use <strong>attrs</strong> when you need lightweight classes with optional validation and do not need JSON Schema or serialization.</p>
+
+        <h2 id="performance">12. Performance in V2</h2>
+
+        <p>Pydantic v2 replaced its pure-Python validation core with <code>pydantic-core</code>, a Rust library compiled to a Python C extension. The result is dramatic: model creation is 5&ndash;50x faster depending on the model complexity.</p>
+
+        <ul>
+            <li><strong>Simple models:</strong> ~5x faster than v1</li>
+            <li><strong>Nested models:</strong> ~17x faster than v1</li>
+            <li><strong>JSON parsing:</strong> ~20x faster (Rust JSON parser bypasses Python dict creation)</li>
+            <li><strong>JSON serialization:</strong> ~10x faster with <code>model_dump_json()</code></li>
+        </ul>
+
+        <p>Key performance tips:</p>
+
+<pre><code class="language-python">from pydantic import BaseModel, ConfigDict
+
+class FastModel(BaseModel):
+    model_config = ConfigDict(
+        # Skip validation for trusted data
+        # model_validate(..., strict=False) is default
+    )
+    name: str
+    value: int
+
+# Use model_validate_json() instead of json.loads() + model_validate()
+# This is faster because Rust parses JSON directly into the model
+data = '{"name": "test", "value": 42}'
+m = FastModel.model_validate_json(data)  # Fastest path
+
+# For bulk operations, use TypeAdapter for validation without a class
+from pydantic import TypeAdapter
+adapter = TypeAdapter(list[FastModel])
+items = adapter.validate_json(json_bytes)  # Validates entire list in Rust</code></pre>
+
+        <p>Strict mode disables type coercion, which is slightly faster and catches type mismatches that coercion would silently fix:</p>
+
+<pre><code class="language-python">class StrictUser(BaseModel):
+    model_config = ConfigDict(strict=True)
+    name: str
+    age: int
+
+StrictUser(name="Alice", age=30)     # OK
+# StrictUser(name="Alice", age="30") # ValidationError: age must be int, not str</code></pre>
+
+        <h2 id="best-practices">13. Common Patterns and Best Practices</h2>
+
+        <p><strong>Separate input and output models.</strong> Do not use the same model for creating and reading data. Create models strip sensitive fields; response models add computed fields like <code>id</code> and <code>created_at</code>:</p>
+
+<pre><code class="language-python">class UserCreate(BaseModel):
+    email: str
+    password: str  # Input only
+
+class UserDB(BaseModel):
+    id: int
+    email: str
+    hashed_password: str  # Never expose
+
+class UserResponse(BaseModel):
+    id: int
+    email: str  # No password field</code></pre>
+
+        <p><strong>Use model_config instead of inner Config class.</strong> The v1 <code>Config</code> class still works but is deprecated:</p>
+
+<pre><code class="language-python"># V2 style (preferred)
+class MyModel(BaseModel):
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        str_min_length=1,
+        populate_by_name=True,
+        use_enum_values=True,
+    )</code></pre>
+
+        <p><strong>Use TypeAdapter for standalone validation</strong> when you do not need a full model class:</p>
+
+<pre><code class="language-python">from pydantic import TypeAdapter
+
+# Validate a plain list of integers
+int_list = TypeAdapter(list[int])
+result = int_list.validate_python(["1", "2", "3"])  # [1, 2, 3]
+
+# Validate a union type
+from typing import Union
+adapter = TypeAdapter(Union[int, str])
+adapter.validate_python(42)    # 42
+adapter.validate_python("hi")  # "hi"</code></pre>
+
+        <p><strong>Additional best practices:</strong></p>
+        <ul>
+            <li>Use <code>EmailStr</code> from <code>pydantic[email]</code> for email validation instead of regex patterns</li>
+            <li>Use <code>SecretStr</code> for passwords and API keys &mdash; they are masked in <code>repr()</code> and logs</li>
+            <li>Use <code>model_validate_json()</code> instead of <code>json.loads()</code> followed by <code>model_validate()</code> for best performance</li>
+            <li>Use <code>Annotated</code> types for reusable field constraints: <code>PositiveInt = Annotated[int, Field(gt=0)]</code></li>
+            <li>Pin your Pydantic version in production &mdash; minor versions can change validation behavior</li>
+        </ul>
+
+        <div class="faq-section" id="faq">
+            <h2>Frequently Asked Questions</h2>
+
+            <details>
+                <summary>What is Pydantic and why should I use it?</summary>
+                <p>Pydantic is a Python data validation library that uses type hints to validate, parse, and serialize data. It enforces type safety at runtime, catching invalid data before it causes bugs deep in your application. Pydantic is the most widely used validation library in Python, powering frameworks like FastAPI, LangChain, and SQLModel. Use it whenever you handle external data: API requests, config files, database records, or user input.</p>
+            </details>
+
+            <details>
+                <summary>What changed between Pydantic v1 and v2?</summary>
+                <p>Pydantic v2 is a complete rewrite with a Rust-based core (pydantic-core) that makes validation 5&ndash;50x faster. Key API changes: <code>@validator</code> becomes <code>@field_validator</code>, <code>@root_validator</code> becomes <code>@model_validator</code>, <code>.dict()</code> becomes <code>.model_dump()</code>, <code>.json()</code> becomes <code>.model_dump_json()</code>, <code>.parse_obj()</code> becomes <code>.model_validate()</code>, and the <code>Config</code> class becomes <code>model_config</code> dict. V2 also adds strict mode, computed fields, better JSON Schema generation, and more flexible serialization.</p>
+            </details>
+
+            <details>
+                <summary>What is the difference between Pydantic and Python dataclasses?</summary>
+                <p>Python dataclasses generate <code>__init__</code>, <code>__repr__</code>, and <code>__eq__</code> methods but perform zero runtime validation. If you pass a string where an int is expected, dataclasses silently accept it. Pydantic validates and coerces every field at runtime, raises clear errors for invalid data, and provides serialization methods like <code>model_dump()</code> and <code>model_dump_json()</code>. Pydantic also supports nested validation, custom validators, JSON Schema export, and settings management. Use dataclasses for simple internal data containers. Use Pydantic when data crosses a trust boundary.</p>
+            </details>
+
+            <details>
+                <summary>How do Pydantic validators work?</summary>
+                <p>Pydantic v2 provides two decorator types: <code>@field_validator</code> for single fields and <code>@model_validator</code> for cross-field logic. Field validators receive the field value and can run in "before" mode (before type coercion), "after" mode (after coercion, the default), or "wrap" mode (control whether inner validation runs). Model validators receive the entire model and run before or after all field validation. Validators raise <code>ValueError</code> or <code>AssertionError</code> to reject data, and return the validated value to accept or transform it.</p>
+            </details>
+
+            <details>
+                <summary>How do I use pydantic-settings for configuration?</summary>
+                <p>Install <code>pydantic-settings</code> and create a class that inherits from <code>BaseSettings</code>. Each field maps to an environment variable (case-insensitive by default). Set <code>model_config</code> with <code>env_file=".env"</code> to load from dotenv files. Pydantic validates all settings on instantiation, catching missing or invalid config immediately. You can set <code>env_prefix</code> to namespace variables, use <code>env_nested_delimiter</code> for nested settings, and define <code>SecretStr</code> fields to prevent secrets from appearing in logs or repr output.</p>
+            </details>
+        </div>
+
+        <h2>Conclusion</h2>
+
+        <p>Pydantic solves data validation in Python. Define your models with type hints, and Pydantic handles validation, coercion, serialization, and JSON Schema generation. The v2 rewrite makes it fast enough for the most demanding applications, and its integration with FastAPI, SQLModel, and the broader Python ecosystem means you can use one validation approach across your entire stack.</p>
+
+        <p>Start with <code>BaseModel</code> and <code>Field()</code> for your next project. Add custom validators as your business rules grow. Use <code>pydantic-settings</code> for configuration. The patterns in this guide will keep your data clean from API boundary to database.</p>
+
+        <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
+            <strong style="color: #3b82f6;">&#9881; Essential tools:</strong> Format your JSON with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>, validate schemas with the <a href="/tools/json-validator" style="color: #3b82f6;">JSON Validator</a>, and test API endpoints with the <a href="/tools/api-request-builder" style="color: #3b82f6;">API Request Builder</a>.
+        </div>
+
+        <h2>Related Resources</h2>
+
+        <section style="margin-top: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/fastapi-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">FastAPI Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Build high-performance Python APIs with FastAPI and Pydantic</div>
+            </a>
+            <a href="/blog/python-testing-pytest-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Python Testing with Pytest</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Test your Pydantic models and validators thoroughly</div>
+            </a>
+            <a href="/blog/sqlalchemy-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">SQLAlchemy Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Combine Pydantic with SQLAlchemy for database models</div>
+            </a>
+            <a href="/blog/typescript-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">TypeScript Complete Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Type safety in JavaScript, similar to Pydantic for Python</div>
+            </a>
+            <a href="/blog/github-merge-queue-checks-keep-restarting-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Keep Restarting</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Rollback incident guide to stop requeue loops from flaky checks and queue churn</div>
+            </a>
+            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Timed Out or Cancelled</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Classify timeout vs cancellation loops and unblock rollback PR checks safely</div>
+            </a>
+            <a href="/blog/github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Required Check Name Mismatch Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Fix waiting-for-status rollback incidents by synchronizing required-check names with queue runs.</div>
+            </a>
+            <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Stale Review Dismissal Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Handle rollback PR approvals dismissed as stale by queue churn and strict review policy.</div>
+            </a>
+            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Emergency Bypass Governance</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Approval and audit controls for high-risk rollback incidents that need bounded policy exceptions.</div>
+            </a>
+            <a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Deny Extension vs Restore Baseline</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Audit-focused criteria for denying low-signal extension requests and restoring defaults.</div>
+            </a>
+            <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Appeal Outcome Closure Template</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Structured closure template for appeal outcomes with explicit owner and due-date fields.</div>
+            </a>
+            <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Threshold Breach Alert Routing Playbook</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Severity-based routing template for closure-threshold incidents, escalations, and owner handoffs.</div>
+            </a>
+        </div>
+        </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>DevToolbox &mdash; Free developer tools, no strings attached.</p>
+    </footer>
+
+    <script>
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            window.location.href = '/tools/';
+        }
+    });
+    </script>
+</body>
+</html>
