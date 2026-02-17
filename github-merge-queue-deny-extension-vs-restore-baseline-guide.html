@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Merge Queue Deny Extension vs Restore Baseline: Decision Checklist with Audit Examples (2026) | DevToolbox Blog</title>
+    <meta name="description" content="Decide when to deny rollback bypass extension and restore baseline branch protections. Practical checklist, audit examples, and copy-paste PR macros for merge queue incidents.">
+    <meta name="keywords" content="github merge queue deny extension, restore baseline branch protection, rollback bypass decision checklist, merge queue incident audit trail, required checks rollback governance">
+
+    <meta property="og:title" content="Merge Queue Deny Extension vs Restore Baseline Checklist (2026)">
+    <meta property="og:description" content="Use this checklist to deny unsafe extension requests and restore baseline controls with clear audit evidence.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-github-merge-queue-deny-extension-vs-restore-baseline-guide.png">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Merge Queue Deny Extension vs Restore Baseline (2026)">
+    <meta name="twitter:description" content="Decision checklist and audit examples for rejecting extension requests during rollback incidents.">
+
+    <meta property="article:published_time" content="2026-02-17">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/track.js" defer></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "GitHub Merge Queue Deny Extension vs Restore Baseline: Decision Checklist with Audit Examples (2026)",
+        "description": "Decide when to deny rollback bypass extension and restore baseline branch protections with practical checklist and audit examples.",
+        "datePublished": "2026-02-17",
+        "dateModified": "2026-02-17",
+        "url": "https://devtoolbox.dedyn.io/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide",
+        "author": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "When should we deny an extension request and restore baseline protections?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Deny extension when customer impact is stable or decreasing, compensating checks are complete, and no fresh evidence shows baseline path is still blocked. In that state, restore baseline controls immediately."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Who is allowed to deny an extension during an incident?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Any authorized approver in the dual-control model can veto extension if evidence is incomplete or risk no longer justifies policy exception."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What evidence is required for a defensible denial decision?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Record current impact status, rollback validation state, check health, expiry timestamp, and explicit restoration owner confirmation in the PR timeline."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Should denial comments include restoration commands?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Include concrete restoration actions and completion evidence so auditors can verify the policy returned to baseline before or at expiry."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the biggest anti-pattern in deny vs extend decisions?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The biggest anti-pattern is soft denial without explicit restore ownership, which leaves temporary policy deltas active beyond intended expiry."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Merge Queue Deny Extension vs Restore Baseline Guide" }
+        ]
+    }
+    </script>
+
+    <style>
+        .tool-callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            line-height: 1.75;
+            color: #d1d5db;
+        }
+        .tool-callout a { color: #3b82f6; }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #d1fae5;
+        }
+
+        .warn-box {
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.25);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #fde68a;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+        .toc h3 { margin: 0 0 0.75rem 0; color: #e5e7eb; }
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc li { margin: 0.35rem 0; }
+        .toc a { color: #93c5fd; }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .mini-table th, .mini-table td {
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+            vertical-align: top;
+        }
+        .mini-table th { color: #e5e7eb; font-weight: 700; background: rgba(255,255,255,0.03); }
+        .mini-table td { color: #d1d5db; }
+        .mini-table tr:last-child td { border-bottom: 0; }
+
+        .checklist {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .checklist li { margin: 0.55rem 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Merge Queue Deny Extension vs Restore Baseline Guide</span></nav>
+
+    <main class="blog-post">
+        <h1>GitHub Merge Queue Deny Extension vs Restore Baseline: Decision Checklist with Audit Examples (2026)</h1>
+        <p class="meta">Published February 17, 2026 &middot; 9 min read</p>
+
+        <p>Most merge queue incident runbooks explain how to request an extension. Fewer explain how to <strong>say no</strong> safely. But denial decisions are where governance quality is tested: teams must restore protections quickly without creating argument loops in the middle of recovery.</p>
+
+        <p>This guide gives a practical <strong>deny-vs-extend checklist</strong>, plus audit-ready examples you can paste into PR timelines to prove why baseline protections were restored.</p>
+
+        <div class="tool-callout">
+            <strong style="color:#3b82f6;">&#9881; Quick links:</strong>
+            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide">Emergency Bypass Governance Guide</a> &middot;
+            <a href="/blog/github-merge-queue-approval-evidence-template-guide">Approval Evidence Template Guide</a> &middot;
+            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide">Expiry Extension Reapproval Guide</a> &middot;
+            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide">Timeout/Cancelled Checks Guide</a> &middot;
+            <a href="/blog/github-merge-queue-stale-review-dismissal-guide">Stale Review Dismissal Guide</a> &middot;
+            <a href="/blog/github-merge-queue-runner-saturation-vs-queue-starvation-guide">Saturation vs Starvation Guide</a> &middot;
+            <a href="/blog/github-actions-cicd-complete-guide">GitHub Actions CI/CD Guide</a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of contents</h3>
+            <ol>
+                <li><a href="#objective">Decision objective and failure mode</a></li>
+                <li><a href="#signals">Five-signal deny-vs-extend checklist</a></li>
+                <li><a href="#matrix">Decision matrix with audit examples</a></li>
+                <li><a href="#macros">Copy-paste PR macros</a></li>
+                <li><a href="#guardrails">Guardrail metrics and anti-patterns</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <h2 id="objective">1. Decision objective and failure mode</h2>
+
+        <p>Your objective is simple: <strong>keep policy exceptions as short as possible</strong> while avoiding customer-impact regression. Extension is a temporary exception. Denial means protections return to baseline at or before expiry.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Decision mode</th>
+                    <th>What happens</th>
+                    <th>Main risk</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Auto-extend by habit</td>
+                    <td>Exception stays active without re-justification</td>
+                    <td>Policy drift and weak audit trail</td>
+                </tr>
+                <tr>
+                    <td>Deny with evidence</td>
+                    <td>Baseline protections restored by owner and timestamped</td>
+                    <td>Temporary deployment slowdown</td>
+                </tr>
+                <tr>
+                    <td>Deny without owner</td>
+                    <td>Comment says "deny" but no restore action is assigned</td>
+                    <td>Silent exception persistence</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Hard rule:</strong> a denial is incomplete until baseline policy restoration is posted with owner name and UTC completion time.
+        </div>
+
+        <h2 id="signals">2. Five-signal deny-vs-extend checklist</h2>
+
+        <p>Run this checklist at T-10 to T-3 minutes before current expiry.</p>
+
+        <div class="checklist">
+            <ol>
+                <li><strong>Impact trajectory:</strong> Is customer impact stable/decreasing? If yes, bias toward deny and restore.</li>
+                <li><strong>Rollback validation state:</strong> Are smoke/canary checks complete enough to return to normal controls?</li>
+                <li><strong>Queue path viability:</strong> Is baseline merge queue path still blocked by confirmed technical failure, not assumption?</li>
+                <li><strong>Compensating controls maturity:</strong> Were temporary controls executed and documented, not only planned?</li>
+                <li><strong>Restoration ownership:</strong> Is one named owner committed to restoring and confirming baseline within expiry window?</li>
+            </ol>
+        </div>
+
+        <p>If signals 1, 2, and 5 are positive and signal 3 is weak, deny extension by default.</p>
+
+        <div class="tip-box">
+            <strong>Operational shortcut:</strong> if the team cannot provide one fresh blocker with concrete evidence in 90 seconds, deny extension and restore baseline.
+        </div>
+
+        <h2 id="matrix">3. Decision matrix with audit examples</h2>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Observed condition</th>
+                    <th>Decision</th>
+                    <th>Audit note to record</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Impact down, canary healthy, checks passing</td>
+                    <td>Deny extension, restore baseline now</td>
+                    <td>"No active blocker; restoration initiated at 2026-02-17T04:40:00Z"</td>
+                </tr>
+                <tr>
+                    <td>Impact active, queue path blocked by repeated timeout with links</td>
+                    <td>Approve short extension (15-30 min)</td>
+                    <td>"Timeout evidence attached, dual approval, new expiry 2026-02-17T05:00:00Z"</td>
+                </tr>
+                <tr>
+                    <td>Requester asks for extension with no new evidence</td>
+                    <td>Deny extension</td>
+                    <td>"Extension rejected: missing fresh blocker evidence since prior approval"</td>
+                </tr>
+                <tr>
+                    <td>Approvers disagree and expiry is near</td>
+                    <td>Deny by default, escalate after restore</td>
+                    <td>"Tie-break rule applied: protections restored first, escalation opened"</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Why default-to-deny works:</strong> restoring baseline keeps your secure steady state intact while still allowing a new, evidence-backed extension request if risk truly remains high.</p>
+
+        <h3>Example A: defensible denial comment</h3>
+        <pre><code>Decision: DENY extension request
+Reason:
+- Customer impact trend is stable and decreasing
+- Rollback smoke + canary checks completed
+- No fresh queue blocker evidence since prior approval
+
+Action:
+- Restore baseline branch protections now
+- Restoration owner: @oncall-platform
+- Expected completion: 2026-02-17T04:45:00Z</code></pre>
+
+        <h3>Example B: restoration confirmation comment</h3>
+        <pre><code>Baseline restore complete
+Completed at: 2026-02-17T04:44:12Z
+Owner: @oncall-platform
+Verification:
+- Required check set returned to default policy
+- Temporary bypass flag removed
+- Next rollback merges must pass standard queue path</code></pre>
+
+        <h2 id="macros">4. Copy-paste PR macros</h2>
+
+        <p><strong>Macro: deny and restore</strong></p>
+        <pre><code>Extension decision: DENIED
+Incident: [INC-####]
+Current expiry: [YYYY-MM-DDTHH:MM:SSZ]
+Denial rationale:
+1) [Impact trend]
+2) [Validation status]
+3) [No fresh blocker evidence]
+
+Restoration owner: @[owner]
+Restoration deadline: [YYYY-MM-DDTHH:MM:SSZ]
+Required follow-up:
+- Post baseline restore confirmation in this thread</code></pre>
+
+        <p><strong>Macro: conditional short extension (exception path)</strong></p>
+        <pre><code>Extension decision: APPROVED (short window)
+Incident: [INC-####]
+Reason extension remains justified:
+- [Fresh technical blocker with link]
+- [Current impact statement]
+
+New expiry (UTC): [YYYY-MM-DDTHH:MM:SSZ]
+Compensating controls:
+- [control 1]
+- [control 2]
+
+Restoration owner: @[owner]
+No further extension without a new evidence block.</code></pre>
+
+        <h2 id="guardrails">5. Guardrail metrics and anti-patterns</h2>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Target</th>
+                    <th>Warning threshold</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Extension denial-to-restore latency</td>
+                    <td>&lt; 10 minutes</td>
+                    <td>&gt; 20 minutes</td>
+                </tr>
+                <tr>
+                    <td>Extensions without fresh blocker evidence</td>
+                    <td>0%</td>
+                    <td>&gt; 5%</td>
+                </tr>
+                <tr>
+                    <td>Policy exceptions active past expiry</td>
+                    <td>0 events</td>
+                    <td>Any event</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Anti-pattern:</strong> replacing explicit denial with vague language like "probably okay to restore". Ambiguity creates ownership gaps and audit disputes.
+        </div>
+
+        <h2 id="faq">FAQ</h2>
+
+        <details>
+            <summary>When should we deny an extension request and restore baseline protections?</summary>
+            <p>Deny when impact is stable or decreasing, rollback validation is complete enough, and no fresh blocker evidence proves baseline path is still unsafe.</p>
+        </details>
+
+        <details>
+            <summary>Who can deny an extension in a dual-approval model?</summary>
+            <p>Any authorized approver can veto if evidence is incomplete or risk no longer justifies temporary policy exception.</p>
+        </details>
+
+        <details>
+            <summary>What evidence makes denial defensible in audits?</summary>
+            <p>Record impact trend, validation outcomes, blocker status, owner identity, and exact UTC restoration completion in the PR timeline.</p>
+        </details>
+
+        <details>
+            <summary>Can we deny first and still approve later?</summary>
+            <p>Yes. Deny and restore baseline first, then approve a new short extension only if fresh evidence emerges.</p>
+        </details>
+
+        <details>
+            <summary>What is the most common failure after denying an extension?</summary>
+            <p>Teams forget to post restoration confirmation, leaving uncertainty about whether baseline controls are truly active.</p>
+        </details>
+
+        <h2>Related resources</h2>
+        <ul>
+            <li><a href="/blog/github-merge-queue-expiry-extension-reapproval-guide">Merge Queue Expiry Extension Reapproval Guide</a> &mdash; define evidence requirements when extension is still justified.</li>
+            <li><a href="/blog/github-merge-queue-approval-evidence-template-guide">Merge Queue Approval Evidence Template Guide</a> &mdash; copy-paste comment macros for auditable decisions.</li>
+            <li><a href="/blog/github-merge-queue-emergency-bypass-governance-guide">Merge Queue Emergency Bypass Governance Guide</a> &mdash; incident approval model for bounded policy exceptions.</li>
+            <li><a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide">Merge Queue Timeout/Cancelled Checks Guide</a> &mdash; gather blocker evidence before requesting any extension.</li>
+        </ul>
+    </main>
+
+    <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
+        <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Expiry Extension Reapproval Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Evidence-first flow for short extension approvals during prolonged rollback incidents.</div>
+            </a>
+            <a href="/blog/github-merge-queue-approval-evidence-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Approval Evidence Template Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">PR macro templates for dual approvals, expiry, and restoration ownership.</div>
+            </a>
+            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Emergency Bypass Governance Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Approval criteria and bounded bypass execution for critical rollback incidents.</div>
+            </a>
+            <a href="/blog/github-actions-cicd-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; color: inherit;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">GitHub Actions CI/CD Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Workflow context for required checks, merge queue jobs, and incident automation.</div>
+            </a>
+        </div>
+    </section>
+
+    <footer><p>DevToolbox &mdash; Free developer tools, no strings attached.</p></footer>
+</body>
+</html>
