@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Merge Queue Post-Expiry Reopen Criteria: Safe Intake Restore Gates, Evidence Checklist, and Owner Sign-Off Policy (2026) | DevToolbox Blog</title>
+    <meta name="description" content="Define safe reopen criteria after merge queue cutoff expiry enforcement. Includes restore gates, evidence checklist, and copy-paste reopen templates.">
+    <meta name="keywords" content="github merge queue reopen criteria, post expiry reopen policy, merge queue intake restore gates, rollback reopen checklist, governance recovery">
+
+    <meta property="og:title" content="Merge Queue Post-Expiry Reopen Criteria (2026)">
+    <meta property="og:description" content="Reopen merge queue intake safely after cutoff expiry defaults with objective gates and owner sign-off.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/github-merge-queue-post-expiry-reopen-criteria-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-github-merge-queue-post-expiry-reopen-criteria-guide.png">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Merge Queue Post-Expiry Reopen Criteria (2026)">
+    <meta name="twitter:description" content="Use objective reopen gates and evidence checks before restoring merge queue intake after expiry enforcement.">
+
+    <meta property="article:published_time" content="2026-02-18">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/github-merge-queue-post-expiry-reopen-criteria-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/track.js" defer></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "GitHub Merge Queue Post-Expiry Reopen Criteria: Safe Intake Restore Gates, Evidence Checklist, and Owner Sign-Off Policy (2026)",
+        "description": "Governance guide for restoring merge queue intake only after objective reopen criteria are satisfied.",
+        "datePublished": "2026-02-18",
+        "dateModified": "2026-02-18",
+        "url": "https://devtoolbox.dedyn.io/blog/github-merge-queue-post-expiry-reopen-criteria-guide",
+        "author": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is post-expiry reopen criteria in merge queue governance?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "It is the objective checklist that must be satisfied before restoring queue intake after expiry-default actions were enforced."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Why not reopen immediately after expiry enforcement?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Immediate reopen without criteria often recreates the same failure mode, causing repeated rollback incidents and governance drift."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Who should approve reopen decisions?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A designated incident owner and an independent reviewer should both approve reopen, with UTC-stamped evidence links."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What evidence is required before reopening queue intake?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Minimum evidence includes rollback validation status, required-check health, owner availability window, and a fallback restore path."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How can teams prevent unsafe reopen decisions?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use hard gates, dual sign-off, and an immediate re-freeze trigger if any reopen SLO guardrail is violated."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Merge Queue Post-Expiry Reopen Criteria Guide" }
+        ]
+    }
+    </script>
+
+    <style>
+        .tool-callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            line-height: 1.75;
+            color: #d1d5db;
+        }
+        .tool-callout a { color: #3b82f6; }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #d1fae5;
+        }
+
+        .warn-box {
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.25);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #fde68a;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+        .toc h3 { margin: 0 0 0.75rem 0; color: #e5e7eb; }
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc li { margin: 0.35rem 0; }
+        .toc a { color: #93c5fd; }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .mini-table th, .mini-table td {
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+            vertical-align: top;
+        }
+        .mini-table th { color: #e5e7eb; font-weight: 700; background: rgba(255,255,255,0.03); }
+        .mini-table td { color: #d1d5db; }
+        .mini-table tr:last-child td { border-bottom: 0; }
+
+        .gate-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .gate-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+        }
+        .gate-label { color: #9ca3af; font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .gate-value { color: #e5e7eb; font-weight: 700; font-size: 1.05rem; }
+
+        .checklist {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .checklist li { margin: 0.55rem 0; }
+
+        .macro {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.25rem;
+        }
+        .macro pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Merge Queue Post-Expiry Reopen Criteria Guide</span></nav>
+
+    <main class="blog-post">
+        <h1>GitHub Merge Queue Post-Expiry Reopen Criteria: Safe Intake Restore Gates, Evidence Checklist, and Owner Sign-Off Policy (2026)</h1>
+        <p class="meta">Published February 18, 2026 · 9 min read</p>
+
+        <p>Expiry enforcement stops governance drift, but it does not automatically prove the system is ready to reopen queue intake. Teams that reopen too early often re-enter the same failure loop within minutes.</p>
+
+        <p>This guide defines a <strong>post-expiry reopen policy</strong> for GitHub merge queue incidents. It gives objective gates, role ownership, and copy-paste templates so reopen decisions stay auditable and safe.</p>
+
+        <div class="tool-callout">
+            <strong style="color:#3b82f6;">&#9881; Quick links:</strong>
+            <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide">ACK Timeout Remediation Runbook</a> &middot;
+            <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide">Escalation Decision Cutoff Guide</a> &middot;
+            <a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide">Cutoff Window Expiry Enforcement Guide</a> &middot;
+            <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">Threshold Alert Routing Playbook</a> &middot;
+            <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide">Closure Quality Metrics Dashboard</a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of contents</h3>
+            <ol>
+                <li><a href="#why">Why reopen criteria must be explicit</a></li>
+                <li><a href="#gates">Core reopen gates and ownership</a></li>
+                <li><a href="#matrix">Severity-based reopen matrix</a></li>
+                <li><a href="#workflow">30-minute reopen workflow</a></li>
+                <li><a href="#templates">Copy-paste reopen templates</a></li>
+                <li><a href="#kpi">KPIs and auto re-freeze triggers</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <h2 id="why">1. Why reopen criteria must be explicit</h2>
+
+        <p>When teams treat reopen as a subjective call, pressure biases the decision toward speed over safety. Explicit gates prevent optimism from overruling evidence.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Unsafe reopen pattern</th>
+                    <th>What fails next</th>
+                    <th>Policy correction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>"Looks stable" reopen with no checks</td>
+                    <td>Required checks fail again; queue re-freezes</td>
+                    <td>Require health proof from required-check set</td>
+                </tr>
+                <tr>
+                    <td>Single-owner verbal approval</td>
+                    <td>No audit trail; ownership disputes after relapse</td>
+                    <td>Dual sign-off with UTC comment template</td>
+                </tr>
+                <tr>
+                    <td>No fallback path after reopen</td>
+                    <td>Delayed recovery when errors spike</td>
+                    <td>Pre-declare immediate restore/re-freeze path</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Policy warning:</strong> Reopen is not "incident closed." It is a controlled experiment with guardrails. Treat the first 60 minutes as high-risk.
+        </div>
+
+        <h2 id="gates">2. Core reopen gates and ownership</h2>
+
+        <p>A reopen decision is valid only when every mandatory gate passes and responsible owners are present for the observation window.</p>
+
+        <div class="gate-grid">
+            <div class="gate-card"><div class="gate-label">Gate 1</div><div class="gate-value">Rollback Integrity Verified</div></div>
+            <div class="gate-card"><div class="gate-label">Gate 2</div><div class="gate-value">Required Checks Green</div></div>
+            <div class="gate-card"><div class="gate-label">Gate 3</div><div class="gate-value">Owner Pair On-Call</div></div>
+            <div class="gate-card"><div class="gate-label">Gate 4</div><div class="gate-value">Fallback Path Pre-Approved</div></div>
+        </div>
+
+        <ul class="checklist">
+            <li><strong>Rollback integrity:</strong> Verified target commit/state is deployed and stable in production canaries.</li>
+            <li><strong>Required-check health:</strong> Last N queue-relevant checks completed without timeout/cancel loops.</li>
+            <li><strong>Owner coverage:</strong> Incident owner + independent reviewer available for at least 60 minutes post-reopen.</li>
+            <li><strong>Fallback readiness:</strong> Restore baseline/re-freeze action is executable in under 10 minutes.</li>
+            <li><strong>Communication:</strong> Reopen scope, blast radius, and re-freeze trigger are posted in incident thread.</li>
+        </ul>
+
+        <div class="tip-box">
+            <strong>Tip:</strong> If any gate is "unknown" rather than "pass," keep queue intake frozen. Unknowns are not neutral; they are hidden risk.
+        </div>
+
+        <h2 id="matrix">3. Severity-based reopen matrix</h2>
+
+        <p>Reopen strictness should follow incident severity. Higher severity demands stronger proof and longer guarded observation.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Severity</th>
+                    <th>Minimum proof before reopen</th>
+                    <th>Observation window</th>
+                    <th>Auto re-freeze trigger</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>SEV-1</td>
+                    <td>All gates + leadership sign-off + fallback dry-run evidence</td>
+                    <td>60 min</td>
+                    <td>Any required-check timeout/cancel or error-budget burn spike</td>
+                </tr>
+                <tr>
+                    <td>SEV-2</td>
+                    <td>All gates + dual owner sign-off</td>
+                    <td>45 min</td>
+                    <td>Two consecutive queue failures in same service slice</td>
+                </tr>
+                <tr>
+                    <td>SEV-3</td>
+                    <td>All gates + reviewer confirmation</td>
+                    <td>30 min</td>
+                    <td>One repeated failure on prior incident signature</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="workflow">4. 30-minute reopen workflow</h2>
+
+        <p>Use this short workflow after expiry defaults have been enforced and baseline state is stable.</p>
+
+        <ol class="checklist">
+            <li><strong>T+00:</strong> Validate gate checklist with links (check dashboard, required-check run URLs, owner confirmations).</li>
+            <li><strong>T+05:</strong> Post "reopen proposal" comment with severity, scope, fallback, and observation owner.</li>
+            <li><strong>T+10:</strong> Independent reviewer approves or rejects with explicit reason.</li>
+            <li><strong>T+12:</strong> Reopen intake for a limited service subset (not full blast radius).</li>
+            <li><strong>T+20:</strong> Review queue health and required-check completion latency.</li>
+            <li><strong>T+30:</strong> Promote to full reopen only if no guardrail breach; otherwise immediately re-freeze and restore defaults.</li>
+        </ol>
+
+        <div class="warn-box">
+            <strong>Do not skip staged reopen:</strong> Opening all repositories at once removes your ability to isolate relapse quickly.
+        </div>
+
+        <h2 id="templates">5. Copy-paste reopen templates</h2>
+
+        <p>Use these templates to standardize audit logs and avoid ambiguous comments.</p>
+
+        <h3>Template A: Reopen approved</h3>
+        <div class="macro">
+<pre><code>[Merge Queue Reopen - Approved]
+Incident: [INC-###]
+Severity: [SEV-1/SEV-2/SEV-3]
+Decision UTC: [YYYY-MM-DD HH:MM]
+Approved By: [owner], [reviewer]
+
+Gate Results:
+- Rollback integrity: PASS ([link])
+- Required checks health: PASS ([link])
+- Owner coverage (60/45/30m): PASS ([link])
+- Fallback readiness: PASS ([link])
+
+Reopen Scope:
+- Phase 1 repos/services: [list]
+- Observation window: [minutes]
+- Auto re-freeze trigger: [rule]
+
+If trigger fires, immediately restore defaults and freeze intake.
+</code></pre>
+        </div>
+
+        <h3>Template B: Reopen denied</h3>
+        <div class="macro">
+<pre><code>[Merge Queue Reopen - Denied]
+Incident: [INC-###]
+Severity: [SEV-1/SEV-2/SEV-3]
+Decision UTC: [YYYY-MM-DD HH:MM]
+Denied By: [owner], [reviewer]
+
+Blocking Gates:
+- [Gate]: FAIL/UNKNOWN ([link])
+- [Gate]: FAIL/UNKNOWN ([link])
+
+Action:
+- Keep intake frozen
+- Restore baseline defaults remains active
+- Next review checkpoint UTC: [YYYY-MM-DD HH:MM]
+- Owner for remediation: [name]
+</code></pre>
+        </div>
+
+        <h2 id="kpi">6. KPIs and auto re-freeze triggers</h2>
+
+        <p>Define measurable thresholds so reopen quality can be monitored instead of debated.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>KPI</th>
+                    <th>Target</th>
+                    <th>Trigger threshold</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Queue-required check success rate (first 30m)</td>
+                    <td>&gt;= 98%</td>
+                    <td>&lt; 95% -> re-freeze</td>
+                </tr>
+                <tr>
+                    <td>Median required-check completion time</td>
+                    <td>&lt;= baseline + 20%</td>
+                    <td>&gt; baseline + 40% -> investigate + possible re-freeze</td>
+                </tr>
+                <tr>
+                    <td>Relapse count on prior incident signature</td>
+                    <td>0</td>
+                    <td>&gt;= 1 for SEV-1/2 -> re-freeze</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="faq">7. FAQ</h2>
+
+        <h3>Can we reopen with one failed gate if product pressure is high?</h3>
+        <p>No. A failed gate means known unresolved risk. Reopen with failed gates only hides risk transfer; it does not reduce risk.</p>
+
+        <h3>Should reopen criteria be the same for every repository?</h3>
+        <p>Core gates stay consistent, but scope and thresholds can be tuned by service criticality and incident severity.</p>
+
+        <h3>Who owns re-freeze decisions after reopen?</h3>
+        <p>The observation owner executes immediate re-freeze when trigger conditions fire; reviewer confirms and records evidence.</p>
+
+        <h3>How long should observation last?</h3>
+        <p>At least 30 minutes for SEV-3, 45 for SEV-2, and 60 for SEV-1. Extend if check latency or failure signals are unstable.</p>
+
+        <h3>What if metrics are inconclusive during observation?</h3>
+        <p>Treat inconclusive as non-pass, keep intake frozen, and run another checkpoint after missing evidence is collected.</p>
+
+        <h2>Conclusion</h2>
+        <p>Expiry enforcement prevents unowned drift, but resilient teams also define exactly how intake can be reopened. Objective gates, dual sign-off, and trigger-based re-freeze rules convert reopen from guesswork into governed execution.</p>
+
+        <p>If you already adopted cutoff-window expiry defaults, implement this reopen layer next. It closes the lifecycle loop from escalation to safe restoration.</p>
+
+        <h2>Related Resources</h2>
+        <section style="margin-top: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+                <a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide" style="display:block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration:none;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Cutoff Window Expiry Enforcement Guide</div>
+                    <div style="color:#9ca3af; font-size: 0.9rem;">Default action ladder when cutoff decision windows expire without executable owner proof.</div>
+                </a>
+                <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide" style="display:block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration:none;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Escalation Decision Cutoff Guide</div>
+                    <div style="color:#9ca3af; font-size: 0.9rem;">Authority-transfer policy when ACK timeout breaches keep repeating.</div>
+                </a>
+                <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide" style="display:block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration:none;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">ACK Timeout Remediation Runbook</div>
+                    <div style="color:#9ca3af; font-size: 0.9rem;">Timer-based owner handoff model for missed acknowledgment deadlines.</div>
+                </a>
+                <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide" style="display:block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration:none;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Threshold Alert Routing Playbook</div>
+                    <div style="color:#9ca3af; font-size: 0.9rem;">Severity-based owner routing and escalation SLAs for recurring breaches.</div>
+                </a>
+                <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide" style="display:block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration:none;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Closure Quality Metrics Dashboard</div>
+                    <div style="color:#9ca3af; font-size: 0.9rem;">KPIs and thresholds to detect relapse risk after incident closure.</div>
+                </a>
+                <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide" style="display:block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration:none;">
+                    <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Appeal Outcome Closure Template</div>
+                    <div style="color:#9ca3af; font-size: 0.9rem;">Structured closure comment format with owner checkpoints and due dates.</div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>DevToolbox &mdash; Free developer tools, no strings attached.</p>
+    </footer>
+</body>
+</html>
