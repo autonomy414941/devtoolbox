@@ -134,7 +134,7 @@
         <p>This guide covers systemd from fundamentals to advanced production patterns. Every section includes practical unit file examples and commands you can use immediately. Whether you are deploying a Node.js application, hardening a production server, replacing cron jobs, or debugging boot failures, this is the reference you need.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Related guides:</strong> Use systemd timers as a modern cron alternative &mdash; see our <a href="/blog/bash-scripting-complete-guide" style="color: #3b82f6;">Bash Scripting Guide</a> for the scripts they run, and our <a href="/blog/linux-commands-complete-guide" style="color: #3b82f6;">Linux Commands Guide</a> for the foundation. For incident response ownership when timer-based ACK deadlines are breached, see <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>.
+            <strong style="color: #3b82f6;">&#9881; Related guides:</strong> Use systemd timers as a modern cron alternative &mdash; see our <a href="/blog/bash-scripting-complete-guide" style="color: #3b82f6;">Bash Scripting Guide</a> for the scripts they run, and our <a href="/blog/linux-commands-complete-guide" style="color: #3b82f6;">Linux Commands Guide</a> for the foundation. For incident response ownership when timer-based ACK deadlines are breached, see <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>. When breaches repeat and handoffs stall, enforce cutoffs with the <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide" style="color: #3b82f6;">Merge Queue Escalation Decision Cutoff Guide</a>.
         </div>
 
         <style>
@@ -861,6 +861,7 @@ sudo systemctl start myapp           # Try again</code></pre>
             <li><a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide">GitHub Merge Queue Deny Extension vs Restore Baseline Guide</a> &mdash; checklist for rejecting weak extension requests and restoring default protections with audit evidence</li>
             <li><a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide">GitHub Merge Queue Appeal Outcome Closure Follow-Up Template Guide</a> &mdash; finalize appeal outcomes with explicit owners and 24h/7d/30d follow-up checkpoints</li>
             <li><a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">GitHub Merge Queue Closure Threshold Breach Alert Routing Playbook</a> &mdash; route threshold breaches with severity ownership, escalation SLAs, and explicit handoff evidence</li>
+            <li><a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide">GitHub Merge Queue Escalation Decision Cutoff for Repeated ACK Breaches Guide</a> &mdash; trigger hard decision gates after recurring ACK misses to prevent ownership drift</li>
             <li><a href="/blog/bash-scripting-complete-guide">Bash Scripting: The Complete Guide</a> &mdash; write the scripts that systemd timers and services execute</li>
         </ul>
     </main>
@@ -915,6 +916,10 @@ sudo systemctl start myapp           # Try again</code></pre>
             <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Threshold Breach Alert Routing Playbook</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Severity-based routing playbook for threshold breaches and owner escalation handoffs.</div>
+            </a>
+            <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Escalation Decision Cutoff Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Authority-transfer matrix for recurring ACK timeout breaches and forced decision gates.</div>
             </a>
             <a href="/blog/bash-scripting-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Bash Scripting Guide</div>

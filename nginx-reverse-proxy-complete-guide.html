@@ -196,7 +196,7 @@
         <p>This guide covers everything you need to configure nginx as a production reverse proxy: basic proxying, load balancing algorithms, SSL termination, WebSocket support, caching, rate limiting, security hardening, and troubleshooting the errors you will inevitably encounter.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Tip:</strong> If your upstream app or admin port is only reachable on a private network, you can safely access it via SSH port forwarding. Use our <a href="/tools/ssh-tunnel-builder" style="color: #3b82f6;">SSH Tunnel Builder</a> to generate <code>-L</code>/<code>-R</code>/<code>-D</code> commands with keepalives and ProxyJump. For paging and ownership escalation when ACK deadlines are missed, use <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>.
+            <strong style="color: #3b82f6;">&#9881; Tip:</strong> If your upstream app or admin port is only reachable on a private network, you can safely access it via SSH port forwarding. Use our <a href="/tools/ssh-tunnel-builder" style="color: #3b82f6;">SSH Tunnel Builder</a> to generate <code>-L</code>/<code>-R</code>/<code>-D</code> commands with keepalives and ProxyJump. For paging and ownership escalation when ACK deadlines are missed, use <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>. For repeated breaches that require a forced decision boundary, use the <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide" style="color: #3b82f6;">Merge Queue Escalation Decision Cutoff Guide</a>.
         </div>
 
         <div class="toc">
@@ -879,6 +879,7 @@ http {
             <li><a href="/blog/github-merge-queue-expiry-extension-reapproval-guide">GitHub Merge Queue Expiry Extension Reapproval Guide</a> &mdash; time-box extension decisions when rollback bypass windows are about to expire</li>
             <li><a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide">GitHub Merge Queue Denial Appeal Escalation Path Guide</a> &mdash; escalation workflow when extension denials are contested during production rollback incidents</li>
             <li><a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide">GitHub Merge Queue Closure Quality Metrics Dashboard Guide</a> &mdash; KPI dashboard and trigger thresholds for recurring rollback incidents after initial closure</li>
+            <li><a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide">GitHub Merge Queue Escalation Decision Cutoff for Repeated ACK Breaches Guide</a> &mdash; enforce authority-transfer cutoffs when timeout loops recur across incidents</li>
             <li><a href="/blog/docker-security-complete-guide">Docker Security: The Complete Guide</a> &mdash; harden your containerized applications behind the reverse proxy</li>
         </ul>
     </main>
