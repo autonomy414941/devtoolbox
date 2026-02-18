@@ -28,6 +28,18 @@ ENGINE_PATTERNS = [
     (re.compile(r"search\.brave\.com", re.IGNORECASE), "brave"),
     (re.compile(r"yandex\.", re.IGNORECASE), "yandex"),
 ]
+SUSPICIOUS_PATH_PATTERNS = [
+    re.compile(r"^/(?:wp-admin(?:/|$)|wp-login\.php$|xmlrpc\.php$)", re.IGNORECASE),
+    re.compile(r"/vendor/phpunit/", re.IGNORECASE),
+    re.compile(r"^/(?:phpunit|lib/phpunit)/", re.IGNORECASE),
+    re.compile(r"^/\.(?!well-known/)", re.IGNORECASE),
+    re.compile(r"^/(?:wp-config\.php|web\.config|configuration\.php|config\.json|secrets\.json|credentials\.json)$", re.IGNORECASE),
+    re.compile(r"^/(?:public/hot|public/storage|containers/json|storage/\*\.key)$", re.IGNORECASE),
+    re.compile(r"^/(?:bin/sh|hello\.world|manager/html|shell|version|v1)$", re.IGNORECASE),
+    re.compile(r"^/(?:boaform/|actuator/|geoserver/web/|developmentserver/metadatauploader)", re.IGNORECASE),
+    re.compile(r"^/(?:\.emacs\.desktop(?:\.lock)?|eshell/(?:lastdir|history)|elpa/|auto/)$", re.IGNORECASE),
+    re.compile(r"^/(?:webui/|admin(?:/config\.php)?$|login$|aaa9$|aab9$)", re.IGNORECASE),
+]
 
 
 def read_log_lines(path: str):
@@ -66,6 +78,15 @@ def detect_engine(referrer: str) -> str:
     return ""
 
 
+def is_suspicious_path(path: str) -> bool:
+    if not path:
+        return False
+    for pattern in SUSPICIOUS_PATH_PATTERNS:
+        if pattern.search(path):
+            return True
+    return False
+
+
 def counter_to_sorted_list(counter: Counter, key_name: str):
     return [{key_name: key, "count": count} for key, count in counter.most_common()]
 
@@ -84,13 +105,22 @@ def main():
     cutoff = now - timedelta(hours=max(1, args.hours))
 
     total_requests = 0
+    clean_requests = 0
+    content_requests = 0
+    suspicious_requests = 0
     unique_ips = set()
+    clean_unique_ips = set()
+    content_unique_ips = set()
+    suspicious_unique_ips = set()
     status_counts = Counter()
     page_counts = Counter()
     organic_engine_counts = Counter()
     organic_page_counts = Counter()
     external_referrers = Counter()
     not_found_pages = Counter()
+    clean_not_found_pages = Counter()
+    suspicious_paths = Counter()
+    suspicious_not_found_pages = Counter()
 
     for logfile in LOG_FILES:
         try:
@@ -117,15 +147,31 @@ def main():
             referrer = match.group("ref").strip()
             path = parse_request_path(match.group("req"))
             asset = is_asset_path(path)
+            suspicious_path = is_suspicious_path(path)
 
             total_requests += 1
             unique_ips.add(ip)
             status_counts[status] += 1
+            if suspicious_path:
+                suspicious_requests += 1
+                suspicious_unique_ips.add(ip)
+                if path:
+                    suspicious_paths[path] += 1
+            else:
+                clean_requests += 1
+                clean_unique_ips.add(ip)
+                if not asset and path:
+                    content_requests += 1
+                    content_unique_ips.add(ip)
 
             if not asset and path:
                 page_counts[path] += 1
                 if status == "404":
                     not_found_pages[path] += 1
+                    if suspicious_path:
+                        suspicious_not_found_pages[path] += 1
+                    else:
+                        clean_not_found_pages[path] += 1
 
             if referrer and referrer != "-":
                 if not INTERNAL_REFERRER_PATTERN.match(referrer):
@@ -141,12 +187,26 @@ def main():
         "window_hours": max(1, args.hours),
         "total_requests": total_requests,
         "unique_ips": len(unique_ips),
+        "clean_requests": clean_requests,
+        "clean_unique_ips": len(clean_unique_ips),
+        "content_requests": content_requests,
+        "content_unique_ips": len(content_unique_ips),
+        "suspicious_requests": suspicious_requests,
+        "suspicious_unique_ips": len(suspicious_unique_ips),
+        "suspicious_404": sum(suspicious_not_found_pages.values()),
+        "clean_404": sum(clean_not_found_pages.values()),
         "organic_referrals": organic_total,
     }
 
     print(f"=== TRAFFIC SUMMARY (last {summary['window_hours']}h) ===")
     print(f"  total_requests: {summary['total_requests']}")
     print(f"  unique_ips: {summary['unique_ips']}")
+    print(f"  clean_requests: {summary['clean_requests']}")
+    print(f"  clean_unique_ips: {summary['clean_unique_ips']}")
+    print(f"  content_requests: {summary['content_requests']}")
+    print(f"  content_unique_ips: {summary['content_unique_ips']}")
+    print(f"  suspicious_requests: {summary['suspicious_requests']}")
+    print(f"  suspicious_404: {summary['suspicious_404']}")
     print(f"  organic_referrals: {summary['organic_referrals']}")
     print()
 
@@ -178,6 +238,16 @@ def main():
     print("=== TOP 404 PAGES ===")
     for path, count in not_found_pages.most_common(args.max_items):
         print(f"  {count:4d}  {path}")
+    print()
+
+    print("=== TOP CLEAN 404 PAGES ===")
+    for path, count in clean_not_found_pages.most_common(args.max_items):
+        print(f"  {count:4d}  {path}")
+    print()
+
+    print("=== TOP SUSPICIOUS PATHS ===")
+    for path, count in suspicious_paths.most_common(args.max_items):
+        print(f"  {count:4d}  {path}")
 
     report = {
         "summary": summary,
@@ -187,6 +257,8 @@ def main():
         "top_organic_pages": counter_to_sorted_list(organic_page_counts, "path"),
         "top_external_referrers": counter_to_sorted_list(external_referrers, "referrer"),
         "top_404_pages": counter_to_sorted_list(not_found_pages, "path"),
+        "top_clean_404_pages": counter_to_sorted_list(clean_not_found_pages, "path"),
+        "top_suspicious_paths": counter_to_sorted_list(suspicious_paths, "path"),
     }
 
     if args.json:
