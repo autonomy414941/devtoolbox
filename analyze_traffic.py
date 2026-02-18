@@ -1,63 +1,199 @@
 #!/usr/bin/env python3
-"""Analyze organic search traffic from nginx access logs."""
+import argparse
+import json
+import os
 import re
 import subprocess
+import sys
 from collections import Counter
+from datetime import datetime, timedelta, timezone
 
-referrers = Counter()
-pages = Counter()
-engines = Counter()
-today_pages = Counter()
-
-search_pattern = re.compile(r'(bing\.com|google\.com|duckduckgo|yahoo\.com|ecosia|qwant|aol\.com|brave|yandex)')
+LOG_FILES = ["/var/log/nginx/web-ceo.access.log", "/var/log/nginx/web-ceo.access.log.1"]
+LOG_PATTERN = re.compile(
+    r'^(?P<ip>\S+) \S+ \S+ \[(?P<ts>[^\]]+)\] "(?P<req>[^"]*)" (?P<status>\d{3}) \S+ "(?P<ref>[^"]*)" "(?P<ua>[^"]*)"'
+)
+ASSET_PATTERN = re.compile(
+    r"\.(css|js|mjs|ico|png|jpg|jpeg|gif|svg|webp|avif|woff|woff2|ttf|eot|map|txt|xml)$",
+    re.IGNORECASE,
+)
+INTERNAL_REFERRER_PATTERN = re.compile(r"^https?://(www\.)?devtoolbox\.dedyn\.io/?", re.IGNORECASE)
+ENGINE_PATTERNS = [
+    (re.compile(r"google\.", re.IGNORECASE), "google"),
+    (re.compile(r"bing\.", re.IGNORECASE), "bing"),
+    (re.compile(r"duckduckgo\.", re.IGNORECASE), "duckduckgo"),
+    (re.compile(r"yahoo\.", re.IGNORECASE), "yahoo"),
+    (re.compile(r"ecosia\.", re.IGNORECASE), "ecosia"),
+    (re.compile(r"qwant\.", re.IGNORECASE), "qwant"),
+    (re.compile(r"aol\.", re.IGNORECASE), "aol"),
+    (re.compile(r"search\.brave\.com", re.IGNORECASE), "brave"),
+    (re.compile(r"yandex\.", re.IGNORECASE), "yandex"),
+]
 
 
 def read_log_lines(path: str):
+    if not os.path.exists(path):
+        return []
     try:
         with open(path, encoding="utf-8", errors="replace") as f:
             return f.readlines()
     except PermissionError:
+        output = subprocess.check_output(["sudo", "-n", "cat", path], text=True, stderr=subprocess.DEVNULL)
+        return output.splitlines(keepends=True)
+
+
+def parse_request_path(request: str) -> str:
+    parts = request.split()
+    if len(parts) < 2:
+        return ""
+    path = parts[1].split("?", 1)[0].strip()
+    return path or "/"
+
+
+def is_asset_path(path: str) -> bool:
+    if not path:
+        return True
+    if path in {"/favicon.ico", "/robots.txt", "/sitemap.xml", "/feed.xml", "/sw.js"}:
+        return True
+    if path.startswith("/assets/") or path.startswith("/static/"):
+        return True
+    return bool(ASSET_PATTERN.search(path))
+
+
+def detect_engine(referrer: str) -> str:
+    for pattern, name in ENGINE_PATTERNS:
+        if pattern.search(referrer):
+            return name
+    return ""
+
+
+def counter_to_sorted_list(counter: Counter, key_name: str):
+    return [{key_name: key, "count": count} for key, count in counter.most_common()]
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Analyze web-ceo nginx access logs.")
+    parser.add_argument("--hours", type=int, default=24, help="Rolling time window in hours (default: 24)")
+    parser.add_argument("--max-items", type=int, default=20, help="Max rows per printed section (default: 20)")
+    parser.add_argument("--json", type=str, default="", help="Write JSON output to this file")
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(hours=max(1, args.hours))
+
+    total_requests = 0
+    unique_ips = set()
+    status_counts = Counter()
+    page_counts = Counter()
+    organic_engine_counts = Counter()
+    organic_page_counts = Counter()
+    external_referrers = Counter()
+    not_found_pages = Counter()
+
+    for logfile in LOG_FILES:
         try:
-            output = subprocess.check_output(
-                ["sudo", "-n", "cat", path],
-                stderr=subprocess.STDOUT,
-                text=True,
-            )
-            return output.splitlines(keepends=True)
-        except Exception as e:
-            raise RuntimeError(f"sudo read failed: {e}") from e
+            lines = read_log_lines(logfile)
+        except Exception as exc:
+            print(f"Error reading {logfile}: {exc}", file=sys.stderr)
+            continue
 
-for i, logfile in enumerate(['/var/log/nginx/web-ceo.access.log', '/var/log/nginx/web-ceo.access.log.1']):
-    try:
-        for line in read_log_lines(logfile):
-            parts = line.split('"')
-            if len(parts) >= 4:
-                ref = parts[3]
-                if ref not in ('-', '') and ref.strip():
-                    referrers[ref] += 1
-                    if search_pattern.search(ref):
-                        req = parts[1].split()[1] if len(parts[1].split()) > 1 else ''
-                        pages[req] += 1
-                        if i == 0:
-                            today_pages[req] += 1
-                        m = search_pattern.search(ref)
-                        if m:
-                            engines[m.group(1)] += 1
-    except Exception as e:
-        print(f"Error reading {logfile}: {e}")
+        for line in lines:
+            match = LOG_PATTERN.match(line)
+            if not match:
+                continue
 
-print('=== SEARCH ENGINE REFERRALS (2-day) ===')
-for eng, c in engines.most_common():
-    print(f'  {eng}: {c}')
-print(f'  TOTAL: {sum(engines.values())}')
+            try:
+                ts = datetime.strptime(match.group("ts"), "%d/%b/%Y:%H:%M:%S %z").astimezone(timezone.utc)
+            except ValueError:
+                continue
 
-print()
-print('=== TOP PAGES BY ORGANIC REFERRALS (2-day) ===')
-for page, c in pages.most_common(30):
-    t = today_pages.get(page, 0)
-    print(f'  {c:3d} (today:{t:2d})  {page}')
+            if ts < cutoff:
+                continue
 
-print()
-print('=== ALL NON-EMPTY REFERRERS (2-day) ===')
-for ref, c in referrers.most_common(30):
-    print(f'  {c:3d}  {ref}')
+            ip = match.group("ip")
+            status = match.group("status")
+            referrer = match.group("ref").strip()
+            path = parse_request_path(match.group("req"))
+            asset = is_asset_path(path)
+
+            total_requests += 1
+            unique_ips.add(ip)
+            status_counts[status] += 1
+
+            if not asset and path:
+                page_counts[path] += 1
+                if status == "404":
+                    not_found_pages[path] += 1
+
+            if referrer and referrer != "-":
+                if not INTERNAL_REFERRER_PATTERN.match(referrer):
+                    external_referrers[referrer] += 1
+                engine = detect_engine(referrer)
+                if engine and not asset and path:
+                    organic_engine_counts[engine] += 1
+                    organic_page_counts[path] += 1
+
+    organic_total = sum(organic_engine_counts.values())
+    summary = {
+        "generated_at": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "window_hours": max(1, args.hours),
+        "total_requests": total_requests,
+        "unique_ips": len(unique_ips),
+        "organic_referrals": organic_total,
+    }
+
+    print(f"=== TRAFFIC SUMMARY (last {summary['window_hours']}h) ===")
+    print(f"  total_requests: {summary['total_requests']}")
+    print(f"  unique_ips: {summary['unique_ips']}")
+    print(f"  organic_referrals: {summary['organic_referrals']}")
+    print()
+
+    print("=== STATUS CODES ===")
+    for code, count in status_counts.most_common(args.max_items):
+        print(f"  {code}: {count}")
+    print()
+
+    print("=== TOP PAGES (non-asset) ===")
+    for path, count in page_counts.most_common(args.max_items):
+        print(f"  {count:4d}  {path}")
+    print()
+
+    print("=== ORGANIC ENGINES ===")
+    for engine, count in organic_engine_counts.most_common(args.max_items):
+        print(f"  {engine}: {count}")
+    print()
+
+    print("=== TOP ORGANIC LANDING PAGES ===")
+    for path, count in organic_page_counts.most_common(args.max_items):
+        print(f"  {count:4d}  {path}")
+    print()
+
+    print("=== TOP EXTERNAL REFERRERS ===")
+    for referrer, count in external_referrers.most_common(args.max_items):
+        print(f"  {count:4d}  {referrer}")
+    print()
+
+    print("=== TOP 404 PAGES ===")
+    for path, count in not_found_pages.most_common(args.max_items):
+        print(f"  {count:4d}  {path}")
+
+    report = {
+        "summary": summary,
+        "status_codes": counter_to_sorted_list(status_counts, "code"),
+        "top_pages": counter_to_sorted_list(page_counts, "path"),
+        "organic_engines": counter_to_sorted_list(organic_engine_counts, "engine"),
+        "top_organic_pages": counter_to_sorted_list(organic_page_counts, "path"),
+        "top_external_referrers": counter_to_sorted_list(external_referrers, "referrer"),
+        "top_404_pages": counter_to_sorted_list(not_found_pages, "path"),
+    }
+
+    if args.json:
+        with open(args.json, "w", encoding="utf-8") as f:
+            json.dump(report, f, ensure_ascii=False, indent=2)
+            f.write("\n")
+
+
+if __name__ == "__main__":
+    main()
