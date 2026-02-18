@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Merge Queue Escalation ACK Timeout Remediation Runbook: On-Call Handoffs, Breach Timers, and Recovery Templates (2026) | DevToolbox Blog</title>
+    <meta name="description" content="Run a practical remediation workflow when merge queue escalation ACK deadlines are missed. Includes timer model, escalation tiers, and copy-paste incident templates.">
+    <meta name="keywords" content="github merge queue ack timeout, escalation ack breach, merge queue incident remediation, on-call handoff timer, rollback governance sla">
+
+    <meta property="og:title" content="Merge Queue ACK Timeout Remediation Runbook (2026)">
+    <meta property="og:description" content="Fix escalation ACK timeout breaches with explicit timers, owner handoffs, and recovery templates.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-github-merge-queue-escalation-ack-timeout-remediation-runbook-guide.png">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Merge Queue ACK Timeout Remediation Runbook (2026)">
+    <meta name="twitter:description" content="On-call handoffs and escalation timers for merge queue ACK timeout breaches.">
+
+    <meta property="article:published_time" content="2026-02-18">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/track.js" defer></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "GitHub Merge Queue Escalation ACK Timeout Remediation Runbook: On-Call Handoffs, Breach Timers, and Recovery Templates (2026)",
+        "description": "Remediation playbook for merge queue escalation ACK timeout breaches with explicit timer model and owner handoffs.",
+        "datePublished": "2026-02-18",
+        "dateModified": "2026-02-18",
+        "url": "https://devtoolbox.dedyn.io/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide",
+        "author": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is an ACK timeout breach in merge queue governance?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "An ACK timeout breach occurs when the assigned owner fails to acknowledge an escalation alert within the agreed time window, which leaves incident decisions unowned and increases repeat-risk in rollback windows."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Which timer should start first during an escalation incident?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Start the acknowledgement timer first, then the action timer after acknowledgement, and run a leadership timeout in parallel as the safety rail if acknowledgement never arrives."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How many escalation tiers should teams use for ACK breaches?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Most teams can use three tiers: primary responder, secondary on-call, and incident/governance lead as final tie-break owner."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What evidence is required before closing an ACK timeout breach?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Record breach timestamp, paging evidence, owner handoff timestamps in UTC, remediation actions taken, and confirmation that baseline protections and required checks were restored."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do you prevent recurring ACK timeout breaches?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use a weekly closure-quality review that tracks ACK SLA misses by team and service, then trigger ownership corrections when the miss rate crosses your recurring-incident threshold."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Merge Queue ACK Timeout Remediation Runbook Guide" }
+        ]
+    }
+    </script>
+
+    <style>
+        .tool-callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            line-height: 1.75;
+            color: #d1d5db;
+        }
+        .tool-callout a { color: #3b82f6; }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #d1fae5;
+        }
+
+        .warn-box {
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.25);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #fde68a;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+        .toc h3 { margin: 0 0 0.75rem 0; color: #e5e7eb; }
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc li { margin: 0.35rem 0; }
+        .toc a { color: #93c5fd; }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .mini-table th, .mini-table td {
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+            vertical-align: top;
+        }
+        .mini-table th { color: #e5e7eb; font-weight: 700; background: rgba(255,255,255,0.03); }
+        .mini-table td { color: #d1d5db; }
+        .mini-table tr:last-child td { border-bottom: 0; }
+
+        .checklist {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .checklist li { margin: 0.55rem 0; }
+
+        .sla-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .sla-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+        }
+        .sla-label { color: #9ca3af; font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .sla-value { color: #e5e7eb; font-weight: 700; font-size: 1.05rem; }
+
+        .macro {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.25rem;
+        }
+        .macro pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Merge Queue ACK Timeout Remediation Runbook Guide</span></nav>
+
+    <main class="blog-post">
+        <h1>GitHub Merge Queue Escalation ACK Timeout Remediation Runbook: On-Call Handoffs, Breach Timers, and Recovery Templates (2026)</h1>
+        <p class="meta">Published February 18, 2026 &middot; 11 min read</p>
+
+        <p>Most merge queue incident playbooks define who to page. Fewer define what to do when nobody acknowledges the page on time. ACK timeout breaches are where ownership fails silently and rollback windows remain exposed.</p>
+
+        <p>This guide gives a practical <strong>ACK-timeout remediation runbook</strong> for GitHub merge queue governance: timer model, escalation tiers, handoff expectations, and copy-paste communication templates.</p>
+
+        <div class="tool-callout">
+            <strong style="color:#3b82f6;">&#9881; Quick links:</strong>
+            <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">Threshold Alert Routing Playbook</a> &middot;
+            <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide">Closure Quality Metrics Dashboard</a> &middot;
+            <a href="/blog/github-merge-queue-approval-evidence-template-guide">Approval Evidence Template Guide</a> &middot;
+            <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide">Denial Appeal Escalation Path Guide</a> &middot;
+            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide">Expiry Extension Reapproval Guide</a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of contents</h3>
+            <ol>
+                <li><a href="#why">Why ACK timeout breaches are high-risk</a></li>
+                <li><a href="#timers">Three-timer model for escalation governance</a></li>
+                <li><a href="#thresholds">Severity thresholds and ACK SLA targets</a></li>
+                <li><a href="#path">Escalation path and owner handoff matrix</a></li>
+                <li><a href="#workflow">15-minute remediation workflow</a></li>
+                <li><a href="#templates">Copy-paste communication templates</a></li>
+                <li><a href="#antipatterns">Anti-patterns and guardrails</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <h2 id="why">1. Why ACK timeout breaches are high-risk</h2>
+
+        <p>A missed acknowledgement is not just a paging issue. It means incident ownership is undefined while branch-protection exceptions are still active, required checks are still unstable, or recovery decisions are still pending.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Failure pattern</th>
+                    <th>What usually happens next</th>
+                    <th>Control you need</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Primary owner silent past ACK window</td>
+                    <td>Informal chat escalation with no timestamp trail</td>
+                    <td>Automatic tier handoff at timeout boundary</td>
+                </tr>
+                <tr>
+                    <td>Multiple responders answer late</td>
+                    <td>Duplicate actions and conflicting decisions</td>
+                    <td>Single acting owner declaration macro</td>
+                </tr>
+                <tr>
+                    <td>No leadership fallback trigger</td>
+                    <td>Incident drifts beyond rollback-safe window</td>
+                    <td>Parallel leadership timer with hard cutover</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Critical rule:</strong> treat ACK timeout as a governance breach event, not an operator preference issue. The breach itself should create a trackable record.
+        </div>
+
+        <h2 id="timers">2. Three-timer model for escalation governance</h2>
+
+        <p>Run three explicit timers from the moment the first escalation alert is sent. This prevents ownership ambiguity and avoids silent waiting loops.</p>
+
+        <div class="sla-strip">
+            <div class="sla-card">
+                <div class="sla-label">Timer A</div>
+                <div class="sla-value">ACK timer</div>
+                <div>How long the assigned owner has to acknowledge and claim execution.</div>
+            </div>
+            <div class="sla-card">
+                <div class="sla-label">Timer B</div>
+                <div class="sla-value">Action timer</div>
+                <div>How long after ACK to post first concrete remediation action in the PR timeline.</div>
+            </div>
+            <div class="sla-card">
+                <div class="sla-label">Timer C</div>
+                <div class="sla-value">Leadership timer</div>
+                <div>Independent timeout that triggers governance lead takeover if A or B is missed.</div>
+            </div>
+        </div>
+
+        <div class="tip-box">
+            <strong>Implementation tip:</strong> start all three timers at once in your incident bot payload, but only surface Timer B after ACK. This keeps the model simple and auditable.
+        </div>
+
+        <h2 id="thresholds">3. Severity thresholds and ACK SLA targets</h2>
+
+        <p>ACK windows should scale by impact. Use severity mapping that is short enough to stop drift but realistic for your on-call coverage model.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Severity</th>
+                    <th>ACK SLA</th>
+                    <th>Action SLA</th>
+                    <th>Leadership cutover</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>SEV-1 production rollback blocked</td>
+                    <td>5 minutes</td>
+                    <td>10 minutes from ACK</td>
+                    <td>15 minutes from initial alert</td>
+                </tr>
+                <tr>
+                    <td>SEV-2 merge queue unstable, safe rollback path exists</td>
+                    <td>10 minutes</td>
+                    <td>20 minutes from ACK</td>
+                    <td>30 minutes from initial alert</td>
+                </tr>
+                <tr>
+                    <td>SEV-3 policy drift risk, no active customer impact</td>
+                    <td>20 minutes</td>
+                    <td>40 minutes from ACK</td>
+                    <td>60 minutes from initial alert</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>These values are starting points. Calibrate weekly with your closure-quality dashboard and adjust only with explicit owner sign-off.</p>
+
+        <h2 id="path">4. Escalation path and owner handoff matrix</h2>
+
+        <p>The path must be deterministic: each timeout has one destination owner and one expected action. No "whoever is online" routing.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Timeout event</th>
+                    <th>Escalates to</th>
+                    <th>Expected action</th>
+                    <th>Evidence required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ACK timer breached (Timer A)</td>
+                    <td>Secondary on-call owner</td>
+                    <td>Post owner-claim comment and begin action plan</td>
+                    <td>UTC breach timestamp + pager receipt</td>
+                </tr>
+                <tr>
+                    <td>Action timer breached (Timer B)</td>
+                    <td>Incident commander</td>
+                    <td>Take execution ownership and publish decision path</td>
+                    <td>Missing-action proof + command takeover note</td>
+                </tr>
+                <tr>
+                    <td>Leadership timer breached (Timer C)</td>
+                    <td>Governance lead / manager on duty</td>
+                    <td>Authorize bounded exception or enforce baseline restore</td>
+                    <td>Risk justification + expiry + restoration plan</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="workflow">5. 15-minute remediation workflow</h2>
+
+        <p>When ACK SLA is missed, run this sequence as a fixed protocol. Avoid ad-hoc negotiation until after ownership is restored.</p>
+
+        <div class="checklist">
+            <ol>
+                <li><strong>Declare breach:</strong> post ACK-timeout breach comment with exact UTC timestamp.</li>
+                <li><strong>Trigger handoff:</strong> page tier-2 owner and assign acting owner immediately.</li>
+                <li><strong>Freeze ambiguity:</strong> record one acting owner in PR to avoid parallel decision makers.</li>
+                <li><strong>Reconfirm risk:</strong> summarize current merge queue risk and rollback status in two to three lines.</li>
+                <li><strong>Start action timer:</strong> set new action SLA checkpoint from handoff acceptance time.</li>
+                <li><strong>Escalate if needed:</strong> if first action is missed, route to incident commander without debate.</li>
+                <li><strong>Close with proof:</strong> finalize timeline with all breach and handoff timestamps.</li>
+            </ol>
+        </div>
+
+        <div class="tip-box">
+            <strong>Short principle:</strong> speed without timeline evidence creates future disagreement. Every handoff must have one UTC timestamp and one named owner.
+        </div>
+
+        <h2 id="templates">6. Copy-paste communication templates</h2>
+
+        <p>Use these templates directly in PR comments or incident channels to keep language consistent.</p>
+
+        <div class="macro">
+            <p><strong>Template A: ACK timeout breach notice</strong></p>
+<pre><code>[ACK TIMEOUT BREACH]
+Incident: &lt;id&gt;
+Severity: &lt;SEV-1/2/3&gt;
+Primary owner: @&lt;handle&gt;
+ACK deadline (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Breach detected (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Next owner (tier-2): @&lt;handle&gt;
+Requested action: claim ownership and post first action within &lt;N&gt; min.
+</code></pre>
+        </div>
+
+        <div class="macro">
+            <p><strong>Template B: Tier handoff confirmation</strong></p>
+<pre><code>[HANDOFF ACCEPTED]
+Acting owner: @&lt;handle&gt;
+Accepted at (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Action deadline (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Current risk summary:
+- &lt;required checks state&gt;
+- &lt;rollback status&gt;
+- &lt;branch protection exception state&gt;
+</code></pre>
+        </div>
+
+        <div class="macro">
+            <p><strong>Template C: Leadership cutover</strong></p>
+<pre><code>[LEADERSHIP CUTOVER]
+Cutover trigger: &lt;Timer B breach / Timer C breach&gt;
+Cutover owner: @&lt;handle&gt;
+Cutover time (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Decision needed: &lt;bounded extension / enforce baseline restore / rollback path&gt;
+Decision deadline (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Evidence links: &lt;links&gt;
+</code></pre>
+        </div>
+
+        <div class="macro">
+            <p><strong>Template D: Breach closure record</strong></p>
+<pre><code>[ACK BREACH CLOSURE]
+Incident: &lt;id&gt;
+Initial breach at (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Final owner: @&lt;handle&gt;
+Remediation completed at (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Restoration proof: &lt;required checks + protection baseline links&gt;
+Follow-up owner: @&lt;handle&gt;
+Follow-up due (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+</code></pre>
+        </div>
+
+        <h2 id="antipatterns">7. Anti-patterns and guardrails</h2>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Anti-pattern</th>
+                    <th>Why it fails</th>
+                    <th>Guardrail</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Waiting "a bit longer" after timeout</td>
+                    <td>Extends unowned risk window</td>
+                    <td>Auto-handoff trigger with no manual approval</td>
+                </tr>
+                <tr>
+                    <td>Escalation in private chat only</td>
+                    <td>No audit trail and unclear accountability</td>
+                    <td>Mandatory PR timeline update before action</td>
+                </tr>
+                <tr>
+                    <td>Multiple responders acting simultaneously</td>
+                    <td>Conflicting rollback decisions</td>
+                    <td>Single acting-owner declaration per phase</td>
+                </tr>
+                <tr>
+                    <td>No post-breach review</td>
+                    <td>Same team keeps missing ACK SLA</td>
+                    <td>Weekly threshold review with ownership correction</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="faq">FAQ</h2>
+
+        <h3>Should ACK timeout always trigger leadership escalation immediately?</h3>
+        <p>Not always. Route first to tier-2 ownership if your timer model includes it, but leadership cutover should still be pre-timed and automatic if tier-2 fails.</p>
+
+        <h3>Do we need separate timers for weekdays and weekends?</h3>
+        <p>You can vary SLA values by staffing model, but keep the same timer structure and escalation path so responders do not relearn the process during incidents.</p>
+
+        <h3>How do we measure if this runbook works?</h3>
+        <p>Track ACK timeout frequency, median handoff completion time, repeated timeout rate by team, and closure completeness for breached incidents.</p>
+
+        <h3>Can this runbook be used outside merge queue incidents?</h3>
+        <p>Yes. The same timer and handoff model can be used for any incident class where delayed acknowledgement creates operational risk.</p>
+
+        <h3>What is the minimum governance record for compliance reviews?</h3>
+        <p>At minimum: initial alert timestamp, ACK deadline, breach timestamp, owner handoffs, final decision, and restoration proof links.</p>
+
+        <p>ACK timeout breaches are predictable. Treat them as first-class governance events, automate the handoff path, and keep timeline evidence strict. This is how you stop silent ownership failures from becoming recurring incidents.</p>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 DevToolbox. All rights reserved.</p>
+    </footer>
+</body>
+</html>
