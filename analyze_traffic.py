@@ -39,6 +39,14 @@ SUSPICIOUS_PATH_PATTERNS = [
     re.compile(r"^/(?:boaform/|actuator/|geoserver/web/|developmentserver/metadatauploader)", re.IGNORECASE),
     re.compile(r"^/(?:\.emacs\.desktop(?:\.lock)?|eshell/(?:lastdir|history)|elpa/|auto/)$", re.IGNORECASE),
     re.compile(r"^/(?:webui/|admin(?:/config\.php)?$|login$|aaa9$|aab9$)", re.IGNORECASE),
+    re.compile(r"^/(?:backup|dump|database)\.sql$", re.IGNORECASE),
+    re.compile(r"^/(?:phpinfo\.php|composer\.json|docker-compose\.yml|bitbucket-pipelines\.yml)$", re.IGNORECASE),
+    re.compile(r"^/wp-config\.php(?:\.(?:bak|old|save|orig))?$", re.IGNORECASE),
+    re.compile(r"^/(?:var/log/|usr/bin/|path/to/|bins/)", re.IGNORECASE),
+    re.compile(r"%7c_", re.IGNORECASE),
+    re.compile(r"\|_", re.IGNORECASE),
+    re.compile(r"/\.git/config$", re.IGNORECASE),
+    re.compile(r"^/gponform/diag_form$", re.IGNORECASE),
 ]
 
 
