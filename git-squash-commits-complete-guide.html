@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Squash Commits: Complete Guide (Interactive Rebase, Merge --squash, Fixup) for 2026 | DevToolbox Blog</title>
+    <meta name="description" content="Master git squash workflows with interactive rebase, autosquash, and merge --squash. Learn when to squash, how to avoid history breakage, and how to recover safely.">
+    <meta name="keywords" content="git squash commits, interactive rebase squash, git merge squash, autosquash fixup, squash before pull request, git commit cleanup">
+    <meta property="og:title" content="Git Squash Commits: Complete Guide for 2026">
+    <meta property="og:description" content="Interactive rebase, merge --squash, fixup+autosquash, and recovery patterns for safe commit history cleanup.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/git-squash-commits-complete-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-git-squash-commits-complete-guide.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Git Squash Commits: Complete Guide for 2026">
+    <meta name="twitter:description" content="Use squash commits safely with interactive rebase, merge --squash, and autosquash workflows.">
+    <meta property="article:published_time" content="2026-02-18">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/git-squash-commits-complete-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/track.js" defer></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Git Squash Commits: Complete Guide (Interactive Rebase, Merge --squash, Fixup) for 2026",
+        "description": "Practical guide to squash commit workflows with interactive rebase, merge --squash, autosquash, and safe recovery patterns.",
+        "datePublished": "2026-02-18",
+        "dateModified": "2026-02-18",
+        "url": "https://devtoolbox.dedyn.io/blog/git-squash-commits-complete-guide",
+        "author": { "@type": "Organization", "name": "DevToolbox" },
+        "publisher": { "@type": "Organization", "name": "DevToolbox" }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the safest way to squash commits before opening a PR?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use interactive rebase on your local feature branch: git rebase -i origin/main, then mark commit lines as squash or fixup. Verify with git log --oneline and push with --force-with-lease only if the branch was already pushed."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the difference between squash and fixup in interactive rebase?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Both combine commits. squash lets you edit a combined commit message. fixup discards the folded commit message and keeps the target message. Use fixup for cleanup commits like typo fixes or lint-only changes."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Should I squash commits on shared branches?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Avoid squashing shared branches because it rewrites commit hashes and can break other collaborators' history. Squash safely on personal feature branches before merge, or use merge --squash at integration time."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I recover if I squashed the wrong commits?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use git reflog to locate the pre-rebase branch tip, then restore it with git reset --hard <hash> on a recovery branch first. If the wrong history was already pushed, coordinate and use --force-with-lease carefully."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "When should I use merge --squash instead of interactive rebase?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use merge --squash when maintainers want one clean integration commit on main while preserving detailed branch history in the feature branch or PR discussion. Use interactive rebase when the branch history itself must be cleaned before review."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Git Squash Commits Complete Guide" }
+        ]
+    }
+    </script>
+
+    <style>
+        .callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            line-height: 1.75;
+            color: #d1d5db;
+        }
+        .callout a { color: #93c5fd; }
+
+        .warn-box {
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #fde68a;
+        }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.22);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #d1fae5;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .toc h3 { margin: 0 0 0.75rem 0; color: #e5e7eb; }
+        .toc ol { margin: 0; padding-left: 1.2rem; }
+        .toc li { margin: 0.4rem 0; }
+
+        .matrix {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .matrix th,
+        .matrix td {
+            text-align: left;
+            vertical-align: top;
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .matrix th {
+            background: rgba(255,255,255,0.04);
+            color: #e5e7eb;
+            font-weight: 700;
+        }
+
+        .matrix td { color: #d1d5db; }
+
+        .matrix tr:last-child td { border-bottom: 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Git Squash Commits Complete Guide</span></nav>
+
+    <main class="blog-post">
+        <h1>Git Squash Commits: Complete Guide (Interactive Rebase, Merge <code>--squash</code>, Fixup) for 2026</h1>
+        <p class="meta">Published February 18, 2026 &middot; 14 min read</p>
+
+        <div class="callout">
+            <strong>&#9881; Related Git workflows:</strong>
+            Start with <a href="/blog/git-rebase-complete-guide">Git Rebase Complete Guide</a> for core rewrite mechanics.
+            For safe pushed-branch rollback, use <a href="/blog/git-revert-complete-guide">Git Revert Complete Guide</a>.
+            If you lose commits while rewriting, recover with <a href="/blog/git-reflog-recover-lost-commits-guide">Git Reflog Recovery Guide</a>.
+            When choosing history style for team branches, compare <a href="/blog/git-merge-vs-rebase">Git Merge vs Rebase</a>.
+        </div>
+
+        <p>Squashing commits is one of the fastest ways to make pull requests easier to review. It turns a noisy sequence of WIP, typo, and fix-later commits into a clean, logical history. But squash is history rewriting, so the workflow must be deliberate.</p>
+
+        <p>This guide focuses on practical scenarios: cleaning feature branches before review, using fixup plus autosquash, integrating with <code>merge --squash</code>, and recovering from mistakes without losing work.</p>
+
+        <section class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+                <li><a href="#what-is-squash">What Squash Actually Changes</a></li>
+                <li><a href="#when-to-use">When to Squash (and When Not To)</a></li>
+                <li><a href="#interactive-rebase">Interactive Rebase Squash Workflow</a></li>
+                <li><a href="#fixup-autosquash">Fixup + Autosquash Workflow</a></li>
+                <li><a href="#merge-squash">Using <code>git merge --squash</code></a></li>
+                <li><a href="#team-policy">Team Policy Patterns</a></li>
+                <li><a href="#recovery">Recovery if Squash Goes Wrong</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </section>
+
+        <h2 id="what-is-squash">What Squash Actually Changes</h2>
+        <p>A squash combines multiple commits into one commit. That new commit has a new hash and new parent relationship. Even if file content is the same, the commit identity is different.</p>
+
+<pre><code># Before
+A - B - C - D (feature)
+
+# After squash into one commit
+A - E (feature)
+</code></pre>
+
+        <p>Because hashes change, squash is safe on your own feature branch but risky on a branch other people already pulled.</p>
+
+        <h2 id="when-to-use">When to Squash (and When Not To)</h2>
+
+        <table class="matrix">
+            <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>Recommendation</th>
+                    <th>Why</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Local feature branch before PR</td>
+                    <td>Squash with interactive rebase</td>
+                    <td>Cleaner review, linear history, fewer noisy commits</td>
+                </tr>
+                <tr>
+                    <td>Shared branch with multiple collaborators</td>
+                    <td>Avoid rebasing squash</td>
+                    <td>Rewriting hashes will break others' branch state</td>
+                </tr>
+                <tr>
+                    <td>Maintainer merging PR to main</td>
+                    <td>Consider <code>merge --squash</code></td>
+                    <td>One integration commit while preserving PR discussion context</td>
+                </tr>
+                <tr>
+                    <td>Audit-heavy repos</td>
+                    <td>Squash carefully with policy</td>
+                    <td>Over-squashing can hide decision timeline details</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Rule:</strong> If the branch is already public and used by others, prefer additive fixes or merge commits over force-pushed squash rewrites.
+        </div>
+
+        <h2 id="interactive-rebase">Interactive Rebase Squash Workflow</h2>
+
+        <p>Use this when you want to clean up your own branch before opening or updating a pull request.</p>
+
+<pre><code># 1) Make sure you are on your feature branch
+git checkout feature/refactor-auth
+
+# 2) Fetch latest main
+git fetch origin
+
+# 3) Rebase interactively from merge-base to tip
+git rebase -i origin/main
+</code></pre>
+
+        <p>Your editor opens a list of commits from oldest to newest:</p>
+
+<pre><code>pick 5f0a1d2 Add auth middleware
+pick a23bb9c Fix typo in middleware log
+pick c02df3f Add tests for auth middleware
+pick de99111 WIP: rename helper function
+</code></pre>
+
+        <p>Convert cleanup commits to <code>squash</code> or <code>fixup</code>:</p>
+
+<pre><code>pick 5f0a1d2 Add auth middleware
+fixup a23bb9c Fix typo in middleware log
+squash c02df3f Add tests for auth middleware
+fixup de99111 WIP: rename helper function
+</code></pre>
+
+        <p>After save/exit:</p>
+
+<pre><code># Resolve any conflicts if prompted
+git add -A
+git rebase --continue
+
+# Verify rewritten history
+git log --oneline --decorate -n 8
+</code></pre>
+
+        <p>If branch was already pushed, update remote safely:</p>
+
+<pre><code>git push --force-with-lease origin feature/refactor-auth
+</code></pre>
+
+        <div class="tip-box">
+            <strong>Use <code>--force-with-lease</code>, not <code>--force</code>:</strong> it refuses to overwrite unexpected remote updates and prevents accidental teammate history loss.
+        </div>
+
+        <h2 id="fixup-autosquash">Fixup + Autosquash Workflow</h2>
+
+        <p>For long-lived branches, make targeted fix commits immediately and auto-fold them later. This is faster than manually editing each rebase todo list.</p>
+
+<pre><code># Create a fixup commit targeting an older commit
+git commit --fixup 5f0a1d2
+
+# Autosquash reorders and marks fixups automatically
+git rebase -i --autosquash origin/main
+</code></pre>
+
+        <p>Configure autosquash by default:</p>
+
+<pre><code>git config --global rebase.autosquash true
+</code></pre>
+
+        <p>This pattern keeps active development fast while still producing clean PR history before review.</p>
+
+        <h2 id="merge-squash">Using <code>git merge --squash</code></h2>
+
+        <p><code>merge --squash</code> is different from interactive rebase. It does not rewrite the feature branch. Instead, it stages the net diff of another branch as one new commit on the current branch.</p>
+
+<pre><code># On main (or integration branch)
+git checkout main
+git pull --ff-only origin main
+git merge --squash feature/refactor-auth
+git commit -m "feat(auth): refactor middleware and tests"
+</code></pre>
+
+        <p>Use this when maintainers want one clean commit in <code>main</code> but do not need each intermediate feature-branch commit preserved in the mainline history.</p>
+
+        <h2 id="team-policy">Team Policy Patterns</h2>
+
+        <p>Most teams avoid random per-PR choices by defining one policy per repository:</p>
+
+        <ul>
+            <li><strong>Linear-history policy:</strong> contributors rebase+squash before review, maintainers fast-forward or rebase-merge.</li>
+            <li><strong>Squash-at-merge policy:</strong> contributors can keep noisy branch history; maintainer always squash-merges to main.</li>
+            <li><strong>Audit-preserving policy:</strong> keep granular commits for incident-sensitive repos, squash only trivial fixup commits.</li>
+        </ul>
+
+        <p>Whichever policy you choose, document force-push rules explicitly. Ambiguous rewrite rules are a common source of avoidable incidents.</p>
+
+        <h2 id="recovery">Recovery if Squash Goes Wrong</h2>
+
+        <p>If you accidentally squashed wrong commits, your old branch tip is usually still in reflog.</p>
+
+<pre><code># Inspect recent HEAD movements
+git reflog --date=iso -n 20
+
+# Create a safety branch from old commit
+git branch recovery/pre-squash &lt;old-hash&gt;
+
+# Optionally restore current branch
+git checkout feature/refactor-auth
+git reset --hard &lt;old-hash&gt;
+</code></pre>
+
+        <p>If the bad rewrite was pushed, coordinate with your team, then push the fixed history with <code>--force-with-lease</code>. Do not repeatedly force-push without communication.</p>
+
+        <h2 id="faq">FAQ</h2>
+
+        <h3>Should I squash every PR into one commit?</h3>
+        <p>No. A single commit is not always better. Keep separate commits when they represent meaningful independent changes that help review or future bisecting.</p>
+
+        <h3>Is squash better than merge commits?</h3>
+        <p>Not universally. Squash improves readability, but merge commits preserve integration context. Pick based on team needs, not preference alone.</p>
+
+        <h3>Can I squash after opening a PR?</h3>
+        <p>Yes. Squash locally, force-push with lease, and the PR updates automatically in GitHub.</p>
+
+        <h3>Will squash reduce conflicts?</h3>
+        <p>Sometimes during review, yes. But squash does not magically remove real code conflicts; it mostly reduces history noise and commit count.</p>
+
+        <h3>What is the fastest safe default?</h3>
+        <p>Personal feature branches: develop normally, use <code>--fixup</code>, then run <code>git rebase -i --autosquash origin/main</code> before push/PR update.</p>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 2rem 0;">
+
+        <p>Need broader undo/rewrite decisions? Keep these nearby:</p>
+        <ul>
+            <li><a href="/blog/git-undo-reset-revert-guide">Git Undo: Reset, Revert, Restore</a></li>
+            <li><a href="/blog/git-rebase-complete-guide">Git Rebase Complete Guide</a></li>
+            <li><a href="/blog/git-reset-complete-guide">Git Reset Complete Guide</a></li>
+            <li><a href="/blog/git-reflog-recover-lost-commits-guide">Git Reflog Recovery Guide</a></li>
+            <li><a href="/blog/git-merge-vs-rebase">Git Merge vs Rebase</a></li>
+        </ul>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 DevToolbox. Built for developers.</p>
+    </footer>
+</body>
+</html>
