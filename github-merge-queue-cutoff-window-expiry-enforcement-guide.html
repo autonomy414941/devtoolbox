@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Merge Queue Cutoff Window Expiry Enforcement: Default Action Ladder, Intake Freeze Rules, and Audit-Proof Recovery Policy (2026) | DevToolbox Blog</title>
+    <meta name="description" content="Enforce deterministic actions when merge queue escalation decision windows expire. Includes default-action ladder, freeze criteria, and copy-paste enforcement templates.">
+    <meta name="keywords" content="github merge queue cutoff expiry, decision window expiry enforcement, merge queue intake freeze policy, escalation default action ladder, rollback governance">
+
+    <meta property="og:title" content="Merge Queue Cutoff Window Expiry Enforcement (2026)">
+    <meta property="og:description" content="Run a default-action ladder when escalation windows expire in merge queue incidents.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://devtoolbox.dedyn.io/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://devtoolbox.dedyn.io/og/blog-github-merge-queue-cutoff-window-expiry-enforcement-guide.png">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Merge Queue Cutoff Window Expiry Enforcement (2026)">
+    <meta name="twitter:description" content="When cutoff decision windows expire, enforce deterministic defaults and stop governance drift.">
+
+    <meta property="article:published_time" content="2026-02-18">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devtoolbox.dedyn.io/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/track.js" defer></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "GitHub Merge Queue Cutoff Window Expiry Enforcement: Default Action Ladder, Intake Freeze Rules, and Audit-Proof Recovery Policy (2026)",
+        "description": "Governance playbook for enforcing deterministic actions when merge queue escalation decision windows expire.",
+        "datePublished": "2026-02-18",
+        "dateModified": "2026-02-18",
+        "url": "https://devtoolbox.dedyn.io/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide",
+        "author": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "DevToolbox"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is a cutoff window expiry event in merge queue governance?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "It is the moment a declared decision deadline passes after a cutoff trigger, without an approved and executed decision artifact."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Why do teams need default actions after expiry?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Because expired decision windows without defaults create policy drift, unowned risk, and silent extension of emergency exceptions."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What should the first default action be for SEV-1 rollback incidents?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "For SEV-1 rollback-blocked incidents, default immediately to baseline restore and queue intake freeze until a fresh owner confirms safe reopen criteria."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can teams allow grace time beyond expiry?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, but grace must be bounded, explicit, and pre-defined in policy. Ad-hoc grace granted after expiry should be treated as policy violation."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do we prove expiry enforcement happened correctly?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Record trigger time, expiry deadline, chosen default path, execution proof links, acting owner, and follow-up checkpoint timestamps in UTC."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtoolbox.dedyn.io/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtoolbox.dedyn.io/blog" },
+            { "@type": "ListItem", "position": 3, "name": "Merge Queue Cutoff Window Expiry Enforcement Guide" }
+        ]
+    }
+    </script>
+
+    <style>
+        .tool-callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            line-height: 1.75;
+            color: #d1d5db;
+        }
+        .tool-callout a { color: #3b82f6; }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #d1fae5;
+        }
+
+        .warn-box {
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.25);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: #fde68a;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+        .toc h3 { margin: 0 0 0.75rem 0; color: #e5e7eb; }
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc li { margin: 0.35rem 0; }
+        .toc a { color: #93c5fd; }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .mini-table th, .mini-table td {
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+            vertical-align: top;
+        }
+        .mini-table th { color: #e5e7eb; font-weight: 700; background: rgba(255,255,255,0.03); }
+        .mini-table td { color: #d1d5db; }
+        .mini-table tr:last-child td { border-bottom: 0; }
+
+        .decision-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .decision-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+        }
+        .decision-label { color: #9ca3af; font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .decision-value { color: #e5e7eb; font-weight: 700; font-size: 1.05rem; }
+
+        .checklist {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.5rem;
+        }
+        .checklist li { margin: 0.55rem 0; }
+
+        .macro {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.25rem;
+        }
+        .macro pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
+            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+        </nav>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Merge Queue Cutoff Window Expiry Enforcement Guide</span></nav>
+
+    <main class="blog-post">
+        <h1>GitHub Merge Queue Cutoff Window Expiry Enforcement: Default Action Ladder, Intake Freeze Rules, and Audit-Proof Recovery Policy (2026)</h1>
+        <p class="meta">Published February 18, 2026 · 9 min read</p>
+
+        <p>Declaring a cutoff is only half of governance. The harder failure mode appears when the cutoff decision window expires and no one executes the promised path. Teams then drift into silent exceptions while risk accumulates.</p>
+
+        <p>This guide defines an <strong>expiry enforcement playbook</strong> for GitHub merge queue incidents. It gives default actions, severity-based fallback rules, and copy-paste templates so decision-window expiry cannot become an unowned state.</p>
+
+        <div class="tool-callout">
+            <strong style="color:#3b82f6;">&#9881; Quick links:</strong>
+            <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide">ACK Timeout Remediation Runbook</a> &middot;
+            <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide">Escalation Decision Cutoff Guide</a> &middot;
+            <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">Threshold Alert Routing Playbook</a> &middot;
+            <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide">Closure Quality Metrics Dashboard</a> &middot;
+            <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide">Appeal Outcome Closure Template</a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of contents</h3>
+            <ol>
+                <li><a href="#why">Why expiry enforcement is mandatory</a></li>
+                <li><a href="#triggers">Expiry trigger sets and detection rules</a></li>
+                <li><a href="#ladder">Default action ladder after expiry</a></li>
+                <li><a href="#severity">Severity-based fallback enforcement</a></li>
+                <li><a href="#workflow">20-minute post-expiry workflow</a></li>
+                <li><a href="#templates">Copy-paste enforcement templates</a></li>
+                <li><a href="#kpi">KPIs and anti-drift safeguards</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ol>
+        </div>
+
+        <h2 id="why">1. Why expiry enforcement is mandatory</h2>
+
+        <p>A cutoff without expiry enforcement is only a promise. If the decision deadline passes and nothing is forced, responders learn that deadlines are optional and emergency exceptions can survive by inertia.</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Failure pattern</th>
+                    <th>Impact</th>
+                    <th>Enforcement control</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Deadline passes with no accepted decision owner</td>
+                    <td>No accountable execution path</td>
+                    <td>Immediate default owner assignment</td>
+                </tr>
+                <tr>
+                    <td>Deadline passes with owner but no execution proof</td>
+                    <td>Unverifiable progress claims</td>
+                    <td>Mandatory proof artifact within fixed SLA</td>
+                </tr>
+                <tr>
+                    <td>Multiple expiry events in same incident</td>
+                    <td>Governance trust collapse</td>
+                    <td>Automatic intake freeze and leadership escalation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Policy principle:</strong> once a cutoff window expires, the system must transition to a deterministic default state without waiting for additional discussion.
+        </div>
+
+        <h2 id="triggers">2. Expiry trigger sets and detection rules</h2>
+
+        <p>Keep expiry detection objective and machine-checkable. These three inputs are enough for most teams:</p>
+
+        <div class="decision-grid">
+            <div class="decision-card">
+                <div class="decision-label">Signal A</div>
+                <div class="decision-value">Decision deadline reached</div>
+                <div>Current UTC time is later than declared deadline.</div>
+            </div>
+            <div class="decision-card">
+                <div class="decision-label">Signal B</div>
+                <div class="decision-value">No valid execution proof</div>
+                <div>No commit/PR/status artifact matching chosen path.</div>
+            </div>
+            <div class="decision-card">
+                <div class="decision-label">Signal C</div>
+                <div class="decision-value">Exception still active</div>
+                <div>Bypass or weakened protection remains enabled.</div>
+            </div>
+        </div>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Trigger combination</th>
+                    <th>Minimum condition</th>
+                    <th>Enforcement result</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>A only</td>
+                    <td>Deadline passed</td>
+                    <td>Auto-notify acting decision owner</td>
+                </tr>
+                <tr>
+                    <td>A + B</td>
+                    <td>Deadline passed, no proof</td>
+                    <td>Default action ladder step 1</td>
+                </tr>
+                <tr>
+                    <td>A + B + C</td>
+                    <td>Deadline passed, no proof, exception active</td>
+                    <td>Immediate restore-or-freeze default</td>
+                </tr>
+                <tr>
+                    <td>Repeat A + B within 24h</td>
+                    <td>Second expiry event</td>
+                    <td>Mandatory leadership handoff</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tip-box">
+            <strong>Implementation tip:</strong> render deadline and current UTC timestamp in every incident status update. Visibility prevents “I thought we still had time” failures.
+        </div>
+
+        <h2 id="ladder">3. Default action ladder after expiry</h2>
+
+        <p>Define one ladder so every responder knows what happens next when expiry fires:</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Ladder step</th>
+                    <th>Time budget</th>
+                    <th>Action</th>
+                    <th>Expected artifact</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Step 1</td>
+                    <td>0-3 minutes</td>
+                    <td>Auto-assign acting decision owner role</td>
+                    <td>Ownership acceptance comment</td>
+                </tr>
+                <tr>
+                    <td>Step 2</td>
+                    <td>3-8 minutes</td>
+                    <td>Choose default path: restore baseline or freeze intake</td>
+                    <td>Decision comment with rationale</td>
+                </tr>
+                <tr>
+                    <td>Step 3</td>
+                    <td>8-15 minutes</td>
+                    <td>Execute chosen path</td>
+                    <td>Protection delta / queue state proof</td>
+                </tr>
+                <tr>
+                    <td>Step 4</td>
+                    <td>15-20 minutes</td>
+                    <td>Publish follow-up checkpoint and reopen criteria</td>
+                    <td>UTC checkpoint + owner</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>Default paths should be conservative: if uncertainty is high, protect baseline first and optimize throughput later.</p>
+
+        <h2 id="severity">4. Severity-based fallback enforcement</h2>
+
+        <p>Use severity to determine default action when no explicit decision is delivered before expiry:</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>Severity</th>
+                    <th>If window expires</th>
+                    <th>Fallback owner</th>
+                    <th>Default path</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>SEV-1 rollback blocked</td>
+                    <td>No debate period</td>
+                    <td>Incident commander</td>
+                    <td>Restore baseline + freeze intake</td>
+                </tr>
+                <tr>
+                    <td>SEV-2 queue unstable</td>
+                    <td>Single short grace (max 5 minutes)</td>
+                    <td>Governance lead</td>
+                    <td>Freeze intake, keep current rollback lane only</td>
+                </tr>
+                <tr>
+                    <td>SEV-3 policy drift risk</td>
+                    <td>Immediate closure review scheduling</td>
+                    <td>Service owner delegate</td>
+                    <td>Deny extension, restore protections</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warn-box">
+            <strong>Guardrail:</strong> any grace period must be policy-defined before incidents. Post-expiry ad-hoc grace is policy drift and should be logged as a governance defect.
+        </div>
+
+        <h2 id="workflow">5. 20-minute post-expiry workflow</h2>
+
+        <p>Run this fixed sequence after expiry detection:</p>
+
+        <div class="checklist">
+            <ol>
+                <li><strong>Minute 0-2:</strong> publish expiry event with breached deadline and UTC now.</li>
+                <li><strong>Minute 2-4:</strong> assign fallback owner role and require explicit acceptance.</li>
+                <li><strong>Minute 4-8:</strong> execute default action ladder step 2 selection.</li>
+                <li><strong>Minute 8-15:</strong> apply protection/queue changes and publish first proof.</li>
+                <li><strong>Minute 15-20:</strong> lock next checkpoint, owner, and follow-up review window.</li>
+            </ol>
+        </div>
+
+        <div class="tip-box">
+            <strong>Execution rule:</strong> after expiry, freshness of proof matters more than completeness of narrative. Publish evidence first, analysis second.
+        </div>
+
+        <h2 id="templates">6. Copy-paste enforcement templates</h2>
+
+        <p>Use these templates in PR timelines or incident channels:</p>
+
+        <div class="macro">
+            <p><strong>Template A: expiry event declaration</strong></p>
+<pre><code>[CUTOFF WINDOW EXPIRED]
+Incident: &lt;id&gt;
+Severity: &lt;SEV-1/2/3&gt;
+Original decision deadline (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Detected at (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Execution proof present: &lt;yes/no&gt;
+Active exception present: &lt;yes/no&gt;
+Fallback owner role: @&lt;role-handle&gt;
+Default action step start (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+</code></pre>
+        </div>
+
+        <div class="macro">
+            <p><strong>Template B: fallback owner acceptance</strong></p>
+<pre><code>[FALLBACK OWNER ACCEPTED]
+Acting owner: @&lt;handle&gt;
+Accepted at (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Selected default path: &lt;restore-baseline / freeze-intake&gt;
+First execution proof ETA (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Disallowed actions: permanent policy edits
+</code></pre>
+        </div>
+
+        <div class="macro">
+            <p><strong>Template C: default-path execution proof</strong></p>
+<pre><code>[DEFAULT PATH EXECUTED]
+Path: &lt;restore-baseline / freeze-intake&gt;
+Executed at (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+Branch protection state: &lt;summary&gt;
+Queue intake state: &lt;open/frozen/limited&gt;
+Proof links: &lt;links&gt;
+Next checkpoint owner: @&lt;handle&gt;
+Next checkpoint (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+</code></pre>
+        </div>
+
+        <div class="macro">
+            <p><strong>Template D: expiry enforcement closure</strong></p>
+<pre><code>[EXPIRY ENFORCEMENT CLOSURE]
+Incident: &lt;id&gt;
+Expiry event count in incident: &lt;N&gt;
+Final enforced path: &lt;restore / freeze / limited intake&gt;
+Current risk status: &lt;stable / unstable&gt;
+Follow-up governance review owner: @&lt;handle&gt;
+Follow-up due (UTC): &lt;yyyy-mm-dd hh:mm&gt;
+</code></pre>
+        </div>
+
+        <h2 id="kpi">7. KPIs and anti-drift safeguards</h2>
+
+        <p>Track these weekly to verify expiry enforcement is real:</p>
+
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th>KPI</th>
+                    <th>Target</th>
+                    <th>If missed</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Expiry-to-first-proof median</td>
+                    <td>&lt;= 15 minutes</td>
+                    <td>Reduce owner hops and force pre-assigned fallback roles</td>
+                </tr>
+                <tr>
+                    <td>Incidents with post-expiry ad-hoc grace</td>
+                    <td>0</td>
+                    <td>Treat as governance defect; require policy update</td>
+                </tr>
+                <tr>
+                    <td>Repeat expiry events within same incident</td>
+                    <td>Downward trend</td>
+                    <td>Escalate to leadership and tighten decision windows</td>
+                </tr>
+                <tr>
+                    <td>Closure records with full UTC evidence fields</td>
+                    <td>100%</td>
+                    <td>Block closure until fields are complete</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>Cutoff governance fails when expiry is treated as advisory. A strict enforcement ladder turns expired decisions into predictable recovery behavior, not policy drift.</p>
+
+        <h2 id="faq">FAQ</h2>
+
+        <h3>Should every expired window force an intake freeze?</h3>
+        <p>No. Use severity-based defaults. SEV-1 often needs immediate freeze, while SEV-3 can default to restore-and-review without full freeze.</p>
+
+        <h3>Can we reopen intake before closure review is complete?</h3>
+        <p>Only with explicit reopen criteria and owner acknowledgment. Reopen without criteria usually recreates the same expiry loop.</p>
+
+        <h3>What if the fallback owner is unavailable?</h3>
+        <p>Use predefined role fallback order. If no fallback accepts within timeout, enforce baseline restore automatically and log emergency fallback.</p>
+
+        <h3>How do we avoid overusing freeze defaults?</h3>
+        <p>Track freeze frequency by service and tune deadlines, on-call coverage, and evidence requirements. Freeze should be protective, not routine.</p>
+
+        <h3>How does this relate to the cutoff matrix guide?</h3>
+        <p>The cutoff matrix guide defines who gets authority at trigger time. This guide defines what must happen if that authority fails to execute before expiry.</p>
+
+        <p>Run this expiry playbook with your ACK-timeout remediation and closure-quality metrics guides to keep merge queue incident governance deterministic end to end.</p>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 DevToolbox. All rights reserved.</p>
+    </footer>
+</body>
+</html>
