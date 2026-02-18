@@ -991,6 +991,7 @@ docker compose exec api ping -c 3 db</code></pre>
             <li><a href="/cheatsheets/docker">Docker Cheat Sheet</a> &mdash; quick reference for Docker and Compose commands</li>
             <li><a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">Merge Queue Threshold Breach Alert Routing Playbook</a> &mdash; severity-based owner handoff model for routing closure-threshold incidents</li>
             <li><a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide">Merge Queue Cutoff Window Expiry Enforcement Guide</a> &mdash; default-action ladder for incidents where cutoff decision windows expire without execution proof</li>
+            <li><a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide">Merge Queue Post-Reopen Monitoring Window Guide</a> &mdash; operate post-reopen guardrails and execute immediate re-freeze when hard triggers fire</li>
         </ul>
     </main>
 
@@ -1048,6 +1049,10 @@ docker compose exec api ping -c 3 db</code></pre>
             <a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Cutoff Window Expiry Enforcement Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Default-action ladder for expired decision windows so merge-queue incidents cannot drift into unowned exceptions.</div>
+            </a>
+            <a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+                <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Post-Reopen Monitoring Window Guide</div>
+                <div style="color: #9ca3af; font-size: 0.9rem;">Post-reopen control loop with guardrail checks and immediate re-freeze decisions on breach.</div>
             </a>
         </div>
     </section>
