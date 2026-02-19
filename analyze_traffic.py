@@ -106,10 +106,155 @@ def counter_to_sorted_list(counter: Counter, key_name: str):
     return [{key_name: key, "count": count} for key, count in counter.most_common()]
 
 
+def safe_ratio(part: int, whole: int) -> float:
+    if whole <= 0:
+        return 0.0
+    return round((part / whole) * 100, 2)
+
+
+def safe_pct_change(current: int, previous: int):
+    if previous <= 0:
+        return None
+    return round(((current - previous) / previous) * 100, 2)
+
+
+class WindowStats:
+    def __init__(self):
+        self.total_requests = 0
+        self.clean_requests = 0
+        self.content_requests = 0
+        self.suspicious_requests = 0
+        self.unique_ips = set()
+        self.clean_unique_ips = set()
+        self.content_unique_ips = set()
+        self.suspicious_unique_ips = set()
+        self.status_counts = Counter()
+        self.page_counts = Counter()
+        self.organic_engine_counts = Counter()
+        self.organic_page_counts = Counter()
+        self.external_referrers = Counter()
+        self.not_found_pages = Counter()
+        self.clean_not_found_pages = Counter()
+        self.suspicious_paths = Counter()
+        self.suspicious_not_found_pages = Counter()
+
+    def record(self, ip: str, status: str, referrer: str, path: str):
+        asset = is_asset_path(path)
+        suspicious_path = is_suspicious_path(path)
+
+        self.total_requests += 1
+        self.unique_ips.add(ip)
+        self.status_counts[status] += 1
+
+        if suspicious_path:
+            self.suspicious_requests += 1
+            self.suspicious_unique_ips.add(ip)
+            if path:
+                self.suspicious_paths[path] += 1
+        else:
+            self.clean_requests += 1
+            self.clean_unique_ips.add(ip)
+            if not asset and path:
+                self.content_requests += 1
+                self.content_unique_ips.add(ip)
+
+        if not asset and path:
+            self.page_counts[path] += 1
+            if status == "404":
+                self.not_found_pages[path] += 1
+                if suspicious_path:
+                    self.suspicious_not_found_pages[path] += 1
+                else:
+                    self.clean_not_found_pages[path] += 1
+
+        if referrer and referrer != "-":
+            if not INTERNAL_REFERRER_PATTERN.match(referrer):
+                self.external_referrers[referrer] += 1
+            engine = detect_engine(referrer)
+            if engine and not asset and path:
+                self.organic_engine_counts[engine] += 1
+                self.organic_page_counts[path] += 1
+
+    def summary(self, generated_at: str, window_hours: int):
+        organic_total = sum(self.organic_engine_counts.values())
+        not_found_total = sum(self.not_found_pages.values())
+        clean_404 = sum(self.clean_not_found_pages.values())
+        suspicious_404 = sum(self.suspicious_not_found_pages.values())
+        return {
+            "generated_at": generated_at,
+            "window_hours": window_hours,
+            "total_requests": self.total_requests,
+            "unique_ips": len(self.unique_ips),
+            "clean_requests": self.clean_requests,
+            "clean_unique_ips": len(self.clean_unique_ips),
+            "content_requests": self.content_requests,
+            "content_unique_ips": len(self.content_unique_ips),
+            "suspicious_requests": self.suspicious_requests,
+            "suspicious_unique_ips": len(self.suspicious_unique_ips),
+            "not_found_requests": not_found_total,
+            "suspicious_404": suspicious_404,
+            "clean_404": clean_404,
+            "organic_referrals": organic_total,
+            "clean_request_ratio": safe_ratio(self.clean_requests, self.total_requests),
+            "content_request_ratio": safe_ratio(self.content_requests, self.total_requests),
+            "suspicious_request_ratio": safe_ratio(self.suspicious_requests, self.total_requests),
+            "organic_referral_ratio": safe_ratio(organic_total, self.total_requests),
+            "not_found_ratio": safe_ratio(not_found_total, self.total_requests),
+            "clean_404_ratio": safe_ratio(clean_404, not_found_total),
+            "suspicious_404_ratio": safe_ratio(suspicious_404, not_found_total),
+        }
+
+
+def build_window_comparison(
+    current_summary: dict,
+    previous_summary: dict,
+    current_start: datetime,
+    current_end: datetime,
+    previous_start: datetime,
+):
+    metrics = [
+        "total_requests",
+        "unique_ips",
+        "clean_requests",
+        "content_requests",
+        "suspicious_requests",
+        "not_found_requests",
+        "clean_404",
+        "suspicious_404",
+        "organic_referrals",
+    ]
+    deltas = {}
+    for metric in metrics:
+        current_value = int(current_summary.get(metric, 0))
+        previous_value = int(previous_summary.get(metric, 0))
+        deltas[metric] = current_value - previous_value
+        deltas[f"{metric}_pct"] = safe_pct_change(current_value, previous_value)
+
+    return {
+        "current_window": {
+            "start": current_start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "end": current_end.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "hours": int(current_summary.get("window_hours", 0)),
+        },
+        "previous_window": {
+            "start": previous_start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "end": current_start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "hours": int(previous_summary.get("window_hours", 0)),
+            "summary": previous_summary,
+        },
+        "deltas": deltas,
+    }
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Analyze web-ceo nginx access logs.")
     parser.add_argument("--hours", type=int, default=24, help="Rolling time window in hours (default: 24)")
     parser.add_argument("--max-items", type=int, default=20, help="Max rows per printed section (default: 20)")
+    parser.add_argument(
+        "--compare-previous",
+        action="store_true",
+        help="Compare current window with the previous window of the same duration",
+    )
     parser.add_argument("--json", type=str, default="", help="Write JSON output to this file")
     return parser.parse_args()
 
@@ -117,25 +262,12 @@ def parse_args():
 def main():
     args = parse_args()
     now = datetime.now(timezone.utc)
-    cutoff = now - timedelta(hours=max(1, args.hours))
+    window_hours = max(1, args.hours)
+    current_start = now - timedelta(hours=window_hours)
+    previous_start = current_start - timedelta(hours=window_hours)
 
-    total_requests = 0
-    clean_requests = 0
-    content_requests = 0
-    suspicious_requests = 0
-    unique_ips = set()
-    clean_unique_ips = set()
-    content_unique_ips = set()
-    suspicious_unique_ips = set()
-    status_counts = Counter()
-    page_counts = Counter()
-    organic_engine_counts = Counter()
-    organic_page_counts = Counter()
-    external_referrers = Counter()
-    not_found_pages = Counter()
-    clean_not_found_pages = Counter()
-    suspicious_paths = Counter()
-    suspicious_not_found_pages = Counter()
+    current_window = WindowStats()
+    previous_window = WindowStats() if args.compare_previous else None
 
     for logfile in LOG_FILES:
         try:
@@ -154,64 +286,30 @@ def main():
             except ValueError:
                 continue
 
-            if ts < cutoff:
+            if args.compare_previous:
+                if ts < previous_start:
+                    continue
+                target_window = current_window if ts >= current_start else previous_window
+            else:
+                if ts < current_start:
+                    continue
+                target_window = current_window
+
+            if target_window is None:
                 continue
 
             ip = match.group("ip")
             status = match.group("status")
             referrer = match.group("ref").strip()
             path = parse_request_path(match.group("req"))
-            asset = is_asset_path(path)
-            suspicious_path = is_suspicious_path(path)
+            target_window.record(ip, status, referrer, path)
 
-            total_requests += 1
-            unique_ips.add(ip)
-            status_counts[status] += 1
-            if suspicious_path:
-                suspicious_requests += 1
-                suspicious_unique_ips.add(ip)
-                if path:
-                    suspicious_paths[path] += 1
-            else:
-                clean_requests += 1
-                clean_unique_ips.add(ip)
-                if not asset and path:
-                    content_requests += 1
-                    content_unique_ips.add(ip)
-
-            if not asset and path:
-                page_counts[path] += 1
-                if status == "404":
-                    not_found_pages[path] += 1
-                    if suspicious_path:
-                        suspicious_not_found_pages[path] += 1
-                    else:
-                        clean_not_found_pages[path] += 1
-
-            if referrer and referrer != "-":
-                if not INTERNAL_REFERRER_PATTERN.match(referrer):
-                    external_referrers[referrer] += 1
-                engine = detect_engine(referrer)
-                if engine and not asset and path:
-                    organic_engine_counts[engine] += 1
-                    organic_page_counts[path] += 1
-
-    organic_total = sum(organic_engine_counts.values())
-    summary = {
-        "generated_at": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "window_hours": max(1, args.hours),
-        "total_requests": total_requests,
-        "unique_ips": len(unique_ips),
-        "clean_requests": clean_requests,
-        "clean_unique_ips": len(clean_unique_ips),
-        "content_requests": content_requests,
-        "content_unique_ips": len(content_unique_ips),
-        "suspicious_requests": suspicious_requests,
-        "suspicious_unique_ips": len(suspicious_unique_ips),
-        "suspicious_404": sum(suspicious_not_found_pages.values()),
-        "clean_404": sum(clean_not_found_pages.values()),
-        "organic_referrals": organic_total,
-    }
+    generated_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    summary = current_window.summary(generated_at, window_hours)
+    comparison = None
+    if args.compare_previous and previous_window is not None:
+        previous_summary = previous_window.summary(current_start.strftime("%Y-%m-%dT%H:%M:%SZ"), window_hours)
+        comparison = build_window_comparison(summary, previous_summary, current_start, now, previous_start)
 
     print(f"=== TRAFFIC SUMMARY (last {summary['window_hours']}h) ===")
     print(f"  total_requests: {summary['total_requests']}")
@@ -221,60 +319,82 @@ def main():
     print(f"  content_requests: {summary['content_requests']}")
     print(f"  content_unique_ips: {summary['content_unique_ips']}")
     print(f"  suspicious_requests: {summary['suspicious_requests']}")
+    print(f"  not_found_requests: {summary['not_found_requests']}")
     print(f"  suspicious_404: {summary['suspicious_404']}")
     print(f"  organic_referrals: {summary['organic_referrals']}")
+    print(f"  clean_request_ratio: {summary['clean_request_ratio']}%")
+    print(f"  suspicious_request_ratio: {summary['suspicious_request_ratio']}%")
+    print(f"  organic_referral_ratio: {summary['organic_referral_ratio']}%")
     print()
 
+    if comparison:
+        print("=== WINDOW COMPARISON (current vs previous same-duration window) ===")
+        for metric in [
+            "total_requests",
+            "unique_ips",
+            "content_requests",
+            "suspicious_requests",
+            "not_found_requests",
+            "organic_referrals",
+        ]:
+            delta = comparison["deltas"][metric]
+            delta_pct = comparison["deltas"][f"{metric}_pct"]
+            delta_pct_label = "n/a" if delta_pct is None else f"{delta_pct:+.2f}%"
+            print(f"  {metric}: {delta:+d} ({delta_pct_label})")
+        print()
+
     print("=== STATUS CODES ===")
-    for code, count in status_counts.most_common(args.max_items):
+    for code, count in current_window.status_counts.most_common(args.max_items):
         print(f"  {code}: {count}")
     print()
 
     print("=== TOP PAGES (non-asset) ===")
-    for path, count in page_counts.most_common(args.max_items):
+    for path, count in current_window.page_counts.most_common(args.max_items):
         print(f"  {count:4d}  {path}")
     print()
 
     print("=== ORGANIC ENGINES ===")
-    for engine, count in organic_engine_counts.most_common(args.max_items):
+    for engine, count in current_window.organic_engine_counts.most_common(args.max_items):
         print(f"  {engine}: {count}")
     print()
 
     print("=== TOP ORGANIC LANDING PAGES ===")
-    for path, count in organic_page_counts.most_common(args.max_items):
+    for path, count in current_window.organic_page_counts.most_common(args.max_items):
         print(f"  {count:4d}  {path}")
     print()
 
     print("=== TOP EXTERNAL REFERRERS ===")
-    for referrer, count in external_referrers.most_common(args.max_items):
+    for referrer, count in current_window.external_referrers.most_common(args.max_items):
         print(f"  {count:4d}  {referrer}")
     print()
 
     print("=== TOP 404 PAGES ===")
-    for path, count in not_found_pages.most_common(args.max_items):
+    for path, count in current_window.not_found_pages.most_common(args.max_items):
         print(f"  {count:4d}  {path}")
     print()
 
     print("=== TOP CLEAN 404 PAGES ===")
-    for path, count in clean_not_found_pages.most_common(args.max_items):
+    for path, count in current_window.clean_not_found_pages.most_common(args.max_items):
         print(f"  {count:4d}  {path}")
     print()
 
     print("=== TOP SUSPICIOUS PATHS ===")
-    for path, count in suspicious_paths.most_common(args.max_items):
+    for path, count in current_window.suspicious_paths.most_common(args.max_items):
         print(f"  {count:4d}  {path}")
 
     report = {
         "summary": summary,
-        "status_codes": counter_to_sorted_list(status_counts, "code"),
-        "top_pages": counter_to_sorted_list(page_counts, "path"),
-        "organic_engines": counter_to_sorted_list(organic_engine_counts, "engine"),
-        "top_organic_pages": counter_to_sorted_list(organic_page_counts, "path"),
-        "top_external_referrers": counter_to_sorted_list(external_referrers, "referrer"),
-        "top_404_pages": counter_to_sorted_list(not_found_pages, "path"),
-        "top_clean_404_pages": counter_to_sorted_list(clean_not_found_pages, "path"),
-        "top_suspicious_paths": counter_to_sorted_list(suspicious_paths, "path"),
+        "status_codes": counter_to_sorted_list(current_window.status_counts, "code"),
+        "top_pages": counter_to_sorted_list(current_window.page_counts, "path"),
+        "organic_engines": counter_to_sorted_list(current_window.organic_engine_counts, "engine"),
+        "top_organic_pages": counter_to_sorted_list(current_window.organic_page_counts, "path"),
+        "top_external_referrers": counter_to_sorted_list(current_window.external_referrers, "referrer"),
+        "top_404_pages": counter_to_sorted_list(current_window.not_found_pages, "path"),
+        "top_clean_404_pages": counter_to_sorted_list(current_window.clean_not_found_pages, "path"),
+        "top_suspicious_paths": counter_to_sorted_list(current_window.suspicious_paths, "path"),
     }
+    if comparison:
+        report["comparison"] = comparison
 
     if args.json:
         with open(args.json, "w", encoding="utf-8") as f:
