@@ -32,6 +32,13 @@ SUSPICIOUS_PATH_PATTERNS = [
     re.compile(r"^/(?:wp-admin(?:/|$)|wp-login\.php$|xmlrpc\.php$)", re.IGNORECASE),
     re.compile(r"/vendor/phpunit/", re.IGNORECASE),
     re.compile(r"^/(?:phpunit|lib/phpunit)/", re.IGNORECASE),
+    re.compile(r"\.(?:php(?:\d+)?|phtml|phar)$", re.IGNORECASE),
+    re.compile(r"/\.env(?:[._-][^/]*)?$", re.IGNORECASE),
+    re.compile(r"^/wp-config", re.IGNORECASE),
+    re.compile(
+        r"(?:^|/)(?:phpinfo|phpsysinfo|php-info|php[_-]?details?|phpinformation|infophp|testphp(?:info)?|pinfo|php\.ini)(?:$|[/.])",
+        re.IGNORECASE,
+    ),
     re.compile(r"^/\.(?!well-known/)", re.IGNORECASE),
     re.compile(r"^/(?:wp-config\.php|web\.config|configuration\.php|config\.json|secrets\.json|credentials\.json)$", re.IGNORECASE),
     re.compile(r"^/(?:public/hot|public/storage|containers/json|storage/\*\.key)$", re.IGNORECASE),
