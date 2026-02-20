@@ -17,7 +17,17 @@ ASSET_PATTERN = re.compile(
     r"\.(css|js|mjs|ico|png|jpg|jpeg|gif|svg|webp|avif|woff|woff2|ttf|eot|map|txt|xml)$",
     re.IGNORECASE,
 )
+EXACT_ASSET_PATHS = {
+    "/favicon.ico",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/feed.xml",
+    "/sw.js",
+    "/manifest.json",
+    "/site.webmanifest",
+}
 INTERNAL_REFERRER_PATTERN = re.compile(r"^https?://(www\.)?devtoolbox\.dedyn\.io/?", re.IGNORECASE)
+CONTENT_SECTION_NAMES = ("homepage", "blog", "tools", "cheatsheets", "datekit", "budgetkit", "other")
 ENGINE_PATTERNS = [
     (re.compile(r"google\.", re.IGNORECASE), "google"),
     (re.compile(r"bing\.", re.IGNORECASE), "bing"),
@@ -81,11 +91,27 @@ def parse_request_path_query(request: str):
 def is_asset_path(path: str) -> bool:
     if not path:
         return True
-    if path in {"/favicon.ico", "/robots.txt", "/sitemap.xml", "/feed.xml", "/sw.js"}:
+    if path in EXACT_ASSET_PATHS:
         return True
     if path.startswith("/assets/") or path.startswith("/static/"):
         return True
     return bool(ASSET_PATTERN.search(path))
+
+
+def classify_content_section(path: str) -> str:
+    if path == "/":
+        return "homepage"
+    if path == "/blog" or path.startswith("/blog/"):
+        return "blog"
+    if path == "/tools" or path.startswith("/tools/"):
+        return "tools"
+    if path == "/cheatsheets" or path.startswith("/cheatsheets/"):
+        return "cheatsheets"
+    if path == "/datekit" or path.startswith("/datekit/"):
+        return "datekit"
+    if path == "/budgetkit" or path.startswith("/budgetkit/"):
+        return "budgetkit"
+    return "other"
 
 
 def detect_engine(referrer: str) -> str:
@@ -104,8 +130,12 @@ def is_suspicious_path(path: str) -> bool:
     return False
 
 
-def counter_to_sorted_list(counter: Counter, key_name: str):
-    return [{key_name: key, "count": count} for key, count in counter.most_common()]
+def counter_to_sorted_list(counter: Counter, key_name: str, max_items: int | None = None):
+    if max_items is None or max_items < 0:
+        items = counter.most_common()
+    else:
+        items = counter.most_common(max_items)
+    return [{key_name: key, "count": count} for key, count in items]
 
 
 def safe_ratio(part: int, whole: int) -> float:
@@ -132,8 +162,10 @@ class WindowStats:
         self.suspicious_unique_ips = set()
         self.status_counts = Counter()
         self.page_counts = Counter()
+        self.content_section_counts = Counter()
         self.organic_engine_counts = Counter()
         self.organic_page_counts = Counter()
+        self.organic_section_counts = Counter()
         self.external_referrers = Counter()
         self.not_found_pages = Counter()
         self.clean_not_found_pages = Counter()
@@ -162,6 +194,8 @@ class WindowStats:
             if not asset and path:
                 self.content_requests += 1
                 self.content_unique_ips.add(ip)
+                section = classify_content_section(path)
+                self.content_section_counts[section] += 1
 
         if not asset and path:
             self.page_counts[path] += 1
@@ -183,16 +217,32 @@ class WindowStats:
             if not INTERNAL_REFERRER_PATTERN.match(referrer):
                 self.external_referrers[referrer] += 1
             engine = detect_engine(referrer)
-            if engine and not asset and path:
+            if engine and not asset and path and not suspicious_path:
                 self.organic_engine_counts[engine] += 1
                 self.organic_page_counts[path] += 1
+                section = classify_content_section(path)
+                self.organic_section_counts[section] += 1
 
     def summary(self, generated_at: str, window_hours: int):
         organic_total = sum(self.organic_engine_counts.values())
         not_found_total = sum(self.not_found_pages.values())
         clean_404 = sum(self.clean_not_found_pages.values())
         suspicious_404 = sum(self.suspicious_not_found_pages.values())
-        return {
+        content_sections = {name: int(self.content_section_counts.get(name, 0)) for name in CONTENT_SECTION_NAMES}
+        organic_sections = {name: int(self.organic_section_counts.get(name, 0)) for name in CONTENT_SECTION_NAMES}
+        content_section_share = {name: safe_ratio(content_sections[name], self.content_requests) for name in CONTENT_SECTION_NAMES}
+        organic_section_share = {name: safe_ratio(organic_sections[name], organic_total) for name in CONTENT_SECTION_NAMES}
+
+        top_content_section = "other"
+        top_content_section_requests = 0
+        top_organic_section = "other"
+        top_organic_section_referrals = 0
+        if content_sections:
+            top_content_section, top_content_section_requests = max(content_sections.items(), key=lambda item: item[1])
+        if organic_sections:
+            top_organic_section, top_organic_section_referrals = max(organic_sections.items(), key=lambda item: item[1])
+
+        summary = {
             "generated_at": generated_at,
             "window_hours": window_hours,
             "total_requests": self.total_requests,
@@ -215,7 +265,19 @@ class WindowStats:
             "not_found_ratio": safe_ratio(not_found_total, self.total_requests),
             "clean_404_ratio": safe_ratio(clean_404, not_found_total),
             "suspicious_404_ratio": safe_ratio(suspicious_404, not_found_total),
+            "content_sections": content_sections,
+            "organic_sections": organic_sections,
+            "content_section_share_pct": content_section_share,
+            "organic_section_share_pct": organic_section_share,
+            "top_content_section": top_content_section,
+            "top_content_section_requests": top_content_section_requests,
+            "top_organic_section": top_organic_section,
+            "top_organic_section_referrals": top_organic_section_referrals,
         }
+        for section_name in CONTENT_SECTION_NAMES:
+            summary[f"content_{section_name}_requests"] = content_sections[section_name]
+            summary[f"organic_{section_name}_referrals"] = organic_sections[section_name]
+        return summary
 
 
 def build_window_comparison(
@@ -236,6 +298,20 @@ def build_window_comparison(
         "suspicious_404",
         "organic_referrals",
         "crosspromo_campaign_hits",
+        "content_homepage_requests",
+        "content_blog_requests",
+        "content_tools_requests",
+        "content_cheatsheets_requests",
+        "content_datekit_requests",
+        "content_budgetkit_requests",
+        "content_other_requests",
+        "organic_homepage_referrals",
+        "organic_blog_referrals",
+        "organic_tools_referrals",
+        "organic_cheatsheets_referrals",
+        "organic_datekit_referrals",
+        "organic_budgetkit_referrals",
+        "organic_other_referrals",
     ]
     deltas = {}
     for metric in metrics:
@@ -342,15 +418,39 @@ def main():
     print(f"  organic_referral_ratio: {summary['organic_referral_ratio']}%")
     print()
 
+    print("=== CONTENT SECTION BREAKDOWN (clean, non-asset) ===")
+    for section_name in CONTENT_SECTION_NAMES:
+        section_count = summary.get(f"content_{section_name}_requests", 0)
+        section_share = summary.get("content_section_share_pct", {}).get(section_name, 0)
+        print(f"  {section_name}: {section_count} ({section_share}%)")
+    print()
+
+    print("=== ORGANIC SECTION BREAKDOWN ===")
+    for section_name in CONTENT_SECTION_NAMES:
+        section_count = summary.get(f"organic_{section_name}_referrals", 0)
+        section_share = summary.get("organic_section_share_pct", {}).get(section_name, 0)
+        print(f"  {section_name}: {section_count} ({section_share}%)")
+    print()
+
     if comparison:
         print("=== WINDOW COMPARISON (current vs previous same-duration window) ===")
         for metric in [
             "total_requests",
             "unique_ips",
             "content_requests",
+            "content_blog_requests",
+            "content_tools_requests",
+            "content_cheatsheets_requests",
+            "content_datekit_requests",
+            "content_budgetkit_requests",
             "suspicious_requests",
             "not_found_requests",
             "organic_referrals",
+            "organic_blog_referrals",
+            "organic_tools_referrals",
+            "organic_cheatsheets_referrals",
+            "organic_datekit_referrals",
+            "organic_budgetkit_referrals",
             "crosspromo_campaign_hits",
         ]:
             delta = comparison["deltas"][metric]
@@ -410,16 +510,18 @@ def main():
 
     report = {
         "summary": summary,
-        "status_codes": counter_to_sorted_list(current_window.status_counts, "code"),
-        "top_pages": counter_to_sorted_list(current_window.page_counts, "path"),
-        "organic_engines": counter_to_sorted_list(current_window.organic_engine_counts, "engine"),
-        "top_organic_pages": counter_to_sorted_list(current_window.organic_page_counts, "path"),
-        "top_external_referrers": counter_to_sorted_list(current_window.external_referrers, "referrer"),
-        "crosspromo_campaign_pages": counter_to_sorted_list(current_window.crosspromo_campaign_pages, "path"),
-        "crosspromo_campaign_sources": counter_to_sorted_list(current_window.crosspromo_campaign_sources, "source"),
-        "top_404_pages": counter_to_sorted_list(current_window.not_found_pages, "path"),
-        "top_clean_404_pages": counter_to_sorted_list(current_window.clean_not_found_pages, "path"),
-        "top_suspicious_paths": counter_to_sorted_list(current_window.suspicious_paths, "path"),
+        "status_codes": counter_to_sorted_list(current_window.status_counts, "code", args.max_items),
+        "content_sections": counter_to_sorted_list(current_window.content_section_counts, "section", args.max_items),
+        "organic_sections": counter_to_sorted_list(current_window.organic_section_counts, "section", args.max_items),
+        "top_pages": counter_to_sorted_list(current_window.page_counts, "path", args.max_items),
+        "organic_engines": counter_to_sorted_list(current_window.organic_engine_counts, "engine", args.max_items),
+        "top_organic_pages": counter_to_sorted_list(current_window.organic_page_counts, "path", args.max_items),
+        "top_external_referrers": counter_to_sorted_list(current_window.external_referrers, "referrer", args.max_items),
+        "crosspromo_campaign_pages": counter_to_sorted_list(current_window.crosspromo_campaign_pages, "path", args.max_items),
+        "crosspromo_campaign_sources": counter_to_sorted_list(current_window.crosspromo_campaign_sources, "source", args.max_items),
+        "top_404_pages": counter_to_sorted_list(current_window.not_found_pages, "path", args.max_items),
+        "top_clean_404_pages": counter_to_sorted_list(current_window.clean_not_found_pages, "path", args.max_items),
+        "top_suspicious_paths": counter_to_sorted_list(current_window.suspicious_paths, "path", args.max_items),
     }
     if comparison:
         report["comparison"] = comparison
