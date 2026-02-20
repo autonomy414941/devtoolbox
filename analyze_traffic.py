@@ -7,7 +7,7 @@ import subprocess
 import sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlparse
 
 LOG_FILES = ["/var/log/nginx/web-ceo.access.log", "/var/log/nginx/web-ceo.access.log.1"]
 LOG_PATTERN = re.compile(
@@ -26,8 +26,8 @@ EXACT_ASSET_PATHS = {
     "/manifest.json",
     "/site.webmanifest",
 }
-INTERNAL_REFERRER_PATTERN = re.compile(r"^https?://(www\.)?devtoolbox\.dedyn\.io/?", re.IGNORECASE)
 CONTENT_SECTION_NAMES = ("homepage", "blog", "tools", "cheatsheets", "datekit", "budgetkit", "other")
+INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit")
 ENGINE_PATTERNS = [
     (re.compile(r"google\.", re.IGNORECASE), "google"),
     (re.compile(r"bing\.", re.IGNORECASE), "bing"),
@@ -121,6 +121,21 @@ def detect_engine(referrer: str) -> str:
     return ""
 
 
+def parse_internal_referrer_path(referrer: str) -> str:
+    if not referrer or referrer == "-":
+        return ""
+    try:
+        parsed = urlparse(referrer)
+    except ValueError:
+        return ""
+    host = (parsed.netloc or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
+    if host != "devtoolbox.dedyn.io":
+        return ""
+    return parsed.path or "/"
+
+
 def is_suspicious_path(path: str) -> bool:
     if not path:
         return False
@@ -174,10 +189,16 @@ class WindowStats:
         self.crosspromo_campaign_hits = 0
         self.crosspromo_campaign_pages = Counter()
         self.crosspromo_campaign_sources = Counter()
+        self.internal_crossproperty_referrals = 0
+        self.internal_crossproperty_target_sections = Counter()
+        self.internal_crossproperty_source_sections = Counter()
+        self.internal_crossproperty_target_pages = Counter()
+        self.internal_crossproperty_source_pages = Counter()
 
     def record(self, ip: str, status: str, referrer: str, path: str, query: str):
         asset = is_asset_path(path)
         suspicious_path = is_suspicious_path(path)
+        internal_referrer_path = parse_internal_referrer_path(referrer)
 
         self.total_requests += 1
         self.unique_ips.add(ip)
@@ -214,7 +235,7 @@ class WindowStats:
                         self.crosspromo_campaign_sources[source] += 1
 
         if referrer and referrer != "-":
-            if not INTERNAL_REFERRER_PATTERN.match(referrer):
+            if not internal_referrer_path:
                 self.external_referrers[referrer] += 1
             engine = detect_engine(referrer)
             if engine and not asset and path and not suspicious_path:
@@ -222,6 +243,16 @@ class WindowStats:
                 self.organic_page_counts[path] += 1
                 section = classify_content_section(path)
                 self.organic_section_counts[section] += 1
+
+        if internal_referrer_path and not asset and path and not suspicious_path:
+            source_section = classify_content_section(internal_referrer_path)
+            target_section = classify_content_section(path)
+            if target_section in INTERNAL_CROSSPROPERTY_TARGETS and source_section != target_section:
+                self.internal_crossproperty_referrals += 1
+                self.internal_crossproperty_target_sections[target_section] += 1
+                self.internal_crossproperty_source_sections[source_section] += 1
+                self.internal_crossproperty_target_pages[path] += 1
+                self.internal_crossproperty_source_pages[internal_referrer_path] += 1
 
     def summary(self, generated_at: str, window_hours: int):
         organic_total = sum(self.organic_engine_counts.values())
@@ -237,10 +268,19 @@ class WindowStats:
         top_content_section_requests = 0
         top_organic_section = "other"
         top_organic_section_referrals = 0
+        internal_to_datekit = int(self.internal_crossproperty_target_sections.get("datekit", 0))
+        internal_to_budgetkit = int(self.internal_crossproperty_target_sections.get("budgetkit", 0))
+        top_internal_source_section = "other"
+        top_internal_source_referrals = 0
         if content_sections:
             top_content_section, top_content_section_requests = max(content_sections.items(), key=lambda item: item[1])
         if organic_sections:
             top_organic_section, top_organic_section_referrals = max(organic_sections.items(), key=lambda item: item[1])
+        if self.internal_crossproperty_source_sections:
+            top_internal_source_section, top_internal_source_referrals = max(
+                self.internal_crossproperty_source_sections.items(),
+                key=lambda item: item[1],
+            )
 
         summary = {
             "generated_at": generated_at,
@@ -258,10 +298,14 @@ class WindowStats:
             "clean_404": clean_404,
             "organic_referrals": organic_total,
             "crosspromo_campaign_hits": self.crosspromo_campaign_hits,
+            "internal_crossproperty_referrals": self.internal_crossproperty_referrals,
+            "internal_crossproperty_referrals_to_datekit": internal_to_datekit,
+            "internal_crossproperty_referrals_to_budgetkit": internal_to_budgetkit,
             "clean_request_ratio": safe_ratio(self.clean_requests, self.total_requests),
             "content_request_ratio": safe_ratio(self.content_requests, self.total_requests),
             "suspicious_request_ratio": safe_ratio(self.suspicious_requests, self.total_requests),
             "organic_referral_ratio": safe_ratio(organic_total, self.total_requests),
+            "internal_crossproperty_referral_ratio": safe_ratio(self.internal_crossproperty_referrals, self.total_requests),
             "not_found_ratio": safe_ratio(not_found_total, self.total_requests),
             "clean_404_ratio": safe_ratio(clean_404, not_found_total),
             "suspicious_404_ratio": safe_ratio(suspicious_404, not_found_total),
@@ -273,6 +317,8 @@ class WindowStats:
             "top_content_section_requests": top_content_section_requests,
             "top_organic_section": top_organic_section,
             "top_organic_section_referrals": top_organic_section_referrals,
+            "top_internal_crossproperty_source_section": top_internal_source_section,
+            "top_internal_crossproperty_source_referrals": top_internal_source_referrals,
         }
         for section_name in CONTENT_SECTION_NAMES:
             summary[f"content_{section_name}_requests"] = content_sections[section_name]
@@ -298,6 +344,9 @@ def build_window_comparison(
         "suspicious_404",
         "organic_referrals",
         "crosspromo_campaign_hits",
+        "internal_crossproperty_referrals",
+        "internal_crossproperty_referrals_to_datekit",
+        "internal_crossproperty_referrals_to_budgetkit",
         "content_homepage_requests",
         "content_blog_requests",
         "content_tools_requests",
@@ -413,9 +462,11 @@ def main():
     print(f"  suspicious_404: {summary['suspicious_404']}")
     print(f"  organic_referrals: {summary['organic_referrals']}")
     print(f"  crosspromo_campaign_hits: {summary['crosspromo_campaign_hits']}")
+    print(f"  internal_crossproperty_referrals: {summary['internal_crossproperty_referrals']}")
     print(f"  clean_request_ratio: {summary['clean_request_ratio']}%")
     print(f"  suspicious_request_ratio: {summary['suspicious_request_ratio']}%")
     print(f"  organic_referral_ratio: {summary['organic_referral_ratio']}%")
+    print(f"  internal_crossproperty_referral_ratio: {summary['internal_crossproperty_referral_ratio']}%")
     print()
 
     print("=== CONTENT SECTION BREAKDOWN (clean, non-asset) ===")
@@ -452,6 +503,9 @@ def main():
             "organic_datekit_referrals",
             "organic_budgetkit_referrals",
             "crosspromo_campaign_hits",
+            "internal_crossproperty_referrals",
+            "internal_crossproperty_referrals_to_datekit",
+            "internal_crossproperty_referrals_to_budgetkit",
         ]:
             delta = comparison["deltas"][metric]
             delta_pct = comparison["deltas"][f"{metric}_pct"]
@@ -494,6 +548,22 @@ def main():
         print(f"  {count:4d}  {source}")
     print()
 
+    print("=== INTERNAL CROSS-PROPERTY REFERRALS (to DateKit/BudgetKit) ===")
+    print(f"  total: {current_window.internal_crossproperty_referrals}")
+    print("  by target section:")
+    for section, count in current_window.internal_crossproperty_target_sections.most_common(args.max_items):
+        print(f"    {section}: {count}")
+    print("  by source section:")
+    for section, count in current_window.internal_crossproperty_source_sections.most_common(args.max_items):
+        print(f"    {section}: {count}")
+    print("  top source pages:")
+    for source_path, count in current_window.internal_crossproperty_source_pages.most_common(args.max_items):
+        print(f"    {count:4d}  {source_path}")
+    print("  top target pages:")
+    for target_path, count in current_window.internal_crossproperty_target_pages.most_common(args.max_items):
+        print(f"    {count:4d}  {target_path}")
+    print()
+
     print("=== TOP 404 PAGES ===")
     for path, count in current_window.not_found_pages.most_common(args.max_items):
         print(f"  {count:4d}  {path}")
@@ -519,6 +589,26 @@ def main():
         "top_external_referrers": counter_to_sorted_list(current_window.external_referrers, "referrer", args.max_items),
         "crosspromo_campaign_pages": counter_to_sorted_list(current_window.crosspromo_campaign_pages, "path", args.max_items),
         "crosspromo_campaign_sources": counter_to_sorted_list(current_window.crosspromo_campaign_sources, "source", args.max_items),
+        "internal_crossproperty_target_sections": counter_to_sorted_list(
+            current_window.internal_crossproperty_target_sections,
+            "section",
+            args.max_items,
+        ),
+        "internal_crossproperty_source_sections": counter_to_sorted_list(
+            current_window.internal_crossproperty_source_sections,
+            "section",
+            args.max_items,
+        ),
+        "internal_crossproperty_source_pages": counter_to_sorted_list(
+            current_window.internal_crossproperty_source_pages,
+            "path",
+            args.max_items,
+        ),
+        "internal_crossproperty_target_pages": counter_to_sorted_list(
+            current_window.internal_crossproperty_target_pages,
+            "path",
+            args.max_items,
+        ),
         "top_404_pages": counter_to_sorted_list(current_window.not_found_pages, "path", args.max_items),
         "top_clean_404_pages": counter_to_sorted_list(current_window.clean_not_found_pages, "path", args.max_items),
         "top_suspicious_paths": counter_to_sorted_list(current_window.suspicious_paths, "path", args.max_items),
