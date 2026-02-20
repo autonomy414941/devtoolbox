@@ -18,6 +18,8 @@ from pathlib import Path
 SITE_ROOT = Path("/var/www/web-ceo")
 BASE_URL = "https://devtoolbox.dedyn.io"
 REQUIRED_ROOT_FILES = ("google5ab7b13e25381f31.html",)
+DATEKIT_ROOT = Path("/var/www/datekit")
+BUDGETKIT_ROOT = SITE_ROOT / "budgetkit"
 
 
 @dataclass(frozen=True)
@@ -84,6 +86,35 @@ def write_sitemap(entries: list[SitemapEntry], output_path: Path) -> None:
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def add_subsite_pages(
+    entries: list[SitemapEntry],
+    mount_path: str,
+    source_dir: Path,
+    root_priority: str = "0.8",
+    page_priority: str = "0.7",
+) -> None:
+    if not source_dir.exists():
+        return
+
+    pages = sorted(source_dir.glob("*.html"), key=lambda p: p.name)
+    for page in pages:
+        if page.name == "index.html":
+            loc_path = f"{mount_path}/"
+            priority = root_priority
+        else:
+            loc_path = f"{mount_path}/{page.name}"
+            priority = page_priority
+
+        entries.append(
+            SitemapEntry(
+                loc=f"{BASE_URL}{loc_path}",
+                lastmod=utc_mtime_date(page),
+                changefreq="weekly",
+                priority=priority,
+            )
+        )
+
+
 def main() -> None:
     missing = [name for name in REQUIRED_ROOT_FILES if not (SITE_ROOT / name).exists()]
     if missing:
@@ -111,6 +142,8 @@ def main() -> None:
     add("/blog", SITE_ROOT / "blog" / "index.html", "weekly", "0.9")
     add("/tools", SITE_ROOT / "tools" / "index.html", "weekly", "0.8")
     add("/cheatsheets", SITE_ROOT / "cheatsheets" / "index.html", "weekly", "0.8")
+    add_subsite_pages(entries, "/datekit", DATEKIT_ROOT)
+    add_subsite_pages(entries, "/budgetkit", BUDGETKIT_ROOT)
 
     tools_dir = SITE_ROOT / "tools"
     tool_pages = sorted(
