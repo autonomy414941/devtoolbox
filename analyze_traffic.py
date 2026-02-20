@@ -7,6 +7,7 @@ import subprocess
 import sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+from urllib.parse import parse_qs
 
 LOG_FILES = ["/var/log/nginx/web-ceo.access.log", "/var/log/nginx/web-ceo.access.log.1"]
 LOG_PATTERN = re.compile(
@@ -68,12 +69,13 @@ def read_log_lines(path: str):
         return output.splitlines(keepends=True)
 
 
-def parse_request_path(request: str) -> str:
+def parse_request_path_query(request: str):
     parts = request.split()
     if len(parts) < 2:
-        return ""
-    path = parts[1].split("?", 1)[0].strip()
-    return path or "/"
+        return "", ""
+    target = parts[1].strip()
+    path, _, query = target.partition("?")
+    return (path or "/"), query
 
 
 def is_asset_path(path: str) -> bool:
@@ -137,8 +139,11 @@ class WindowStats:
         self.clean_not_found_pages = Counter()
         self.suspicious_paths = Counter()
         self.suspicious_not_found_pages = Counter()
+        self.crosspromo_campaign_hits = 0
+        self.crosspromo_campaign_pages = Counter()
+        self.crosspromo_campaign_sources = Counter()
 
-    def record(self, ip: str, status: str, referrer: str, path: str):
+    def record(self, ip: str, status: str, referrer: str, path: str, query: str):
         asset = is_asset_path(path)
         suspicious_path = is_suspicious_path(path)
 
@@ -166,6 +171,13 @@ class WindowStats:
                     self.suspicious_not_found_pages[path] += 1
                 else:
                     self.clean_not_found_pages[path] += 1
+            if "utm_campaign=crosspromo-top-organic" in query:
+                self.crosspromo_campaign_hits += 1
+                self.crosspromo_campaign_pages[path] += 1
+                params = parse_qs(query, keep_blank_values=False)
+                for source in params.get("utm_content", []):
+                    if source:
+                        self.crosspromo_campaign_sources[source] += 1
 
         if referrer and referrer != "-":
             if not INTERNAL_REFERRER_PATTERN.match(referrer):
@@ -195,6 +207,7 @@ class WindowStats:
             "suspicious_404": suspicious_404,
             "clean_404": clean_404,
             "organic_referrals": organic_total,
+            "crosspromo_campaign_hits": self.crosspromo_campaign_hits,
             "clean_request_ratio": safe_ratio(self.clean_requests, self.total_requests),
             "content_request_ratio": safe_ratio(self.content_requests, self.total_requests),
             "suspicious_request_ratio": safe_ratio(self.suspicious_requests, self.total_requests),
@@ -222,6 +235,7 @@ def build_window_comparison(
         "clean_404",
         "suspicious_404",
         "organic_referrals",
+        "crosspromo_campaign_hits",
     ]
     deltas = {}
     for metric in metrics:
@@ -301,8 +315,8 @@ def main():
             ip = match.group("ip")
             status = match.group("status")
             referrer = match.group("ref").strip()
-            path = parse_request_path(match.group("req"))
-            target_window.record(ip, status, referrer, path)
+            path, query = parse_request_path_query(match.group("req"))
+            target_window.record(ip, status, referrer, path, query)
 
     generated_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     summary = current_window.summary(generated_at, window_hours)
@@ -322,6 +336,7 @@ def main():
     print(f"  not_found_requests: {summary['not_found_requests']}")
     print(f"  suspicious_404: {summary['suspicious_404']}")
     print(f"  organic_referrals: {summary['organic_referrals']}")
+    print(f"  crosspromo_campaign_hits: {summary['crosspromo_campaign_hits']}")
     print(f"  clean_request_ratio: {summary['clean_request_ratio']}%")
     print(f"  suspicious_request_ratio: {summary['suspicious_request_ratio']}%")
     print(f"  organic_referral_ratio: {summary['organic_referral_ratio']}%")
@@ -336,6 +351,7 @@ def main():
             "suspicious_requests",
             "not_found_requests",
             "organic_referrals",
+            "crosspromo_campaign_hits",
         ]:
             delta = comparison["deltas"][metric]
             delta_pct = comparison["deltas"][f"{metric}_pct"]
@@ -368,6 +384,16 @@ def main():
         print(f"  {count:4d}  {referrer}")
     print()
 
+    print("=== CROSSPROMO CAMPAIGN LANDINGS ===")
+    for path, count in current_window.crosspromo_campaign_pages.most_common(args.max_items):
+        print(f"  {count:4d}  {path}")
+    print()
+
+    print("=== CROSSPROMO CAMPAIGN SOURCES ===")
+    for source, count in current_window.crosspromo_campaign_sources.most_common(args.max_items):
+        print(f"  {count:4d}  {source}")
+    print()
+
     print("=== TOP 404 PAGES ===")
     for path, count in current_window.not_found_pages.most_common(args.max_items):
         print(f"  {count:4d}  {path}")
@@ -389,6 +415,8 @@ def main():
         "organic_engines": counter_to_sorted_list(current_window.organic_engine_counts, "engine"),
         "top_organic_pages": counter_to_sorted_list(current_window.organic_page_counts, "path"),
         "top_external_referrers": counter_to_sorted_list(current_window.external_referrers, "referrer"),
+        "crosspromo_campaign_pages": counter_to_sorted_list(current_window.crosspromo_campaign_pages, "path"),
+        "crosspromo_campaign_sources": counter_to_sorted_list(current_window.crosspromo_campaign_sources, "source"),
         "top_404_pages": counter_to_sorted_list(current_window.not_found_pages, "path"),
         "top_clean_404_pages": counter_to_sorted_list(current_window.clean_not_found_pages, "path"),
         "top_suspicious_paths": counter_to_sorted_list(current_window.suspicious_paths, "path"),
