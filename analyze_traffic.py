@@ -191,6 +191,11 @@ class WindowStats:
         self.crosspromo_campaign_hits = 0
         self.crosspromo_campaign_pages = Counter()
         self.crosspromo_campaign_sources = Counter()
+        self.crosspromo_campaign_source_pages = Counter()
+        self.crosspromo_campaign_source_sections = Counter()
+        self.crosspromo_campaign_target_sections = Counter()
+        self.crosspromo_campaign_source_target_sections = Counter()
+        self.crosspromo_campaign_page_path_pairs = Counter()
         self.internal_crossproperty_referrals = 0
         self.internal_crossproperty_target_sections = Counter()
         self.internal_crossproperty_source_sections = Counter()
@@ -231,10 +236,18 @@ class WindowStats:
             if "utm_campaign=crosspromo-top-organic" in query:
                 self.crosspromo_campaign_hits += 1
                 self.crosspromo_campaign_pages[path] += 1
+                target_section = classify_content_section(path)
+                self.crosspromo_campaign_target_sections[target_section] += 1
                 params = parse_qs(query, keep_blank_values=False)
                 for source in params.get("utm_content", []):
                     if source:
                         self.crosspromo_campaign_sources[source] += 1
+                        self.crosspromo_campaign_source_target_sections[f"{source}->{target_section}"] += 1
+                if internal_referrer_path:
+                    source_section = classify_content_section(internal_referrer_path)
+                    self.crosspromo_campaign_source_pages[internal_referrer_path] += 1
+                    self.crosspromo_campaign_source_sections[source_section] += 1
+                    self.crosspromo_campaign_page_path_pairs[f"{internal_referrer_path}->{path}"] += 1
 
         if referrer and referrer != "-":
             if not internal_referrer_path:
@@ -273,8 +286,21 @@ class WindowStats:
         internal_to_datekit = int(self.internal_crossproperty_target_sections.get("datekit", 0))
         internal_to_budgetkit = int(self.internal_crossproperty_target_sections.get("budgetkit", 0))
         internal_to_healthkit = int(self.internal_crossproperty_target_sections.get("healthkit", 0))
+        crosspromo_to_datekit = int(self.crosspromo_campaign_target_sections.get("datekit", 0))
+        crosspromo_to_budgetkit = int(self.crosspromo_campaign_target_sections.get("budgetkit", 0))
+        crosspromo_to_healthkit = int(self.crosspromo_campaign_target_sections.get("healthkit", 0))
         top_internal_source_section = "other"
         top_internal_source_referrals = 0
+        top_crosspromo_source = ""
+        top_crosspromo_source_hits = 0
+        top_crosspromo_source_page = ""
+        top_crosspromo_source_page_hits = 0
+        top_crosspromo_target_section = "other"
+        top_crosspromo_target_hits = 0
+        top_crosspromo_source_target = ""
+        top_crosspromo_source_target_hits = 0
+        top_crosspromo_page_pair = ""
+        top_crosspromo_page_pair_hits = 0
         if content_sections:
             top_content_section, top_content_section_requests = max(content_sections.items(), key=lambda item: item[1])
         if organic_sections:
@@ -282,6 +308,31 @@ class WindowStats:
         if self.internal_crossproperty_source_sections:
             top_internal_source_section, top_internal_source_referrals = max(
                 self.internal_crossproperty_source_sections.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_campaign_sources:
+            top_crosspromo_source, top_crosspromo_source_hits = max(
+                self.crosspromo_campaign_sources.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_campaign_source_pages:
+            top_crosspromo_source_page, top_crosspromo_source_page_hits = max(
+                self.crosspromo_campaign_source_pages.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_campaign_target_sections:
+            top_crosspromo_target_section, top_crosspromo_target_hits = max(
+                self.crosspromo_campaign_target_sections.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_campaign_source_target_sections:
+            top_crosspromo_source_target, top_crosspromo_source_target_hits = max(
+                self.crosspromo_campaign_source_target_sections.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_campaign_page_path_pairs:
+            top_crosspromo_page_pair, top_crosspromo_page_pair_hits = max(
+                self.crosspromo_campaign_page_path_pairs.items(),
                 key=lambda item: item[1],
             )
 
@@ -301,6 +352,9 @@ class WindowStats:
             "clean_404": clean_404,
             "organic_referrals": organic_total,
             "crosspromo_campaign_hits": self.crosspromo_campaign_hits,
+            "crosspromo_campaign_hits_to_datekit": crosspromo_to_datekit,
+            "crosspromo_campaign_hits_to_budgetkit": crosspromo_to_budgetkit,
+            "crosspromo_campaign_hits_to_healthkit": crosspromo_to_healthkit,
             "internal_crossproperty_referrals": self.internal_crossproperty_referrals,
             "internal_crossproperty_referrals_to_datekit": internal_to_datekit,
             "internal_crossproperty_referrals_to_budgetkit": internal_to_budgetkit,
@@ -323,6 +377,16 @@ class WindowStats:
             "top_organic_section_referrals": top_organic_section_referrals,
             "top_internal_crossproperty_source_section": top_internal_source_section,
             "top_internal_crossproperty_source_referrals": top_internal_source_referrals,
+            "top_crosspromo_campaign_source": top_crosspromo_source,
+            "top_crosspromo_campaign_source_hits": top_crosspromo_source_hits,
+            "top_crosspromo_campaign_source_page": top_crosspromo_source_page,
+            "top_crosspromo_campaign_source_page_hits": top_crosspromo_source_page_hits,
+            "top_crosspromo_campaign_target_section": top_crosspromo_target_section,
+            "top_crosspromo_campaign_target_hits": top_crosspromo_target_hits,
+            "top_crosspromo_campaign_source_target_section": top_crosspromo_source_target,
+            "top_crosspromo_campaign_source_target_hits": top_crosspromo_source_target_hits,
+            "top_crosspromo_campaign_page_pair": top_crosspromo_page_pair,
+            "top_crosspromo_campaign_page_pair_hits": top_crosspromo_page_pair_hits,
         }
         for section_name in CONTENT_SECTION_NAMES:
             summary[f"content_{section_name}_requests"] = content_sections[section_name]
@@ -348,6 +412,9 @@ def build_window_comparison(
         "suspicious_404",
         "organic_referrals",
         "crosspromo_campaign_hits",
+        "crosspromo_campaign_hits_to_datekit",
+        "crosspromo_campaign_hits_to_budgetkit",
+        "crosspromo_campaign_hits_to_healthkit",
         "internal_crossproperty_referrals",
         "internal_crossproperty_referrals_to_datekit",
         "internal_crossproperty_referrals_to_budgetkit",
@@ -469,7 +536,13 @@ def main():
     print(f"  suspicious_404: {summary['suspicious_404']}")
     print(f"  organic_referrals: {summary['organic_referrals']}")
     print(f"  crosspromo_campaign_hits: {summary['crosspromo_campaign_hits']}")
+    print(f"  crosspromo_campaign_hits_to_datekit: {summary['crosspromo_campaign_hits_to_datekit']}")
+    print(f"  crosspromo_campaign_hits_to_budgetkit: {summary['crosspromo_campaign_hits_to_budgetkit']}")
+    print(f"  crosspromo_campaign_hits_to_healthkit: {summary['crosspromo_campaign_hits_to_healthkit']}")
     print(f"  internal_crossproperty_referrals: {summary['internal_crossproperty_referrals']}")
+    print(f"  top_crosspromo_campaign_source: {summary['top_crosspromo_campaign_source']}")
+    print(f"  top_crosspromo_campaign_target_section: {summary['top_crosspromo_campaign_target_section']}")
+    print(f"  top_crosspromo_campaign_source_target_section: {summary['top_crosspromo_campaign_source_target_section']}")
     print(f"  clean_request_ratio: {summary['clean_request_ratio']}%")
     print(f"  suspicious_request_ratio: {summary['suspicious_request_ratio']}%")
     print(f"  organic_referral_ratio: {summary['organic_referral_ratio']}%")
@@ -512,6 +585,9 @@ def main():
             "organic_budgetkit_referrals",
             "organic_healthkit_referrals",
             "crosspromo_campaign_hits",
+            "crosspromo_campaign_hits_to_datekit",
+            "crosspromo_campaign_hits_to_budgetkit",
+            "crosspromo_campaign_hits_to_healthkit",
             "internal_crossproperty_referrals",
             "internal_crossproperty_referrals_to_datekit",
             "internal_crossproperty_referrals_to_budgetkit",
@@ -558,6 +634,31 @@ def main():
         print(f"  {count:4d}  {source}")
     print()
 
+    print("=== CROSSPROMO CAMPAIGN SOURCE PAGES ===")
+    for source_path, count in current_window.crosspromo_campaign_source_pages.most_common(args.max_items):
+        print(f"  {count:4d}  {source_path}")
+    print()
+
+    print("=== CROSSPROMO CAMPAIGN SOURCE SECTIONS ===")
+    for section, count in current_window.crosspromo_campaign_source_sections.most_common(args.max_items):
+        print(f"  {section}: {count}")
+    print()
+
+    print("=== CROSSPROMO CAMPAIGN TARGET SECTIONS ===")
+    for section, count in current_window.crosspromo_campaign_target_sections.most_common(args.max_items):
+        print(f"  {section}: {count}")
+    print()
+
+    print("=== CROSSPROMO CAMPAIGN SOURCE->TARGET SECTION PAIRS ===")
+    for pair, count in current_window.crosspromo_campaign_source_target_sections.most_common(args.max_items):
+        print(f"  {count:4d}  {pair}")
+    print()
+
+    print("=== CROSSPROMO CAMPAIGN SOURCE->TARGET PAGE PAIRS ===")
+    for pair, count in current_window.crosspromo_campaign_page_path_pairs.most_common(args.max_items):
+        print(f"  {count:4d}  {pair}")
+    print()
+
     print("=== INTERNAL CROSS-PROPERTY REFERRALS (to DateKit/BudgetKit/HealthKit) ===")
     print(f"  total: {current_window.internal_crossproperty_referrals}")
     print("  by target section:")
@@ -599,6 +700,31 @@ def main():
         "top_external_referrers": counter_to_sorted_list(current_window.external_referrers, "referrer", args.max_items),
         "crosspromo_campaign_pages": counter_to_sorted_list(current_window.crosspromo_campaign_pages, "path", args.max_items),
         "crosspromo_campaign_sources": counter_to_sorted_list(current_window.crosspromo_campaign_sources, "source", args.max_items),
+        "crosspromo_campaign_source_pages": counter_to_sorted_list(
+            current_window.crosspromo_campaign_source_pages,
+            "path",
+            args.max_items,
+        ),
+        "crosspromo_campaign_source_sections": counter_to_sorted_list(
+            current_window.crosspromo_campaign_source_sections,
+            "section",
+            args.max_items,
+        ),
+        "crosspromo_campaign_target_sections": counter_to_sorted_list(
+            current_window.crosspromo_campaign_target_sections,
+            "section",
+            args.max_items,
+        ),
+        "crosspromo_campaign_source_target_sections": counter_to_sorted_list(
+            current_window.crosspromo_campaign_source_target_sections,
+            "pair",
+            args.max_items,
+        ),
+        "crosspromo_campaign_page_path_pairs": counter_to_sorted_list(
+            current_window.crosspromo_campaign_page_path_pairs,
+            "pair",
+            args.max_items,
+        ),
         "internal_crossproperty_target_sections": counter_to_sorted_list(
             current_window.internal_crossproperty_target_sections,
             "section",
