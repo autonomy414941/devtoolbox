@@ -20,6 +20,7 @@ BASE_URL = "https://devtoolbox.dedyn.io"
 REQUIRED_ROOT_FILES = ("google5ab7b13e25381f31.html",)
 DATEKIT_ROOT = Path("/var/www/datekit")
 BUDGETKIT_ROOT = SITE_ROOT / "budgetkit"
+HEALTHKIT_ROOT = SITE_ROOT / "healthkit"
 
 
 @dataclass(frozen=True)
@@ -144,6 +145,7 @@ def main() -> None:
     add("/cheatsheets", SITE_ROOT / "cheatsheets" / "index.html", "weekly", "0.8")
     add_subsite_pages(entries, "/datekit", DATEKIT_ROOT)
     add_subsite_pages(entries, "/budgetkit", BUDGETKIT_ROOT)
+    add_subsite_pages(entries, "/healthkit", HEALTHKIT_ROOT)
 
     tools_dir = SITE_ROOT / "tools"
     tool_pages = sorted(

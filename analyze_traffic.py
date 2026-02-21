@@ -26,8 +26,8 @@ EXACT_ASSET_PATHS = {
     "/manifest.json",
     "/site.webmanifest",
 }
-CONTENT_SECTION_NAMES = ("homepage", "blog", "tools", "cheatsheets", "datekit", "budgetkit", "other")
-INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit")
+CONTENT_SECTION_NAMES = ("homepage", "blog", "tools", "cheatsheets", "datekit", "budgetkit", "healthkit", "other")
+INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit", "healthkit")
 ENGINE_PATTERNS = [
     (re.compile(r"google\.", re.IGNORECASE), "google"),
     (re.compile(r"bing\.", re.IGNORECASE), "bing"),
@@ -111,6 +111,8 @@ def classify_content_section(path: str) -> str:
         return "datekit"
     if path == "/budgetkit" or path.startswith("/budgetkit/"):
         return "budgetkit"
+    if path == "/healthkit" or path.startswith("/healthkit/"):
+        return "healthkit"
     return "other"
 
 
@@ -270,6 +272,7 @@ class WindowStats:
         top_organic_section_referrals = 0
         internal_to_datekit = int(self.internal_crossproperty_target_sections.get("datekit", 0))
         internal_to_budgetkit = int(self.internal_crossproperty_target_sections.get("budgetkit", 0))
+        internal_to_healthkit = int(self.internal_crossproperty_target_sections.get("healthkit", 0))
         top_internal_source_section = "other"
         top_internal_source_referrals = 0
         if content_sections:
@@ -301,6 +304,7 @@ class WindowStats:
             "internal_crossproperty_referrals": self.internal_crossproperty_referrals,
             "internal_crossproperty_referrals_to_datekit": internal_to_datekit,
             "internal_crossproperty_referrals_to_budgetkit": internal_to_budgetkit,
+            "internal_crossproperty_referrals_to_healthkit": internal_to_healthkit,
             "clean_request_ratio": safe_ratio(self.clean_requests, self.total_requests),
             "content_request_ratio": safe_ratio(self.content_requests, self.total_requests),
             "suspicious_request_ratio": safe_ratio(self.suspicious_requests, self.total_requests),
@@ -347,12 +351,14 @@ def build_window_comparison(
         "internal_crossproperty_referrals",
         "internal_crossproperty_referrals_to_datekit",
         "internal_crossproperty_referrals_to_budgetkit",
+        "internal_crossproperty_referrals_to_healthkit",
         "content_homepage_requests",
         "content_blog_requests",
         "content_tools_requests",
         "content_cheatsheets_requests",
         "content_datekit_requests",
         "content_budgetkit_requests",
+        "content_healthkit_requests",
         "content_other_requests",
         "organic_homepage_referrals",
         "organic_blog_referrals",
@@ -360,6 +366,7 @@ def build_window_comparison(
         "organic_cheatsheets_referrals",
         "organic_datekit_referrals",
         "organic_budgetkit_referrals",
+        "organic_healthkit_referrals",
         "organic_other_referrals",
     ]
     deltas = {}
@@ -494,6 +501,7 @@ def main():
             "content_cheatsheets_requests",
             "content_datekit_requests",
             "content_budgetkit_requests",
+            "content_healthkit_requests",
             "suspicious_requests",
             "not_found_requests",
             "organic_referrals",
@@ -502,10 +510,12 @@ def main():
             "organic_cheatsheets_referrals",
             "organic_datekit_referrals",
             "organic_budgetkit_referrals",
+            "organic_healthkit_referrals",
             "crosspromo_campaign_hits",
             "internal_crossproperty_referrals",
             "internal_crossproperty_referrals_to_datekit",
             "internal_crossproperty_referrals_to_budgetkit",
+            "internal_crossproperty_referrals_to_healthkit",
         ]:
             delta = comparison["deltas"][metric]
             delta_pct = comparison["deltas"][f"{metric}_pct"]
@@ -548,7 +558,7 @@ def main():
         print(f"  {count:4d}  {source}")
     print()
 
-    print("=== INTERNAL CROSS-PROPERTY REFERRALS (to DateKit/BudgetKit) ===")
+    print("=== INTERNAL CROSS-PROPERTY REFERRALS (to DateKit/BudgetKit/HealthKit) ===")
     print(f"  total: {current_window.internal_crossproperty_referrals}")
     print("  by target section:")
     for section, count in current_window.internal_crossproperty_target_sections.most_common(args.max_items):
