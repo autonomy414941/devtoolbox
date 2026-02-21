@@ -509,7 +509,7 @@ body {
   background: var(--bg);
   color: var(--text);
 }</code></pre>
-        <p>Combine with <a href="/blog/css-variables-guide">CSS custom properties</a> for a full theming system. You can also pair this with <code>prefers-color-scheme</code> for automatic defaults:</p>
+        <p>Combine with <a href="/blog/css-variables-complete-guide">CSS custom properties</a> for a full theming system. You can also pair this with <code>prefers-color-scheme</code> for automatic defaults:</p>
 <pre><code class="language-css">/* Respect system preference by default */
 @media (prefers-color-scheme: dark) {
   :root:not(:has(#light-mode:checked)) {
@@ -671,7 +671,7 @@ if (container.children.length === 0) {
             <li><strong>Keep selectors readable.</strong> If a <code>:has()</code> selector becomes longer than a single line, consider using custom properties or adding a comment explaining the intent.</li>
             <li><strong>Test dynamically.</strong> The <code>:has()</code> selector responds to DOM changes in real time. Add and remove elements in DevTools to verify behavior.</li>
             <li><strong>Use our <a href="/tools/css-beautifier">CSS Beautifier</a></strong> to keep complex selectors formatted and readable.</li>
-            <li><strong>Pair with <a href="/blog/css-variables-guide">CSS custom properties</a></strong> for maximum flexibility. Use <code>:has()</code> to set variables and let children inherit them.</li>
+            <li><strong>Pair with <a href="/blog/css-variables-complete-guide">CSS custom properties</a></strong> for maximum flexibility. Use <code>:has()</code> to set variables and let children inherit them.</li>
         </ol>
 <pre><code class="language-css">/* Best practice: :has() sets variables, children consume them */
 .card:has(&gt; .badge[data-type="warning"]) {
@@ -737,7 +737,7 @@ if (container.children.length === 0) {
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Animations Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Transitions, keyframes, and animation best practices</div>
             </a>
-            <a href="/blog/css-variables-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/blog/css-variables-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Variables Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Custom properties, theming, and dynamic styles</div>
             </a>
