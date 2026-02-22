@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import re
 import subprocess
 import tempfile
 from collections import defaultdict
@@ -13,6 +14,16 @@ ANALYZE_TRAFFIC_SCRIPT = os.path.join(BASE_DIR, "analyze_traffic.py")
 BLOG_DIR = "/var/www/web-ceo/blog"
 PROMO_MARKER = 'data-crossproperty-promo="true"'
 PROMO_CAMPAIGN = "crosspromo-top-organic"
+PROMO_BLOCK_PATTERN = re.compile(
+    r'<aside class="crossproperty-promo"[^>]*data-crossproperty-promo="true"[^>]*>.*?</aside>\s*',
+    re.DOTALL,
+)
+PROMO_TARGETS = (
+    ("datekit", "DateKit"),
+    ("budgetkit", "BudgetKit"),
+    ("healthkit", "HealthKit"),
+    ("sleepkit", "SleepKit"),
+)
 
 
 def parse_args():
@@ -69,17 +80,29 @@ def slug_from_blog_path(path: str) -> str:
 
 def build_promo_html(slug: str) -> str:
     params = f"utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}&utm_content={slug}"
+    links = ", ".join(
+        f'<a href="/{target}/?{params}" style="color: #93c5fd; text-decoration: underline;">{label}</a>'
+        for target, label in PROMO_TARGETS
+    )
     return (
         "\n"
         f'        <aside class="crossproperty-promo" {PROMO_MARKER} '
         'style="margin: 1.25rem 0 1.5rem; padding: 1rem 1.1rem; border: 1px solid rgba(59,130,246,0.35); '
         'border-radius: 10px; background: rgba(59,130,246,0.08); line-height: 1.65;">\n'
         '            <strong style="color: #93c5fd;">Quick calculators for planning outside code:</strong> '
-        f'<a href="/datekit/?{params}" style="color: #93c5fd; text-decoration: underline;">DateKit</a>, '
-        f'<a href="/budgetkit/?{params}" style="color: #93c5fd; text-decoration: underline;">BudgetKit</a>, '
-        f'<a href="/healthkit/?{params}" style="color: #93c5fd; text-decoration: underline;">HealthKit</a>.\n'
+        f"{links}.\n"
         "        </aside>\n"
     )
+
+
+def upgrade_existing_promo_block(content: str, slug: str) -> str:
+    match = PROMO_BLOCK_PATTERN.search(content)
+    if not match:
+        return content
+    block = match.group(0)
+    if "/sleepkit/?" in block:
+        return content
+    return content[: match.start()] + build_promo_html(slug) + content[match.end() :]
 
 
 def find_insert_pos(content: str) -> int:
@@ -122,8 +145,19 @@ def patch_blog_file(path: str, dry_run: bool) -> str:
         content = f.read()
 
     if PROMO_MARKER in content:
-        return "skip:already-patched"
-    if f"utm_campaign={PROMO_CAMPAIGN}" in content:
+        upgraded = upgrade_existing_promo_block(content, slug)
+        if upgraded == content:
+            return "skip:already-patched"
+        if not dry_run:
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(upgraded)
+        return "updated:upgraded-existing"
+
+    has_campaign = f"utm_campaign={PROMO_CAMPAIGN}" in content
+    has_sleepkit_campaign = (
+        f"/sleepkit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}" in content
+    )
+    if has_campaign and has_sleepkit_campaign:
         return "skip:campaign-exists"
 
     insert_pos = find_insert_pos(content)
@@ -134,7 +168,9 @@ def patch_blog_file(path: str, dry_run: bool) -> str:
     if not dry_run:
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(updated)
-    return "updated"
+    if has_campaign:
+        return "updated:campaign-upgrade"
+    return "updated:new"
 
 
 def main():
