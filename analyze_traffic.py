@@ -26,7 +26,7 @@ EXACT_ASSET_PATHS = {
     "/manifest.json",
     "/site.webmanifest",
 }
-CONTENT_SECTION_NAMES = ("homepage", "blog", "tools", "cheatsheets", "datekit", "budgetkit", "healthkit", "other")
+CONTENT_SECTION_NAMES = ("homepage", "blog", "tools", "cheatsheets", "datekit", "budgetkit", "healthkit", "sleepkit", "other")
 INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit", "healthkit")
 ENGINE_PATTERNS = [
     (re.compile(r"google\.", re.IGNORECASE), "google"),
@@ -113,6 +113,8 @@ def classify_content_section(path: str) -> str:
         return "budgetkit"
     if path == "/healthkit" or path.startswith("/healthkit/"):
         return "healthkit"
+    if path == "/sleepkit" or path.startswith("/sleepkit/"):
+        return "sleepkit"
     return "other"
 
 
@@ -426,6 +428,7 @@ def build_window_comparison(
         "content_datekit_requests",
         "content_budgetkit_requests",
         "content_healthkit_requests",
+        "content_sleepkit_requests",
         "content_other_requests",
         "organic_homepage_referrals",
         "organic_blog_referrals",
@@ -434,6 +437,7 @@ def build_window_comparison(
         "organic_datekit_referrals",
         "organic_budgetkit_referrals",
         "organic_healthkit_referrals",
+        "organic_sleepkit_referrals",
         "organic_other_referrals",
     ]
     deltas = {}
@@ -575,6 +579,7 @@ def main():
             "content_datekit_requests",
             "content_budgetkit_requests",
             "content_healthkit_requests",
+            "content_sleepkit_requests",
             "suspicious_requests",
             "not_found_requests",
             "organic_referrals",
@@ -584,6 +589,7 @@ def main():
             "organic_datekit_referrals",
             "organic_budgetkit_referrals",
             "organic_healthkit_referrals",
+            "organic_sleepkit_referrals",
             "crosspromo_campaign_hits",
             "crosspromo_campaign_hits_to_datekit",
             "crosspromo_campaign_hits_to_budgetkit",

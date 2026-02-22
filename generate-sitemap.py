@@ -21,6 +21,7 @@ REQUIRED_ROOT_FILES = ("google5ab7b13e25381f31.html",)
 DATEKIT_ROOT = Path("/var/www/datekit")
 BUDGETKIT_ROOT = SITE_ROOT / "budgetkit"
 HEALTHKIT_ROOT = SITE_ROOT / "healthkit"
+SLEEPKIT_ROOT = SITE_ROOT / "sleepkit"
 
 
 @dataclass(frozen=True)
@@ -146,6 +147,7 @@ def main() -> None:
     add_subsite_pages(entries, "/datekit", DATEKIT_ROOT)
     add_subsite_pages(entries, "/budgetkit", BUDGETKIT_ROOT)
     add_subsite_pages(entries, "/healthkit", HEALTHKIT_ROOT)
+    add_subsite_pages(entries, "/sleepkit", SLEEPKIT_ROOT)
 
     tools_dir = SITE_ROOT / "tools"
     tool_pages = sorted(
