@@ -28,6 +28,18 @@ EXACT_ASSET_PATHS = {
 }
 CONTENT_SECTION_NAMES = ("homepage", "blog", "tools", "cheatsheets", "datekit", "budgetkit", "healthkit", "sleepkit", "other")
 INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit", "healthkit", "sleepkit")
+CROSSPROMO_CAMPAIGN_NAME = "crosspromo-top-organic"
+INFERRED_SOURCE_SECTION_PATHS = {
+    "homepage": "/",
+    "blog": "/blog",
+    "tools": "/tools",
+    "cheatsheets": "/cheatsheets",
+    "datekit": "/datekit",
+    "budgetkit": "/budgetkit",
+    "healthkit": "/healthkit",
+    "sleepkit": "/sleepkit",
+}
+BLOG_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 ENGINE_PATTERNS = [
     (re.compile(r"google\.", re.IGNORECASE), "google"),
     (re.compile(r"bing\.", re.IGNORECASE), "bing"),
@@ -85,7 +97,28 @@ def parse_request_path_query(request: str):
         return "", ""
     target = parts[1].strip()
     path, _, query = target.partition("?")
-    return (path or "/"), query
+    normalized = normalize_path(path or "/")
+    return (normalized or "/"), query
+
+
+def normalize_path(path: str) -> str:
+    if not path:
+        return ""
+    raw_path = path.strip()
+    if not raw_path:
+        return ""
+    if "://" in raw_path:
+        try:
+            parsed = urlparse(raw_path)
+        except ValueError:
+            return ""
+        raw_path = parsed.path or "/"
+    if not raw_path.startswith("/"):
+        raw_path = f"/{raw_path}"
+    normalized = re.sub(r"/{2,}", "/", raw_path)
+    if len(normalized) > 1:
+        normalized = normalized.rstrip("/")
+    return normalized or "/"
 
 
 def is_asset_path(path: str) -> bool:
@@ -99,6 +132,7 @@ def is_asset_path(path: str) -> bool:
 
 
 def classify_content_section(path: str) -> str:
+    path = normalize_path(path) or "/"
     if path == "/":
         return "homepage"
     if path == "/blog" or path.startswith("/blog/"):
@@ -137,7 +171,33 @@ def parse_internal_referrer_path(referrer: str) -> str:
         host = host[4:]
     if host != "devtoolbox.dedyn.io":
         return ""
-    return parsed.path or "/"
+    return normalize_path(parsed.path or "/")
+
+
+def infer_internal_source_path(source: str) -> str:
+    candidate = (source or "").strip()
+    if not candidate:
+        return ""
+    if candidate.startswith(("http://", "https://")):
+        try:
+            parsed = urlparse(candidate)
+        except ValueError:
+            return ""
+        host = (parsed.netloc or "").lower()
+        if host.startswith("www."):
+            host = host[4:]
+        if host != "devtoolbox.dedyn.io":
+            return ""
+        return normalize_path(parsed.path or "/")
+    if candidate.startswith("/"):
+        return normalize_path(candidate)
+    section_path = INFERRED_SOURCE_SECTION_PATHS.get(candidate.lower())
+    if section_path:
+        return section_path
+    slug_candidate = candidate.lower()
+    if BLOG_SLUG_PATTERN.fullmatch(slug_candidate):
+        return f"/blog/{slug_candidate}"
+    return ""
 
 
 def is_suspicious_path(path: str) -> bool:
@@ -198,6 +258,10 @@ class WindowStats:
         self.crosspromo_campaign_target_sections = Counter()
         self.crosspromo_campaign_source_target_sections = Counter()
         self.crosspromo_campaign_page_path_pairs = Counter()
+        self.crosspromo_hits_with_internal_referrer = 0
+        self.crosspromo_hits_with_inferred_source = 0
+        self.crosspromo_hits_unattributed = 0
+        self.crosspromo_source_mismatch_hits = 0
         self.internal_crossproperty_referrals = 0
         self.internal_crossproperty_target_sections = Counter()
         self.internal_crossproperty_source_sections = Counter()
@@ -235,21 +299,49 @@ class WindowStats:
                     self.suspicious_not_found_pages[path] += 1
                 else:
                     self.clean_not_found_pages[path] += 1
-            if "utm_campaign=crosspromo-top-organic" in query:
+            if f"utm_campaign={CROSSPROMO_CAMPAIGN_NAME}" in query:
                 self.crosspromo_campaign_hits += 1
                 self.crosspromo_campaign_pages[path] += 1
                 target_section = classify_content_section(path)
                 self.crosspromo_campaign_target_sections[target_section] += 1
                 params = parse_qs(query, keep_blank_values=False)
+                inferred_source_paths: list[str] = []
                 for source in params.get("utm_content", []):
-                    if source:
-                        self.crosspromo_campaign_sources[source] += 1
-                        self.crosspromo_campaign_source_target_sections[f"{source}->{target_section}"] += 1
+                    source = source.strip()
+                    if not source:
+                        continue
+                    self.crosspromo_campaign_sources[source] += 1
+                    self.crosspromo_campaign_source_target_sections[f"{source}->{target_section}"] += 1
+                    inferred_source_path = infer_internal_source_path(source)
+                    if inferred_source_path:
+                        inferred_source_paths.append(inferred_source_path)
                 if internal_referrer_path:
+                    self.crosspromo_hits_with_internal_referrer += 1
                     source_section = classify_content_section(internal_referrer_path)
                     self.crosspromo_campaign_source_pages[internal_referrer_path] += 1
                     self.crosspromo_campaign_source_sections[source_section] += 1
                     self.crosspromo_campaign_page_path_pairs[f"{internal_referrer_path}->{path}"] += 1
+                    normalized_inferred_paths = set()
+                    for inferred_source_path in inferred_source_paths:
+                        normalized_inferred_path = normalize_path(inferred_source_path)
+                        if normalized_inferred_path:
+                            normalized_inferred_paths.add(normalized_inferred_path)
+                    if normalized_inferred_paths and internal_referrer_path not in normalized_inferred_paths:
+                        self.crosspromo_source_mismatch_hits += 1
+                elif inferred_source_paths:
+                    self.crosspromo_hits_with_inferred_source += 1
+                    recorded_paths = set()
+                    for inferred_source_path in inferred_source_paths:
+                        normalized_source_path = normalize_path(inferred_source_path)
+                        if not normalized_source_path or normalized_source_path in recorded_paths:
+                            continue
+                        recorded_paths.add(normalized_source_path)
+                        source_section = classify_content_section(normalized_source_path)
+                        self.crosspromo_campaign_source_pages[normalized_source_path] += 1
+                        self.crosspromo_campaign_source_sections[source_section] += 1
+                        self.crosspromo_campaign_page_path_pairs[f"{normalized_source_path}->{path}"] += 1
+                else:
+                    self.crosspromo_hits_unattributed += 1
 
         if referrer and referrer != "-":
             if not internal_referrer_path:
@@ -293,6 +385,7 @@ class WindowStats:
         crosspromo_to_budgetkit = int(self.crosspromo_campaign_target_sections.get("budgetkit", 0))
         crosspromo_to_healthkit = int(self.crosspromo_campaign_target_sections.get("healthkit", 0))
         crosspromo_to_sleepkit = int(self.crosspromo_campaign_target_sections.get("sleepkit", 0))
+        crosspromo_source_attributed_hits = self.crosspromo_hits_with_internal_referrer + self.crosspromo_hits_with_inferred_source
         top_internal_source_section = "other"
         top_internal_source_referrals = 0
         top_crosspromo_source = ""
@@ -360,6 +453,11 @@ class WindowStats:
             "crosspromo_campaign_hits_to_budgetkit": crosspromo_to_budgetkit,
             "crosspromo_campaign_hits_to_healthkit": crosspromo_to_healthkit,
             "crosspromo_campaign_hits_to_sleepkit": crosspromo_to_sleepkit,
+            "crosspromo_source_attributed_hits": crosspromo_source_attributed_hits,
+            "crosspromo_hits_with_internal_referrer": self.crosspromo_hits_with_internal_referrer,
+            "crosspromo_hits_with_inferred_source": self.crosspromo_hits_with_inferred_source,
+            "crosspromo_hits_unattributed": self.crosspromo_hits_unattributed,
+            "crosspromo_source_mismatch_hits": self.crosspromo_source_mismatch_hits,
             "internal_crossproperty_referrals": self.internal_crossproperty_referrals,
             "internal_crossproperty_referrals_to_datekit": internal_to_datekit,
             "internal_crossproperty_referrals_to_budgetkit": internal_to_budgetkit,
@@ -370,6 +468,7 @@ class WindowStats:
             "suspicious_request_ratio": safe_ratio(self.suspicious_requests, self.total_requests),
             "organic_referral_ratio": safe_ratio(organic_total, self.total_requests),
             "internal_crossproperty_referral_ratio": safe_ratio(self.internal_crossproperty_referrals, self.total_requests),
+            "crosspromo_source_attribution_ratio": safe_ratio(crosspromo_source_attributed_hits, self.crosspromo_campaign_hits),
             "not_found_ratio": safe_ratio(not_found_total, self.total_requests),
             "clean_404_ratio": safe_ratio(clean_404, not_found_total),
             "suspicious_404_ratio": safe_ratio(suspicious_404, not_found_total),
@@ -422,6 +521,11 @@ def build_window_comparison(
         "crosspromo_campaign_hits_to_budgetkit",
         "crosspromo_campaign_hits_to_healthkit",
         "crosspromo_campaign_hits_to_sleepkit",
+        "crosspromo_source_attributed_hits",
+        "crosspromo_hits_with_internal_referrer",
+        "crosspromo_hits_with_inferred_source",
+        "crosspromo_hits_unattributed",
+        "crosspromo_source_mismatch_hits",
         "internal_crossproperty_referrals",
         "internal_crossproperty_referrals_to_datekit",
         "internal_crossproperty_referrals_to_budgetkit",
@@ -550,6 +654,11 @@ def main():
     print(f"  crosspromo_campaign_hits_to_budgetkit: {summary['crosspromo_campaign_hits_to_budgetkit']}")
     print(f"  crosspromo_campaign_hits_to_healthkit: {summary['crosspromo_campaign_hits_to_healthkit']}")
     print(f"  crosspromo_campaign_hits_to_sleepkit: {summary['crosspromo_campaign_hits_to_sleepkit']}")
+    print(f"  crosspromo_source_attributed_hits: {summary['crosspromo_source_attributed_hits']}")
+    print(f"  crosspromo_hits_with_internal_referrer: {summary['crosspromo_hits_with_internal_referrer']}")
+    print(f"  crosspromo_hits_with_inferred_source: {summary['crosspromo_hits_with_inferred_source']}")
+    print(f"  crosspromo_hits_unattributed: {summary['crosspromo_hits_unattributed']}")
+    print(f"  crosspromo_source_mismatch_hits: {summary['crosspromo_source_mismatch_hits']}")
     print(f"  internal_crossproperty_referrals: {summary['internal_crossproperty_referrals']}")
     print(f"  top_crosspromo_campaign_source: {summary['top_crosspromo_campaign_source']}")
     print(f"  top_crosspromo_campaign_target_section: {summary['top_crosspromo_campaign_target_section']}")
@@ -558,6 +667,7 @@ def main():
     print(f"  suspicious_request_ratio: {summary['suspicious_request_ratio']}%")
     print(f"  organic_referral_ratio: {summary['organic_referral_ratio']}%")
     print(f"  internal_crossproperty_referral_ratio: {summary['internal_crossproperty_referral_ratio']}%")
+    print(f"  crosspromo_source_attribution_ratio: {summary['crosspromo_source_attribution_ratio']}%")
     print()
 
     print("=== CONTENT SECTION BREAKDOWN (clean, non-asset) ===")
@@ -602,6 +712,11 @@ def main():
             "crosspromo_campaign_hits_to_budgetkit",
             "crosspromo_campaign_hits_to_healthkit",
             "crosspromo_campaign_hits_to_sleepkit",
+            "crosspromo_source_attributed_hits",
+            "crosspromo_hits_with_internal_referrer",
+            "crosspromo_hits_with_inferred_source",
+            "crosspromo_hits_unattributed",
+            "crosspromo_source_mismatch_hits",
             "internal_crossproperty_referrals",
             "internal_crossproperty_referrals_to_datekit",
             "internal_crossproperty_referrals_to_budgetkit",
