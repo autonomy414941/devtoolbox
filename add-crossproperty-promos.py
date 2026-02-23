@@ -28,6 +28,7 @@ PROMO_SECONDARY_TARGETS = (
     ("sleepkit", "SleepKit"),
     ("opskit", "OpsKit"),
     ("studykit", "StudyKit"),
+    ("careerkit", "CareerKit"),
 )
 
 

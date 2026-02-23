@@ -38,10 +38,20 @@ CONTENT_SECTION_NAMES = (
     "focuskit",
     "opskit",
     "studykit",
+    "careerkit",
     "other",
 )
-KIT_SECTION_NAMES = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "opskit", "studykit")
-INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "opskit", "studykit")
+KIT_SECTION_NAMES = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "opskit", "studykit", "careerkit")
+INTERNAL_CROSSPROPERTY_TARGETS = (
+    "datekit",
+    "budgetkit",
+    "healthkit",
+    "sleepkit",
+    "focuskit",
+    "opskit",
+    "studykit",
+    "careerkit",
+)
 CROSSPROMO_CAMPAIGN_NAME = "crosspromo-top-organic"
 INFERRED_SOURCE_LOOKBACK = timedelta(minutes=30)
 INFERRED_SOURCE_MAX_RECENT_PATHS = 200
@@ -57,6 +67,7 @@ INFERRED_SOURCE_SECTION_PATHS = {
     "focuskit": "/focuskit",
     "opskit": "/opskit",
     "studykit": "/studykit",
+    "careerkit": "/careerkit",
 }
 BLOG_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 ENGINE_PATTERNS = [
@@ -194,6 +205,8 @@ def classify_content_section(path: str) -> str:
         return "opskit"
     if path == "/studykit" or path.startswith("/studykit/"):
         return "studykit"
+    if path == "/careerkit" or path.startswith("/careerkit/"):
+        return "careerkit"
     return "other"
 
 
