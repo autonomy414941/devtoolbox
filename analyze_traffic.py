@@ -5,7 +5,7 @@ import os
 import re
 import subprocess
 import sys
-from collections import Counter
+from collections import Counter, deque
 from datetime import datetime, timedelta, timezone
 from urllib.parse import parse_qs, urlparse
 
@@ -43,6 +43,8 @@ CONTENT_SECTION_NAMES = (
 KIT_SECTION_NAMES = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "opskit", "studykit")
 INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "opskit", "studykit")
 CROSSPROMO_CAMPAIGN_NAME = "crosspromo-top-organic"
+INFERRED_SOURCE_LOOKBACK = timedelta(minutes=30)
+INFERRED_SOURCE_MAX_RECENT_PATHS = 200
 INFERRED_SOURCE_SECTION_PATHS = {
     "homepage": "/",
     "blog": "/blog",
@@ -333,6 +335,10 @@ class WindowStats:
         self.crosspromo_non_bot_hits_with_internal_referrer = 0
         self.crosspromo_non_bot_hits_with_inferred_source = 0
         self.crosspromo_non_bot_hits_unattributed = 0
+        self.crosspromo_inferred_verified_hits = 0
+        self.crosspromo_inferred_unverified_hits = 0
+        self.crosspromo_non_bot_inferred_verified_hits = 0
+        self.crosspromo_non_bot_inferred_unverified_hits = 0
         self.crosspromo_source_mismatch_hits = 0
         self.internal_crossproperty_referrals = 0
         self.internal_crossproperty_target_sections = Counter()
@@ -348,6 +354,14 @@ class WindowStats:
         self.internal_crossproperty_inferred_target_sections = Counter()
         self.internal_crossproperty_inferred_non_bot_referrals = 0
         self.internal_crossproperty_inferred_non_bot_target_sections = Counter()
+        self.internal_crossproperty_inferred_verified_referrals = 0
+        self.internal_crossproperty_inferred_verified_target_sections = Counter()
+        self.internal_crossproperty_inferred_non_bot_verified_referrals = 0
+        self.internal_crossproperty_inferred_non_bot_verified_target_sections = Counter()
+        self.internal_crossproperty_inferred_unverified_referrals = 0
+        self.internal_crossproperty_inferred_unverified_target_sections = Counter()
+        self.internal_crossproperty_inferred_non_bot_unverified_referrals = 0
+        self.internal_crossproperty_inferred_non_bot_unverified_target_sections = Counter()
         self.known_bot_requests = 0
         self.known_bot_unique_ips = set()
         self.crosspromo_known_bot_hits = 0
@@ -357,13 +371,52 @@ class WindowStats:
         self.crosspromo_non_bot_hits_with_any_referrer = 0
         self.crosspromo_non_bot_hits_without_referrer = 0
         self.crosspromo_hits_without_referrer_known_bot = 0
+        self.recent_content_paths_by_client: dict[tuple[str, str], deque[tuple[datetime, str]]] = {}
 
-    def record(self, ip: str, status: str, referrer: str, path: str, query: str, user_agent: str):
+    @staticmethod
+    def _client_key(ip: str, normalized_user_agent: str) -> tuple[str, str]:
+        if normalized_user_agent:
+            return (ip, normalized_user_agent)
+        return (ip, "")
+
+    @staticmethod
+    def _trim_recent_paths(paths: deque[tuple[datetime, str]], cutoff: datetime):
+        while paths and paths[0][0] < cutoff:
+            paths.popleft()
+
+    def _has_recent_inferred_source_match(self, client_key: tuple[str, str], inferred_paths: set[str], ts: datetime) -> bool:
+        if not inferred_paths:
+            return False
+        recent_paths = self.recent_content_paths_by_client.get(client_key)
+        if not recent_paths:
+            return False
+        cutoff = ts - INFERRED_SOURCE_LOOKBACK
+        self._trim_recent_paths(recent_paths, cutoff)
+        if not recent_paths:
+            return False
+        for _, candidate_path in recent_paths:
+            if candidate_path in inferred_paths:
+                return True
+        return False
+
+    def _remember_recent_content_path(self, client_key: tuple[str, str], ts: datetime, path: str):
+        recent_paths = self.recent_content_paths_by_client.get(client_key)
+        if recent_paths is None:
+            recent_paths = deque()
+            self.recent_content_paths_by_client[client_key] = recent_paths
+        cutoff = ts - INFERRED_SOURCE_LOOKBACK
+        self._trim_recent_paths(recent_paths, cutoff)
+        recent_paths.append((ts, path))
+        while len(recent_paths) > INFERRED_SOURCE_MAX_RECENT_PATHS:
+            recent_paths.popleft()
+
+    def record(self, ip: str, status: str, referrer: str, path: str, query: str, user_agent: str, ts: datetime):
         asset = is_asset_path(path)
         suspicious_path = is_suspicious_path(path)
         internal_referrer_path = parse_internal_referrer_path(referrer)
         normalized_user_agent = normalize_user_agent(user_agent)
         known_bot_ua = is_known_bot_user_agent(normalized_user_agent)
+        client_key = self._client_key(ip, normalized_user_agent)
 
         self.total_requests += 1
         self.unique_ips.add(ip)
@@ -429,6 +482,11 @@ class WindowStats:
                     inferred_source_path = infer_internal_source_path(source)
                     if inferred_source_path:
                         inferred_source_paths.append(inferred_source_path)
+                normalized_inferred_paths = set()
+                for inferred_source_path in inferred_source_paths:
+                    normalized_inferred_path = normalize_path(inferred_source_path)
+                    if normalized_inferred_path:
+                        normalized_inferred_paths.add(normalized_inferred_path)
                 if internal_referrer_path:
                     self.crosspromo_hits_with_internal_referrer += 1
                     source_section = classify_content_section(internal_referrer_path)
@@ -440,17 +498,21 @@ class WindowStats:
                         self.crosspromo_non_bot_campaign_source_pages[internal_referrer_path] += 1
                         self.crosspromo_non_bot_campaign_source_sections[source_section] += 1
                         self.crosspromo_non_bot_campaign_page_path_pairs[f"{internal_referrer_path}->{path}"] += 1
-                    normalized_inferred_paths = set()
-                    for inferred_source_path in inferred_source_paths:
-                        normalized_inferred_path = normalize_path(inferred_source_path)
-                        if normalized_inferred_path:
-                            normalized_inferred_paths.add(normalized_inferred_path)
                     if normalized_inferred_paths and internal_referrer_path not in normalized_inferred_paths:
                         self.crosspromo_source_mismatch_hits += 1
                 elif inferred_source_paths:
                     self.crosspromo_hits_with_inferred_source += 1
                     if not known_bot_ua:
                         self.crosspromo_non_bot_hits_with_inferred_source += 1
+                    inferred_source_verified = self._has_recent_inferred_source_match(client_key, normalized_inferred_paths, ts)
+                    if inferred_source_verified:
+                        self.crosspromo_inferred_verified_hits += 1
+                        if not known_bot_ua:
+                            self.crosspromo_non_bot_inferred_verified_hits += 1
+                    else:
+                        self.crosspromo_inferred_unverified_hits += 1
+                        if not known_bot_ua:
+                            self.crosspromo_non_bot_inferred_unverified_hits += 1
                     recorded_paths = set()
                     inferred_internal_crossproperty_recorded = False
                     for inferred_source_path in inferred_source_paths:
@@ -466,9 +528,21 @@ class WindowStats:
                         ):
                             self.internal_crossproperty_inferred_referrals += 1
                             self.internal_crossproperty_inferred_target_sections[target_section] += 1
+                            if inferred_source_verified:
+                                self.internal_crossproperty_inferred_verified_referrals += 1
+                                self.internal_crossproperty_inferred_verified_target_sections[target_section] += 1
+                            else:
+                                self.internal_crossproperty_inferred_unverified_referrals += 1
+                                self.internal_crossproperty_inferred_unverified_target_sections[target_section] += 1
                             if not known_bot_ua:
                                 self.internal_crossproperty_inferred_non_bot_referrals += 1
                                 self.internal_crossproperty_inferred_non_bot_target_sections[target_section] += 1
+                                if inferred_source_verified:
+                                    self.internal_crossproperty_inferred_non_bot_verified_referrals += 1
+                                    self.internal_crossproperty_inferred_non_bot_verified_target_sections[target_section] += 1
+                                else:
+                                    self.internal_crossproperty_inferred_non_bot_unverified_referrals += 1
+                                    self.internal_crossproperty_inferred_non_bot_unverified_target_sections[target_section] += 1
                             inferred_internal_crossproperty_recorded = True
                         self.crosspromo_campaign_source_pages[normalized_source_path] += 1
                         self.crosspromo_campaign_source_sections[source_section] += 1
@@ -511,6 +585,9 @@ class WindowStats:
                     self.internal_crossproperty_non_bot_source_sections[source_section] += 1
                     self.internal_crossproperty_non_bot_target_pages[path] += 1
                     self.internal_crossproperty_non_bot_source_pages[internal_referrer_path] += 1
+
+        if not asset and path and not suspicious_path:
+            self._remember_recent_content_path(client_key, ts, path)
 
     def summary(self, generated_at: str, window_hours: int):
         organic_total = sum(self.organic_engine_counts.values())
@@ -626,6 +703,14 @@ class WindowStats:
         crosspromo_non_bot_source_attributed_hits = (
             self.crosspromo_non_bot_hits_with_internal_referrer + self.crosspromo_non_bot_hits_with_inferred_source
         )
+        crosspromo_inferred_verified_hits = self.crosspromo_inferred_verified_hits
+        crosspromo_inferred_unverified_hits = self.crosspromo_inferred_unverified_hits
+        crosspromo_non_bot_inferred_verified_hits = self.crosspromo_non_bot_inferred_verified_hits
+        crosspromo_non_bot_inferred_unverified_hits = self.crosspromo_non_bot_inferred_unverified_hits
+        internal_inferred_verified_referrals = self.internal_crossproperty_inferred_verified_referrals
+        internal_inferred_non_bot_verified_referrals = self.internal_crossproperty_inferred_non_bot_verified_referrals
+        internal_inferred_unverified_referrals = self.internal_crossproperty_inferred_unverified_referrals
+        internal_inferred_non_bot_unverified_referrals = self.internal_crossproperty_inferred_non_bot_unverified_referrals
         top_internal_source_section = "other"
         top_internal_source_referrals = 0
         top_internal_non_bot_source_section = "other"
@@ -778,10 +863,14 @@ class WindowStats:
             "crosspromo_source_attributed_hits": crosspromo_source_attributed_hits,
             "crosspromo_hits_with_internal_referrer": self.crosspromo_hits_with_internal_referrer,
             "crosspromo_hits_with_inferred_source": self.crosspromo_hits_with_inferred_source,
+            "crosspromo_inferred_verified_hits": crosspromo_inferred_verified_hits,
+            "crosspromo_inferred_unverified_hits": crosspromo_inferred_unverified_hits,
             "crosspromo_hits_unattributed": self.crosspromo_hits_unattributed,
             "crosspromo_non_bot_source_attributed_hits": crosspromo_non_bot_source_attributed_hits,
             "crosspromo_non_bot_hits_with_internal_referrer": self.crosspromo_non_bot_hits_with_internal_referrer,
             "crosspromo_non_bot_hits_with_inferred_source": self.crosspromo_non_bot_hits_with_inferred_source,
+            "crosspromo_non_bot_inferred_verified_hits": crosspromo_non_bot_inferred_verified_hits,
+            "crosspromo_non_bot_inferred_unverified_hits": crosspromo_non_bot_inferred_unverified_hits,
             "crosspromo_non_bot_hits_unattributed": self.crosspromo_non_bot_hits_unattributed,
             "crosspromo_hits_with_any_referrer": self.crosspromo_hits_with_any_referrer,
             "crosspromo_hits_without_referrer": self.crosspromo_hits_without_referrer,
@@ -827,6 +916,10 @@ class WindowStats:
             "internal_crossproperty_inferred_non_bot_referrals_to_focuskit": internal_inferred_non_bot_to_focuskit,
             "internal_crossproperty_inferred_non_bot_referrals_to_opskit": internal_inferred_non_bot_to_opskit,
             "internal_crossproperty_inferred_non_bot_referrals_to_studykit": internal_inferred_non_bot_to_studykit,
+            "internal_crossproperty_inferred_verified_referrals": internal_inferred_verified_referrals,
+            "internal_crossproperty_inferred_non_bot_verified_referrals": internal_inferred_non_bot_verified_referrals,
+            "internal_crossproperty_inferred_unverified_referrals": internal_inferred_unverified_referrals,
+            "internal_crossproperty_inferred_non_bot_unverified_referrals": internal_inferred_non_bot_unverified_referrals,
             "internal_crossproperty_effective_referrals": internal_crossproperty_effective_referrals,
             "internal_crossproperty_effective_referrals_to_datekit": internal_effective_to_datekit,
             "internal_crossproperty_effective_referrals_to_budgetkit": internal_effective_to_budgetkit,
@@ -886,6 +979,30 @@ class WindowStats:
             "crosspromo_non_bot_without_referrer_ratio": safe_ratio(
                 self.crosspromo_non_bot_hits_without_referrer,
                 crosspromo_non_bot_hits,
+            ),
+            "crosspromo_inferred_verification_ratio": safe_ratio(
+                crosspromo_inferred_verified_hits,
+                self.crosspromo_hits_with_inferred_source,
+            ),
+            "crosspromo_non_bot_inferred_verification_ratio": safe_ratio(
+                crosspromo_non_bot_inferred_verified_hits,
+                self.crosspromo_non_bot_hits_with_inferred_source,
+            ),
+            "internal_crossproperty_inferred_verified_referral_ratio": safe_ratio(
+                internal_inferred_verified_referrals,
+                self.total_requests,
+            ),
+            "internal_crossproperty_inferred_non_bot_verified_referral_ratio": safe_ratio(
+                internal_inferred_non_bot_verified_referrals,
+                self.total_requests,
+            ),
+            "internal_crossproperty_inferred_unverified_referral_ratio": safe_ratio(
+                internal_inferred_unverified_referrals,
+                self.total_requests,
+            ),
+            "internal_crossproperty_inferred_non_bot_unverified_referral_ratio": safe_ratio(
+                internal_inferred_non_bot_unverified_referrals,
+                self.total_requests,
             ),
             "not_found_ratio": safe_ratio(not_found_total, self.total_requests),
             "clean_404_ratio": safe_ratio(clean_404, not_found_total),
@@ -981,9 +1098,13 @@ def build_window_comparison(
         "crosspromo_non_bot_source_attributed_hits",
         "crosspromo_hits_with_internal_referrer",
         "crosspromo_hits_with_inferred_source",
+        "crosspromo_inferred_verified_hits",
+        "crosspromo_inferred_unverified_hits",
         "crosspromo_hits_unattributed",
         "crosspromo_non_bot_hits_with_internal_referrer",
         "crosspromo_non_bot_hits_with_inferred_source",
+        "crosspromo_non_bot_inferred_verified_hits",
+        "crosspromo_non_bot_inferred_unverified_hits",
         "crosspromo_non_bot_hits_unattributed",
         "crosspromo_hits_with_any_referrer",
         "crosspromo_hits_without_referrer",
@@ -1026,6 +1147,10 @@ def build_window_comparison(
         "internal_crossproperty_inferred_non_bot_referrals_to_focuskit",
         "internal_crossproperty_inferred_non_bot_referrals_to_opskit",
         "internal_crossproperty_inferred_non_bot_referrals_to_studykit",
+        "internal_crossproperty_inferred_verified_referrals",
+        "internal_crossproperty_inferred_non_bot_verified_referrals",
+        "internal_crossproperty_inferred_unverified_referrals",
+        "internal_crossproperty_inferred_non_bot_unverified_referrals",
         "internal_crossproperty_effective_referrals",
         "internal_crossproperty_effective_referrals_to_datekit",
         "internal_crossproperty_effective_referrals_to_budgetkit",
@@ -1126,6 +1251,7 @@ def main():
 
     current_window = WindowStats()
     previous_window = WindowStats() if args.compare_previous else None
+    events: list[tuple[datetime, str, str, str, str, str, str]] = []
 
     for logfile in LOG_FILES:
         try:
@@ -1147,21 +1273,27 @@ def main():
             if args.compare_previous:
                 if ts < previous_start:
                     continue
-                target_window = current_window if ts >= current_start else previous_window
             else:
                 if ts < current_start:
                     continue
-                target_window = current_window
-
-            if target_window is None:
-                continue
 
             ip = match.group("ip")
             status = match.group("status")
             referrer = match.group("ref").strip()
             user_agent = match.group("ua").strip()
             path, query = parse_request_path_query(match.group("req"))
-            target_window.record(ip, status, referrer, path, query, user_agent)
+            events.append((ts, ip, status, referrer, path, query, user_agent))
+
+    events.sort(key=lambda item: item[0])
+
+    for ts, ip, status, referrer, path, query, user_agent in events:
+        if args.compare_previous:
+            target_window = current_window if ts >= current_start else previous_window
+        else:
+            target_window = current_window
+        if target_window is None:
+            continue
+        target_window.record(ip, status, referrer, path, query, user_agent, ts)
 
     generated_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     summary = current_window.summary(generated_at, window_hours)
@@ -1203,9 +1335,13 @@ def main():
     print(f"  crosspromo_non_bot_source_attributed_hits: {summary['crosspromo_non_bot_source_attributed_hits']}")
     print(f"  crosspromo_hits_with_internal_referrer: {summary['crosspromo_hits_with_internal_referrer']}")
     print(f"  crosspromo_hits_with_inferred_source: {summary['crosspromo_hits_with_inferred_source']}")
+    print(f"  crosspromo_inferred_verified_hits: {summary['crosspromo_inferred_verified_hits']}")
+    print(f"  crosspromo_inferred_unverified_hits: {summary['crosspromo_inferred_unverified_hits']}")
     print(f"  crosspromo_hits_unattributed: {summary['crosspromo_hits_unattributed']}")
     print(f"  crosspromo_non_bot_hits_with_internal_referrer: {summary['crosspromo_non_bot_hits_with_internal_referrer']}")
     print(f"  crosspromo_non_bot_hits_with_inferred_source: {summary['crosspromo_non_bot_hits_with_inferred_source']}")
+    print(f"  crosspromo_non_bot_inferred_verified_hits: {summary['crosspromo_non_bot_inferred_verified_hits']}")
+    print(f"  crosspromo_non_bot_inferred_unverified_hits: {summary['crosspromo_non_bot_inferred_unverified_hits']}")
     print(f"  crosspromo_non_bot_hits_unattributed: {summary['crosspromo_non_bot_hits_unattributed']}")
     print(f"  crosspromo_hits_with_any_referrer: {summary['crosspromo_hits_with_any_referrer']}")
     print(f"  crosspromo_hits_without_referrer: {summary['crosspromo_hits_without_referrer']}")
@@ -1220,6 +1356,16 @@ def main():
     print(f"  internal_crossproperty_non_bot_referrals: {summary['internal_crossproperty_non_bot_referrals']}")
     print(f"  internal_crossproperty_inferred_referrals: {summary['internal_crossproperty_inferred_referrals']}")
     print(f"  internal_crossproperty_inferred_non_bot_referrals: {summary['internal_crossproperty_inferred_non_bot_referrals']}")
+    print(f"  internal_crossproperty_inferred_verified_referrals: {summary['internal_crossproperty_inferred_verified_referrals']}")
+    print(
+        "  internal_crossproperty_inferred_non_bot_verified_referrals: "
+        f"{summary['internal_crossproperty_inferred_non_bot_verified_referrals']}"
+    )
+    print(f"  internal_crossproperty_inferred_unverified_referrals: {summary['internal_crossproperty_inferred_unverified_referrals']}")
+    print(
+        "  internal_crossproperty_inferred_non_bot_unverified_referrals: "
+        f"{summary['internal_crossproperty_inferred_non_bot_unverified_referrals']}"
+    )
     print(f"  internal_crossproperty_effective_referrals: {summary['internal_crossproperty_effective_referrals']}")
     print(f"  internal_crossproperty_effective_non_bot_referrals: {summary['internal_crossproperty_effective_non_bot_referrals']}")
     print(f"  known_bot_requests: {summary['known_bot_requests']}")
@@ -1252,6 +1398,27 @@ def main():
     print(f"  crosspromo_non_bot_source_attribution_ratio: {summary['crosspromo_non_bot_source_attribution_ratio']}%")
     print(f"  crosspromo_without_referrer_ratio: {summary['crosspromo_without_referrer_ratio']}%")
     print(f"  crosspromo_non_bot_without_referrer_ratio: {summary['crosspromo_non_bot_without_referrer_ratio']}%")
+    print(f"  crosspromo_inferred_verification_ratio: {summary['crosspromo_inferred_verification_ratio']}%")
+    print(
+        "  crosspromo_non_bot_inferred_verification_ratio: "
+        f"{summary['crosspromo_non_bot_inferred_verification_ratio']}%"
+    )
+    print(
+        "  internal_crossproperty_inferred_verified_referral_ratio: "
+        f"{summary['internal_crossproperty_inferred_verified_referral_ratio']}%"
+    )
+    print(
+        "  internal_crossproperty_inferred_non_bot_verified_referral_ratio: "
+        f"{summary['internal_crossproperty_inferred_non_bot_verified_referral_ratio']}%"
+    )
+    print(
+        "  internal_crossproperty_inferred_unverified_referral_ratio: "
+        f"{summary['internal_crossproperty_inferred_unverified_referral_ratio']}%"
+    )
+    print(
+        "  internal_crossproperty_inferred_non_bot_unverified_referral_ratio: "
+        f"{summary['internal_crossproperty_inferred_non_bot_unverified_referral_ratio']}%"
+    )
     print()
 
     print("=== CONTENT SECTION BREAKDOWN (clean, non-asset) ===")
@@ -1336,9 +1503,13 @@ def main():
             "crosspromo_non_bot_source_attributed_hits",
             "crosspromo_hits_with_internal_referrer",
             "crosspromo_hits_with_inferred_source",
+            "crosspromo_inferred_verified_hits",
+            "crosspromo_inferred_unverified_hits",
             "crosspromo_hits_unattributed",
             "crosspromo_non_bot_hits_with_internal_referrer",
             "crosspromo_non_bot_hits_with_inferred_source",
+            "crosspromo_non_bot_inferred_verified_hits",
+            "crosspromo_non_bot_inferred_unverified_hits",
             "crosspromo_non_bot_hits_unattributed",
             "crosspromo_hits_with_any_referrer",
             "crosspromo_hits_without_referrer",
@@ -1367,6 +1538,10 @@ def main():
             "internal_crossproperty_non_bot_referrals_to_studykit",
             "internal_crossproperty_inferred_referrals",
             "internal_crossproperty_inferred_non_bot_referrals",
+            "internal_crossproperty_inferred_verified_referrals",
+            "internal_crossproperty_inferred_non_bot_verified_referrals",
+            "internal_crossproperty_inferred_unverified_referrals",
+            "internal_crossproperty_inferred_non_bot_unverified_referrals",
             "internal_crossproperty_effective_referrals",
             "internal_crossproperty_effective_non_bot_referrals",
             "known_bot_requests",
@@ -1498,6 +1673,8 @@ def main():
     print("=== INTERNAL CROSS-PROPERTY REFERRALS (to DateKit/BudgetKit/HealthKit/SleepKit/FocusKit/OpsKit/StudyKit) ===")
     print(f"  total: {current_window.internal_crossproperty_referrals}")
     print(f"  inferred total from campaign source paths: {current_window.internal_crossproperty_inferred_referrals}")
+    print(f"  inferred verified (recent source evidence): {current_window.internal_crossproperty_inferred_verified_referrals}")
+    print(f"  inferred unverified (no recent source evidence): {current_window.internal_crossproperty_inferred_unverified_referrals}")
     print(
         "  effective total (referrer + inferred): "
         f"{current_window.internal_crossproperty_referrals + current_window.internal_crossproperty_inferred_referrals}"
@@ -1521,6 +1698,10 @@ def main():
     print(f"    {current_window.internal_crossproperty_non_bot_referrals}")
     print("  non-bot inferred total:")
     print(f"    {current_window.internal_crossproperty_inferred_non_bot_referrals}")
+    print("  non-bot inferred verified:")
+    print(f"    {current_window.internal_crossproperty_inferred_non_bot_verified_referrals}")
+    print("  non-bot inferred unverified:")
+    print(f"    {current_window.internal_crossproperty_inferred_non_bot_unverified_referrals}")
     print("  non-bot effective total (referrer + inferred):")
     print(
         "    "
@@ -1683,6 +1864,26 @@ def main():
         ),
         "internal_crossproperty_inferred_non_bot_target_sections": counter_to_sorted_list(
             current_window.internal_crossproperty_inferred_non_bot_target_sections,
+            "section",
+            args.max_items,
+        ),
+        "internal_crossproperty_inferred_verified_target_sections": counter_to_sorted_list(
+            current_window.internal_crossproperty_inferred_verified_target_sections,
+            "section",
+            args.max_items,
+        ),
+        "internal_crossproperty_inferred_non_bot_verified_target_sections": counter_to_sorted_list(
+            current_window.internal_crossproperty_inferred_non_bot_verified_target_sections,
+            "section",
+            args.max_items,
+        ),
+        "internal_crossproperty_inferred_unverified_target_sections": counter_to_sorted_list(
+            current_window.internal_crossproperty_inferred_unverified_target_sections,
+            "section",
+            args.max_items,
+        ),
+        "internal_crossproperty_inferred_non_bot_unverified_target_sections": counter_to_sorted_list(
+            current_window.internal_crossproperty_inferred_non_bot_unverified_target_sections,
             "section",
             args.max_items,
         ),
