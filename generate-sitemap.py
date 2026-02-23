@@ -5,6 +5,7 @@ Goal: keep <lastmod> accurate without marking every URL as "today".
 
 - Blog posts: prefer <meta property="article:published_time"> or JSON-LD dateModified.
 - Tools/Cheatsheets/other pages: use file mtime (UTC date).
+- Keep root robots sitemap directives in sync with all mounted kit sitemaps.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from pathlib import Path
 SITE_ROOT = Path("/var/www/web-ceo")
 BASE_URL = "https://devtoolbox.dedyn.io"
 REQUIRED_ROOT_FILES = ("google5ab7b13e25381f31.html",)
+ROBOTS_TXT_PATH = SITE_ROOT / "robots.txt"
 DATEKIT_ROOT = Path("/var/www/datekit")
 BUDGETKIT_ROOT = SITE_ROOT / "budgetkit"
 HEALTHKIT_ROOT = SITE_ROOT / "healthkit"
@@ -26,6 +28,15 @@ FOCUSKIT_ROOT = SITE_ROOT / "focuskit"
 OPSKIT_ROOT = SITE_ROOT / "opskit"
 STUDYKIT_ROOT = SITE_ROOT / "studykit"
 KITS_ROOT = SITE_ROOT / "kits"
+SUBSITE_MOUNTS: tuple[tuple[str, Path], ...] = (
+    ("/datekit", DATEKIT_ROOT),
+    ("/budgetkit", BUDGETKIT_ROOT),
+    ("/healthkit", HEALTHKIT_ROOT),
+    ("/sleepkit", SLEEPKIT_ROOT),
+    ("/focuskit", FOCUSKIT_ROOT),
+    ("/opskit", OPSKIT_ROOT),
+    ("/studykit", STUDYKIT_ROOT),
+)
 
 
 @dataclass(frozen=True)
@@ -92,6 +103,49 @@ def write_sitemap(entries: list[SitemapEntry], output_path: Path) -> None:
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_subsite_sitemap(mount_path: str, source_dir: Path) -> int:
+    if not source_dir.exists():
+        return 0
+
+    entries: list[SitemapEntry] = []
+    pages = sorted(source_dir.glob("*.html"), key=lambda p: p.name)
+    for page in pages:
+        if page.name == "index.html":
+            loc_path = f"{mount_path}/"
+            priority = "0.8"
+        else:
+            loc_path = f"{mount_path}/{page.name}"
+            priority = "0.7"
+
+        entries.append(
+            SitemapEntry(
+                loc=f"{BASE_URL}{loc_path}",
+                lastmod=utc_mtime_date(page),
+                changefreq="weekly",
+                priority=priority,
+            )
+        )
+
+    if not entries:
+        return 0
+
+    write_sitemap(entries, source_dir / "sitemap.xml")
+    return len(entries)
+
+
+def write_robots_txt(subsite_sitemap_urls: list[str], output_path: Path) -> None:
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        "",
+        f"Sitemap: {BASE_URL}/sitemap.xml",
+    ]
+    for sitemap_url in subsite_sitemap_urls:
+        lines.append(f"Sitemap: {sitemap_url}")
+    lines.append("")
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+
+
 def add_subsite_pages(
     entries: list[SitemapEntry],
     mount_path: str,
@@ -130,6 +184,11 @@ def main() -> None:
         )
 
     entries: list[SitemapEntry] = []
+    subsite_sitemap_urls: list[str] = []
+
+    for mount_path, source_dir in SUBSITE_MOUNTS:
+        if write_subsite_sitemap(mount_path, source_dir) > 0:
+            subsite_sitemap_urls.append(f"{BASE_URL}{mount_path}/sitemap.xml")
 
     def add(loc_path: str, file_path: Path, changefreq: str, priority: str) -> None:
         entries.append(
@@ -149,13 +208,8 @@ def main() -> None:
     add("/tools", SITE_ROOT / "tools" / "index.html", "weekly", "0.8")
     add("/cheatsheets", SITE_ROOT / "cheatsheets" / "index.html", "weekly", "0.8")
     add("/kits", KITS_ROOT / "index.html", "weekly", "0.8")
-    add_subsite_pages(entries, "/datekit", DATEKIT_ROOT)
-    add_subsite_pages(entries, "/budgetkit", BUDGETKIT_ROOT)
-    add_subsite_pages(entries, "/healthkit", HEALTHKIT_ROOT)
-    add_subsite_pages(entries, "/sleepkit", SLEEPKIT_ROOT)
-    add_subsite_pages(entries, "/focuskit", FOCUSKIT_ROOT)
-    add_subsite_pages(entries, "/opskit", OPSKIT_ROOT)
-    add_subsite_pages(entries, "/studykit", STUDYKIT_ROOT)
+    for mount_path, source_dir in SUBSITE_MOUNTS:
+        add_subsite_pages(entries, mount_path, source_dir)
 
     tools_dir = SITE_ROOT / "tools"
     tool_pages = sorted(
@@ -213,7 +267,11 @@ def main() -> None:
     )
 
     write_sitemap(entries, SITE_ROOT / "sitemap.xml")
+    write_robots_txt(subsite_sitemap_urls, ROBOTS_TXT_PATH)
     print(f"Wrote {SITE_ROOT / 'sitemap.xml'} with {len(entries)} URLs")
+    print(
+        f"Wrote {ROBOTS_TXT_PATH} with {1 + len(subsite_sitemap_urls)} sitemap directives"
+    )
 
 
 if __name__ == "__main__":
