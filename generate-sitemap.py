@@ -23,6 +23,7 @@ BUDGETKIT_ROOT = SITE_ROOT / "budgetkit"
 HEALTHKIT_ROOT = SITE_ROOT / "healthkit"
 SLEEPKIT_ROOT = SITE_ROOT / "sleepkit"
 FOCUSKIT_ROOT = SITE_ROOT / "focuskit"
+KITS_ROOT = SITE_ROOT / "kits"
 
 
 @dataclass(frozen=True)
@@ -145,6 +146,7 @@ def main() -> None:
     add("/blog", SITE_ROOT / "blog" / "index.html", "weekly", "0.9")
     add("/tools", SITE_ROOT / "tools" / "index.html", "weekly", "0.8")
     add("/cheatsheets", SITE_ROOT / "cheatsheets" / "index.html", "weekly", "0.8")
+    add("/kits", KITS_ROOT / "index.html", "weekly", "0.8")
     add_subsite_pages(entries, "/datekit", DATEKIT_ROOT)
     add_subsite_pages(entries, "/budgetkit", BUDGETKIT_ROOT)
     add_subsite_pages(entries, "/healthkit", HEALTHKIT_ROOT)
