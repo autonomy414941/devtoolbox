@@ -23,6 +23,7 @@ BUDGETKIT_ROOT = SITE_ROOT / "budgetkit"
 HEALTHKIT_ROOT = SITE_ROOT / "healthkit"
 SLEEPKIT_ROOT = SITE_ROOT / "sleepkit"
 FOCUSKIT_ROOT = SITE_ROOT / "focuskit"
+OPSKIT_ROOT = SITE_ROOT / "opskit"
 KITS_ROOT = SITE_ROOT / "kits"
 
 
@@ -152,6 +153,7 @@ def main() -> None:
     add_subsite_pages(entries, "/healthkit", HEALTHKIT_ROOT)
     add_subsite_pages(entries, "/sleepkit", SLEEPKIT_ROOT)
     add_subsite_pages(entries, "/focuskit", FOCUSKIT_ROOT)
+    add_subsite_pages(entries, "/opskit", OPSKIT_ROOT)
 
     tools_dir = SITE_ROOT / "tools"
     tool_pages = sorted(
