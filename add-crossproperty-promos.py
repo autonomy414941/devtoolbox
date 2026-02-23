@@ -13,17 +13,19 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ANALYZE_TRAFFIC_SCRIPT = os.path.join(BASE_DIR, "analyze_traffic.py")
 BLOG_DIR = "/var/www/web-ceo/blog"
 PROMO_MARKER = 'data-crossproperty-promo="true"'
+PROMO_VERSION = "2"
+PROMO_VERSION_MARKER = f'data-crossproperty-promo-version="{PROMO_VERSION}"'
 PROMO_CAMPAIGN = "crosspromo-top-organic"
 PROMO_BLOCK_PATTERN = re.compile(
     r'<aside class="crossproperty-promo"[^>]*data-crossproperty-promo="true"[^>]*>.*?</aside>\s*',
     re.DOTALL,
 )
 PROMO_TARGETS = (
-    ("datekit", "DateKit"),
-    ("budgetkit", "BudgetKit"),
-    ("healthkit", "HealthKit"),
-    ("sleepkit", "SleepKit"),
-    ("focuskit", "FocusKit"),
+    ("focuskit", "FocusKit focus session, time block, and meeting load calculators"),
+    ("datekit", "DateKit deadline and date math calculator"),
+    ("budgetkit", "BudgetKit monthly budget planner"),
+    ("healthkit", "HealthKit calorie and hydration calculators"),
+    ("sleepkit", "SleepKit sleep cycle and debt planner"),
 )
 
 
@@ -81,17 +83,21 @@ def slug_from_blog_path(path: str) -> str:
 
 def build_promo_html(slug: str) -> str:
     params = f"utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}&utm_content={slug}"
-    links = ", ".join(
-        f'<a href="/{target}/?{params}" style="color: #93c5fd; text-decoration: underline;">{label}</a>'
+    links = "".join(
+        f'            <li style="margin: 0.2rem 0;"><a href="/{target}/?{params}" '
+        f'style="color: #bfdbfe; text-decoration: underline;">{label}</a></li>\n'
         for target, label in PROMO_TARGETS
     )
     return (
         "\n"
         f'        <aside class="crossproperty-promo" {PROMO_MARKER} '
+        f'{PROMO_VERSION_MARKER} '
         'style="margin: 1.25rem 0 1.5rem; padding: 1rem 1.1rem; border: 1px solid rgba(59,130,246,0.35); '
         'border-radius: 10px; background: rgba(59,130,246,0.08); line-height: 1.65;">\n'
-        '            <strong style="color: #93c5fd;">Quick calculators for planning outside code:</strong> '
-        f"{links}.\n"
+        '            <strong style="color: #bfdbfe;">Plan execution before writing code:</strong>\n'
+        '            <ul style="margin: 0.45rem 0 0; padding-left: 1.1rem;">\n'
+        f"{links}"
+        "            </ul>\n"
         "        </aside>\n"
     )
 
@@ -101,7 +107,7 @@ def upgrade_existing_promo_block(content: str, slug: str) -> str:
     if not match:
         return content
     block = match.group(0)
-    if all(f"/{target}/?" in block for target, _ in PROMO_TARGETS):
+    if PROMO_VERSION_MARKER in block:
         return content
     return content[: match.start()] + build_promo_html(slug) + content[match.end() :]
 
