@@ -82,9 +82,12 @@ TARGETS = (
 
 def upsert_block(content: str, block: str, anchor_pattern: re.Pattern[str]) -> tuple[str, str]:
     if MARKER in content:
+        marker_match = BLOCK_PATTERN.search(content)
+        if not marker_match:
+            return content, "skip:marker-found-no-match"
         replaced = BLOCK_PATTERN.sub(block, content, count=1)
         if replaced == content:
-            return content, "skip:marker-found-no-match"
+            return content, "skip:already-patched"
         return replaced, "updated:replaced"
 
     anchor_match = anchor_pattern.search(content)
