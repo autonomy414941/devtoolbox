@@ -13,7 +13,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ANALYZE_TRAFFIC_SCRIPT = os.path.join(BASE_DIR, "analyze_traffic.py")
 BLOG_DIR = "/var/www/web-ceo/blog"
 PROMO_MARKER = 'data-crossproperty-promo="true"'
-PROMO_VERSION = "3"
+PROMO_VERSION = "4"
 PROMO_VERSION_MARKER = f'data-crossproperty-promo-version="{PROMO_VERSION}"'
 PROMO_CAMPAIGN = "crosspromo-top-organic"
 PROMO_BLOCK_PATTERN = re.compile(
@@ -26,6 +26,8 @@ PROMO_SECONDARY_TARGETS = (
     ("budgetkit", "BudgetKit"),
     ("healthkit", "HealthKit"),
     ("sleepkit", "SleepKit"),
+    ("opskit", "OpsKit"),
+    ("studykit", "StudyKit"),
 )
 
 
@@ -99,7 +101,7 @@ def build_promo_html(slug: str) -> str:
         'style="display: inline-block; color: #0f172a; text-decoration: none; background: #93c5fd; '
         'padding: 0.28rem 0.55rem; border-radius: 6px; font-weight: 700;">'
         f'{primary_label}</a> for focus sessions, time blocks, and meeting load checks.</p>\n'
-        f'            <p style="margin: 0.45rem 0 0; color: #dbeafe;">Need other planning calculators? {secondary_links}. '
+        f'            <p style="margin: 0.45rem 0 0; color: #dbeafe;">Need other planning calculators for life, ops, or study workflows? {secondary_links}. '
         f'<a href="/kits/?{params}" style="color: #bfdbfe; text-decoration: underline; font-weight: 600;">All Kits</a>.</p>\n'
         "        </aside>\n"
     )
