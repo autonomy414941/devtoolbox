@@ -40,6 +40,7 @@ CONTENT_SECTION_NAMES = (
     "studykit",
     "other",
 )
+KIT_SECTION_NAMES = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "opskit", "studykit")
 INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "opskit", "studykit")
 CROSSPROMO_CAMPAIGN_NAME = "crosspromo-top-organic"
 INFERRED_SOURCE_SECTION_PATHS = {
@@ -304,6 +305,9 @@ class WindowStats:
         self.organic_engine_counts = Counter()
         self.organic_page_counts = Counter()
         self.organic_section_counts = Counter()
+        self.organic_non_bot_engine_counts = Counter()
+        self.organic_non_bot_page_counts = Counter()
+        self.organic_non_bot_section_counts = Counter()
         self.external_referrers = Counter()
         self.not_found_pages = Counter()
         self.clean_not_found_pages = Counter()
@@ -487,6 +491,10 @@ class WindowStats:
                 self.organic_page_counts[path] += 1
                 section = classify_content_section(path)
                 self.organic_section_counts[section] += 1
+                if not known_bot_ua:
+                    self.organic_non_bot_engine_counts[engine] += 1
+                    self.organic_non_bot_page_counts[path] += 1
+                    self.organic_non_bot_section_counts[section] += 1
 
         if internal_referrer_path and not asset and path and not suspicious_path:
             source_section = classify_content_section(internal_referrer_path)
@@ -506,18 +514,37 @@ class WindowStats:
 
     def summary(self, generated_at: str, window_hours: int):
         organic_total = sum(self.organic_engine_counts.values())
+        organic_non_bot_total = sum(self.organic_non_bot_engine_counts.values())
         not_found_total = sum(self.not_found_pages.values())
         clean_404 = sum(self.clean_not_found_pages.values())
         suspicious_404 = sum(self.suspicious_not_found_pages.values())
         content_sections = {name: int(self.content_section_counts.get(name, 0)) for name in CONTENT_SECTION_NAMES}
         organic_sections = {name: int(self.organic_section_counts.get(name, 0)) for name in CONTENT_SECTION_NAMES}
+        organic_non_bot_sections = {name: int(self.organic_non_bot_section_counts.get(name, 0)) for name in CONTENT_SECTION_NAMES}
         content_section_share = {name: safe_ratio(content_sections[name], self.content_requests) for name in CONTENT_SECTION_NAMES}
         organic_section_share = {name: safe_ratio(organic_sections[name], organic_total) for name in CONTENT_SECTION_NAMES}
+        organic_non_bot_section_share = {
+            name: safe_ratio(organic_non_bot_sections[name], organic_non_bot_total) for name in CONTENT_SECTION_NAMES
+        }
+        organic_kit_referrals = sum(organic_sections[name] for name in KIT_SECTION_NAMES)
+        organic_non_bot_kit_referrals = sum(organic_non_bot_sections[name] for name in KIT_SECTION_NAMES)
+        organic_non_bot_kit_page_counts = Counter()
+        for page_path, count in self.organic_non_bot_page_counts.items():
+            if classify_content_section(page_path) in KIT_SECTION_NAMES:
+                organic_non_bot_kit_page_counts[page_path] = count
 
         top_content_section = "other"
         top_content_section_requests = 0
         top_organic_section = "other"
         top_organic_section_referrals = 0
+        top_organic_non_bot_section = "other"
+        top_organic_non_bot_section_referrals = 0
+        top_organic_non_bot_page = ""
+        top_organic_non_bot_page_hits = 0
+        top_organic_non_bot_kit_section = "other"
+        top_organic_non_bot_kit_section_referrals = 0
+        top_organic_non_bot_kit_page = ""
+        top_organic_non_bot_kit_page_hits = 0
         internal_to_datekit = int(self.internal_crossproperty_target_sections.get("datekit", 0))
         internal_to_budgetkit = int(self.internal_crossproperty_target_sections.get("budgetkit", 0))
         internal_to_healthkit = int(self.internal_crossproperty_target_sections.get("healthkit", 0))
@@ -629,6 +656,26 @@ class WindowStats:
             top_content_section, top_content_section_requests = max(content_sections.items(), key=lambda item: item[1])
         if organic_sections:
             top_organic_section, top_organic_section_referrals = max(organic_sections.items(), key=lambda item: item[1])
+        if organic_non_bot_sections:
+            top_organic_non_bot_section, top_organic_non_bot_section_referrals = max(
+                organic_non_bot_sections.items(),
+                key=lambda item: item[1],
+            )
+        if self.organic_non_bot_page_counts:
+            top_organic_non_bot_page, top_organic_non_bot_page_hits = max(
+                self.organic_non_bot_page_counts.items(),
+                key=lambda item: item[1],
+            )
+        if organic_non_bot_kit_referrals > 0:
+            top_organic_non_bot_kit_section, top_organic_non_bot_kit_section_referrals = max(
+                ((name, organic_non_bot_sections[name]) for name in KIT_SECTION_NAMES),
+                key=lambda item: item[1],
+            )
+        if organic_non_bot_kit_page_counts:
+            top_organic_non_bot_kit_page, top_organic_non_bot_kit_page_hits = max(
+                organic_non_bot_kit_page_counts.items(),
+                key=lambda item: item[1],
+            )
         if self.internal_crossproperty_source_sections:
             top_internal_source_section, top_internal_source_referrals = max(
                 self.internal_crossproperty_source_sections.items(),
@@ -710,6 +757,9 @@ class WindowStats:
             "suspicious_404": suspicious_404,
             "clean_404": clean_404,
             "organic_referrals": organic_total,
+            "organic_non_bot_referrals": organic_non_bot_total,
+            "organic_kit_referrals": organic_kit_referrals,
+            "organic_non_bot_kit_referrals": organic_non_bot_kit_referrals,
             "crosspromo_campaign_hits": self.crosspromo_campaign_hits,
             "crosspromo_campaign_hits_to_datekit": crosspromo_to_datekit,
             "crosspromo_campaign_hits_to_budgetkit": crosspromo_to_budgetkit,
@@ -799,6 +849,8 @@ class WindowStats:
             "content_request_ratio": safe_ratio(self.content_requests, self.total_requests),
             "suspicious_request_ratio": safe_ratio(self.suspicious_requests, self.total_requests),
             "organic_referral_ratio": safe_ratio(organic_total, self.total_requests),
+            "organic_non_bot_referral_ratio": safe_ratio(organic_non_bot_total, self.total_requests),
+            "organic_non_bot_kit_referral_ratio": safe_ratio(organic_non_bot_kit_referrals, organic_non_bot_total),
             "internal_crossproperty_referral_ratio": safe_ratio(self.internal_crossproperty_referrals, self.total_requests),
             "internal_crossproperty_non_bot_referral_ratio": safe_ratio(
                 self.internal_crossproperty_non_bot_referrals,
@@ -840,12 +892,22 @@ class WindowStats:
             "suspicious_404_ratio": safe_ratio(suspicious_404, not_found_total),
             "content_sections": content_sections,
             "organic_sections": organic_sections,
+            "organic_non_bot_sections": organic_non_bot_sections,
             "content_section_share_pct": content_section_share,
             "organic_section_share_pct": organic_section_share,
+            "organic_non_bot_section_share_pct": organic_non_bot_section_share,
             "top_content_section": top_content_section,
             "top_content_section_requests": top_content_section_requests,
             "top_organic_section": top_organic_section,
             "top_organic_section_referrals": top_organic_section_referrals,
+            "top_organic_non_bot_section": top_organic_non_bot_section,
+            "top_organic_non_bot_section_referrals": top_organic_non_bot_section_referrals,
+            "top_organic_non_bot_page": top_organic_non_bot_page,
+            "top_organic_non_bot_page_hits": top_organic_non_bot_page_hits,
+            "top_organic_non_bot_kit_section": top_organic_non_bot_kit_section,
+            "top_organic_non_bot_kit_section_referrals": top_organic_non_bot_kit_section_referrals,
+            "top_organic_non_bot_kit_page": top_organic_non_bot_kit_page,
+            "top_organic_non_bot_kit_page_hits": top_organic_non_bot_kit_page_hits,
             "top_internal_crossproperty_source_section": top_internal_source_section,
             "top_internal_crossproperty_source_referrals": top_internal_source_referrals,
             "top_internal_crossproperty_non_bot_source_section": top_internal_non_bot_source_section,
@@ -876,6 +938,7 @@ class WindowStats:
         for section_name in CONTENT_SECTION_NAMES:
             summary[f"content_{section_name}_requests"] = content_sections[section_name]
             summary[f"organic_{section_name}_referrals"] = organic_sections[section_name]
+            summary[f"organic_non_bot_{section_name}_referrals"] = organic_non_bot_sections[section_name]
         return summary
 
 
@@ -896,6 +959,9 @@ def build_window_comparison(
         "clean_404",
         "suspicious_404",
         "organic_referrals",
+        "organic_non_bot_referrals",
+        "organic_kit_referrals",
+        "organic_non_bot_kit_referrals",
         "crosspromo_campaign_hits",
         "crosspromo_campaign_hits_to_datekit",
         "crosspromo_campaign_hits_to_budgetkit",
@@ -1002,6 +1068,18 @@ def build_window_comparison(
         "organic_opskit_referrals",
         "organic_studykit_referrals",
         "organic_other_referrals",
+        "organic_non_bot_homepage_referrals",
+        "organic_non_bot_blog_referrals",
+        "organic_non_bot_tools_referrals",
+        "organic_non_bot_cheatsheets_referrals",
+        "organic_non_bot_datekit_referrals",
+        "organic_non_bot_budgetkit_referrals",
+        "organic_non_bot_healthkit_referrals",
+        "organic_non_bot_sleepkit_referrals",
+        "organic_non_bot_focuskit_referrals",
+        "organic_non_bot_opskit_referrals",
+        "organic_non_bot_studykit_referrals",
+        "organic_non_bot_other_referrals",
     ]
     deltas = {}
     for metric in metrics:
@@ -1103,6 +1181,9 @@ def main():
     print(f"  not_found_requests: {summary['not_found_requests']}")
     print(f"  suspicious_404: {summary['suspicious_404']}")
     print(f"  organic_referrals: {summary['organic_referrals']}")
+    print(f"  organic_non_bot_referrals: {summary['organic_non_bot_referrals']}")
+    print(f"  organic_kit_referrals: {summary['organic_kit_referrals']}")
+    print(f"  organic_non_bot_kit_referrals: {summary['organic_non_bot_kit_referrals']}")
     print(f"  crosspromo_campaign_hits: {summary['crosspromo_campaign_hits']}")
     print(f"  crosspromo_campaign_hits_to_datekit: {summary['crosspromo_campaign_hits_to_datekit']}")
     print(f"  crosspromo_campaign_hits_to_budgetkit: {summary['crosspromo_campaign_hits_to_budgetkit']}")
@@ -1143,6 +1224,10 @@ def main():
     print(f"  internal_crossproperty_effective_non_bot_referrals: {summary['internal_crossproperty_effective_non_bot_referrals']}")
     print(f"  known_bot_requests: {summary['known_bot_requests']}")
     print(f"  known_bot_unique_ips: {summary['known_bot_unique_ips']}")
+    print(f"  top_organic_non_bot_section: {summary['top_organic_non_bot_section']}")
+    print(f"  top_organic_non_bot_page: {summary['top_organic_non_bot_page']}")
+    print(f"  top_organic_non_bot_kit_section: {summary['top_organic_non_bot_kit_section']}")
+    print(f"  top_organic_non_bot_kit_page: {summary['top_organic_non_bot_kit_page']}")
     print(f"  top_crosspromo_campaign_source: {summary['top_crosspromo_campaign_source']}")
     print(f"  top_crosspromo_campaign_target_section: {summary['top_crosspromo_campaign_target_section']}")
     print(f"  top_crosspromo_campaign_source_target_section: {summary['top_crosspromo_campaign_source_target_section']}")
@@ -1150,6 +1235,8 @@ def main():
     print(f"  suspicious_request_ratio: {summary['suspicious_request_ratio']}%")
     print(f"  known_bot_request_ratio: {summary['known_bot_request_ratio']}%")
     print(f"  organic_referral_ratio: {summary['organic_referral_ratio']}%")
+    print(f"  organic_non_bot_referral_ratio: {summary['organic_non_bot_referral_ratio']}%")
+    print(f"  organic_non_bot_kit_referral_ratio: {summary['organic_non_bot_kit_referral_ratio']}%")
     print(f"  internal_crossproperty_referral_ratio: {summary['internal_crossproperty_referral_ratio']}%")
     print(f"  internal_crossproperty_non_bot_referral_ratio: {summary['internal_crossproperty_non_bot_referral_ratio']}%")
     print(f"  internal_crossproperty_inferred_referral_ratio: {summary['internal_crossproperty_inferred_referral_ratio']}%")
@@ -1181,6 +1268,13 @@ def main():
         print(f"  {section_name}: {section_count} ({section_share}%)")
     print()
 
+    print("=== ORGANIC NON-BOT SECTION BREAKDOWN ===")
+    for section_name in CONTENT_SECTION_NAMES:
+        section_count = summary.get(f"organic_non_bot_{section_name}_referrals", 0)
+        section_share = summary.get("organic_non_bot_section_share_pct", {}).get(section_name, 0)
+        print(f"  {section_name}: {section_count} ({section_share}%)")
+    print()
+
     if comparison:
         print("=== WINDOW COMPARISON (current vs previous same-duration window) ===")
         for metric in [
@@ -1200,6 +1294,9 @@ def main():
             "suspicious_requests",
             "not_found_requests",
             "organic_referrals",
+            "organic_non_bot_referrals",
+            "organic_kit_referrals",
+            "organic_non_bot_kit_referrals",
             "organic_blog_referrals",
             "organic_tools_referrals",
             "organic_cheatsheets_referrals",
@@ -1210,6 +1307,16 @@ def main():
             "organic_focuskit_referrals",
             "organic_opskit_referrals",
             "organic_studykit_referrals",
+            "organic_non_bot_blog_referrals",
+            "organic_non_bot_tools_referrals",
+            "organic_non_bot_cheatsheets_referrals",
+            "organic_non_bot_datekit_referrals",
+            "organic_non_bot_budgetkit_referrals",
+            "organic_non_bot_healthkit_referrals",
+            "organic_non_bot_sleepkit_referrals",
+            "organic_non_bot_focuskit_referrals",
+            "organic_non_bot_opskit_referrals",
+            "organic_non_bot_studykit_referrals",
             "crosspromo_campaign_hits",
             "crosspromo_campaign_hits_to_datekit",
             "crosspromo_campaign_hits_to_budgetkit",
@@ -1286,8 +1393,30 @@ def main():
         print(f"  {engine}: {count}")
     print()
 
+    print("=== ORGANIC NON-BOT ENGINES ===")
+    for engine, count in current_window.organic_non_bot_engine_counts.most_common(args.max_items):
+        print(f"  {engine}: {count}")
+    print()
+
     print("=== TOP ORGANIC LANDING PAGES ===")
     for path, count in current_window.organic_page_counts.most_common(args.max_items):
+        print(f"  {count:4d}  {path}")
+    print()
+
+    print("=== TOP ORGANIC NON-BOT LANDING PAGES ===")
+    for path, count in current_window.organic_non_bot_page_counts.most_common(args.max_items):
+        print(f"  {count:4d}  {path}")
+    print()
+
+    print("=== TOP ORGANIC NON-BOT KIT LANDING PAGES ===")
+    organic_non_bot_kit_page_counts = Counter(
+        {
+            path: count
+            for path, count in current_window.organic_non_bot_page_counts.items()
+            if classify_content_section(path) in KIT_SECTION_NAMES
+        }
+    )
+    for path, count in organic_non_bot_kit_page_counts.most_common(args.max_items):
         print(f"  {count:4d}  {path}")
     print()
 
@@ -1433,9 +1562,17 @@ def main():
         "status_codes": counter_to_sorted_list(current_window.status_counts, "code", args.max_items),
         "content_sections": counter_to_sorted_list(current_window.content_section_counts, "section", args.max_items),
         "organic_sections": counter_to_sorted_list(current_window.organic_section_counts, "section", args.max_items),
+        "organic_non_bot_sections": counter_to_sorted_list(current_window.organic_non_bot_section_counts, "section", args.max_items),
         "top_pages": counter_to_sorted_list(current_window.page_counts, "path", args.max_items),
         "organic_engines": counter_to_sorted_list(current_window.organic_engine_counts, "engine", args.max_items),
+        "organic_non_bot_engines": counter_to_sorted_list(
+            current_window.organic_non_bot_engine_counts,
+            "engine",
+            args.max_items,
+        ),
         "top_organic_pages": counter_to_sorted_list(current_window.organic_page_counts, "path", args.max_items),
+        "top_organic_non_bot_pages": counter_to_sorted_list(current_window.organic_non_bot_page_counts, "path", args.max_items),
+        "top_organic_non_bot_kit_pages": counter_to_sorted_list(organic_non_bot_kit_page_counts, "path", args.max_items),
         "top_external_referrers": counter_to_sorted_list(current_window.external_referrers, "referrer", args.max_items),
         "crosspromo_campaign_pages": counter_to_sorted_list(current_window.crosspromo_campaign_pages, "path", args.max_items),
         "crosspromo_campaign_sources": counter_to_sorted_list(current_window.crosspromo_campaign_sources, "source", args.max_items),
