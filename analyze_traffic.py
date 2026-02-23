@@ -301,18 +301,34 @@ class WindowStats:
         self.crosspromo_hits_with_internal_referrer = 0
         self.crosspromo_hits_with_inferred_source = 0
         self.crosspromo_hits_unattributed = 0
+        self.crosspromo_non_bot_campaign_sources = Counter()
+        self.crosspromo_non_bot_campaign_source_pages = Counter()
+        self.crosspromo_non_bot_campaign_source_sections = Counter()
+        self.crosspromo_non_bot_campaign_target_sections = Counter()
+        self.crosspromo_non_bot_campaign_source_target_sections = Counter()
+        self.crosspromo_non_bot_campaign_page_path_pairs = Counter()
+        self.crosspromo_non_bot_hits_with_internal_referrer = 0
+        self.crosspromo_non_bot_hits_with_inferred_source = 0
+        self.crosspromo_non_bot_hits_unattributed = 0
         self.crosspromo_source_mismatch_hits = 0
         self.internal_crossproperty_referrals = 0
         self.internal_crossproperty_target_sections = Counter()
         self.internal_crossproperty_source_sections = Counter()
         self.internal_crossproperty_target_pages = Counter()
         self.internal_crossproperty_source_pages = Counter()
+        self.internal_crossproperty_non_bot_referrals = 0
+        self.internal_crossproperty_non_bot_target_sections = Counter()
+        self.internal_crossproperty_non_bot_source_sections = Counter()
+        self.internal_crossproperty_non_bot_target_pages = Counter()
+        self.internal_crossproperty_non_bot_source_pages = Counter()
         self.known_bot_requests = 0
         self.known_bot_unique_ips = set()
         self.crosspromo_known_bot_hits = 0
         self.crosspromo_known_bot_user_agents = Counter()
         self.crosspromo_hits_with_any_referrer = 0
         self.crosspromo_hits_without_referrer = 0
+        self.crosspromo_non_bot_hits_with_any_referrer = 0
+        self.crosspromo_non_bot_hits_without_referrer = 0
         self.crosspromo_hits_without_referrer_known_bot = 0
 
     def record(self, ip: str, status: str, referrer: str, path: str, query: str, user_agent: str):
@@ -356,10 +372,16 @@ class WindowStats:
                 self.crosspromo_campaign_pages[path] += 1
                 target_section = classify_content_section(path)
                 self.crosspromo_campaign_target_sections[target_section] += 1
+                if not known_bot_ua:
+                    self.crosspromo_non_bot_campaign_target_sections[target_section] += 1
                 if referrer and referrer != "-":
                     self.crosspromo_hits_with_any_referrer += 1
+                    if not known_bot_ua:
+                        self.crosspromo_non_bot_hits_with_any_referrer += 1
                 else:
                     self.crosspromo_hits_without_referrer += 1
+                    if not known_bot_ua:
+                        self.crosspromo_non_bot_hits_without_referrer += 1
                 if known_bot_ua:
                     self.crosspromo_known_bot_hits += 1
                     if normalized_user_agent:
@@ -374,6 +396,9 @@ class WindowStats:
                         continue
                     self.crosspromo_campaign_sources[source] += 1
                     self.crosspromo_campaign_source_target_sections[f"{source}->{target_section}"] += 1
+                    if not known_bot_ua:
+                        self.crosspromo_non_bot_campaign_sources[source] += 1
+                        self.crosspromo_non_bot_campaign_source_target_sections[f"{source}->{target_section}"] += 1
                     inferred_source_path = infer_internal_source_path(source)
                     if inferred_source_path:
                         inferred_source_paths.append(inferred_source_path)
@@ -383,6 +408,11 @@ class WindowStats:
                     self.crosspromo_campaign_source_pages[internal_referrer_path] += 1
                     self.crosspromo_campaign_source_sections[source_section] += 1
                     self.crosspromo_campaign_page_path_pairs[f"{internal_referrer_path}->{path}"] += 1
+                    if not known_bot_ua:
+                        self.crosspromo_non_bot_hits_with_internal_referrer += 1
+                        self.crosspromo_non_bot_campaign_source_pages[internal_referrer_path] += 1
+                        self.crosspromo_non_bot_campaign_source_sections[source_section] += 1
+                        self.crosspromo_non_bot_campaign_page_path_pairs[f"{internal_referrer_path}->{path}"] += 1
                     normalized_inferred_paths = set()
                     for inferred_source_path in inferred_source_paths:
                         normalized_inferred_path = normalize_path(inferred_source_path)
@@ -392,6 +422,8 @@ class WindowStats:
                         self.crosspromo_source_mismatch_hits += 1
                 elif inferred_source_paths:
                     self.crosspromo_hits_with_inferred_source += 1
+                    if not known_bot_ua:
+                        self.crosspromo_non_bot_hits_with_inferred_source += 1
                     recorded_paths = set()
                     for inferred_source_path in inferred_source_paths:
                         normalized_source_path = normalize_path(inferred_source_path)
@@ -402,8 +434,14 @@ class WindowStats:
                         self.crosspromo_campaign_source_pages[normalized_source_path] += 1
                         self.crosspromo_campaign_source_sections[source_section] += 1
                         self.crosspromo_campaign_page_path_pairs[f"{normalized_source_path}->{path}"] += 1
+                        if not known_bot_ua:
+                            self.crosspromo_non_bot_campaign_source_pages[normalized_source_path] += 1
+                            self.crosspromo_non_bot_campaign_source_sections[source_section] += 1
+                            self.crosspromo_non_bot_campaign_page_path_pairs[f"{normalized_source_path}->{path}"] += 1
                 else:
                     self.crosspromo_hits_unattributed += 1
+                    if not known_bot_ua:
+                        self.crosspromo_non_bot_hits_unattributed += 1
 
         if referrer and referrer != "-":
             if not internal_referrer_path:
@@ -424,6 +462,12 @@ class WindowStats:
                 self.internal_crossproperty_source_sections[source_section] += 1
                 self.internal_crossproperty_target_pages[path] += 1
                 self.internal_crossproperty_source_pages[internal_referrer_path] += 1
+                if not known_bot_ua:
+                    self.internal_crossproperty_non_bot_referrals += 1
+                    self.internal_crossproperty_non_bot_target_sections[target_section] += 1
+                    self.internal_crossproperty_non_bot_source_sections[source_section] += 1
+                    self.internal_crossproperty_non_bot_target_pages[path] += 1
+                    self.internal_crossproperty_non_bot_source_pages[internal_referrer_path] += 1
 
     def summary(self, generated_at: str, window_hours: int):
         organic_total = sum(self.organic_engine_counts.values())
@@ -444,14 +488,30 @@ class WindowStats:
         internal_to_healthkit = int(self.internal_crossproperty_target_sections.get("healthkit", 0))
         internal_to_sleepkit = int(self.internal_crossproperty_target_sections.get("sleepkit", 0))
         internal_to_focuskit = int(self.internal_crossproperty_target_sections.get("focuskit", 0))
+        internal_non_bot_to_datekit = int(self.internal_crossproperty_non_bot_target_sections.get("datekit", 0))
+        internal_non_bot_to_budgetkit = int(self.internal_crossproperty_non_bot_target_sections.get("budgetkit", 0))
+        internal_non_bot_to_healthkit = int(self.internal_crossproperty_non_bot_target_sections.get("healthkit", 0))
+        internal_non_bot_to_sleepkit = int(self.internal_crossproperty_non_bot_target_sections.get("sleepkit", 0))
+        internal_non_bot_to_focuskit = int(self.internal_crossproperty_non_bot_target_sections.get("focuskit", 0))
         crosspromo_to_datekit = int(self.crosspromo_campaign_target_sections.get("datekit", 0))
         crosspromo_to_budgetkit = int(self.crosspromo_campaign_target_sections.get("budgetkit", 0))
         crosspromo_to_healthkit = int(self.crosspromo_campaign_target_sections.get("healthkit", 0))
         crosspromo_to_sleepkit = int(self.crosspromo_campaign_target_sections.get("sleepkit", 0))
         crosspromo_to_focuskit = int(self.crosspromo_campaign_target_sections.get("focuskit", 0))
+        crosspromo_non_bot_to_datekit = int(self.crosspromo_non_bot_campaign_target_sections.get("datekit", 0))
+        crosspromo_non_bot_to_budgetkit = int(self.crosspromo_non_bot_campaign_target_sections.get("budgetkit", 0))
+        crosspromo_non_bot_to_healthkit = int(self.crosspromo_non_bot_campaign_target_sections.get("healthkit", 0))
+        crosspromo_non_bot_to_sleepkit = int(self.crosspromo_non_bot_campaign_target_sections.get("sleepkit", 0))
+        crosspromo_non_bot_to_focuskit = int(self.crosspromo_non_bot_campaign_target_sections.get("focuskit", 0))
         crosspromo_source_attributed_hits = self.crosspromo_hits_with_internal_referrer + self.crosspromo_hits_with_inferred_source
+        crosspromo_non_bot_hits = max(0, self.crosspromo_campaign_hits - self.crosspromo_known_bot_hits)
+        crosspromo_non_bot_source_attributed_hits = (
+            self.crosspromo_non_bot_hits_with_internal_referrer + self.crosspromo_non_bot_hits_with_inferred_source
+        )
         top_internal_source_section = "other"
         top_internal_source_referrals = 0
+        top_internal_non_bot_source_section = "other"
+        top_internal_non_bot_source_referrals = 0
         top_crosspromo_source = ""
         top_crosspromo_source_hits = 0
         top_crosspromo_source_page = ""
@@ -464,6 +524,16 @@ class WindowStats:
         top_crosspromo_page_pair_hits = 0
         top_crosspromo_known_bot_user_agent = ""
         top_crosspromo_known_bot_user_agent_hits = 0
+        top_crosspromo_non_bot_source = ""
+        top_crosspromo_non_bot_source_hits = 0
+        top_crosspromo_non_bot_source_page = ""
+        top_crosspromo_non_bot_source_page_hits = 0
+        top_crosspromo_non_bot_target_section = "other"
+        top_crosspromo_non_bot_target_hits = 0
+        top_crosspromo_non_bot_source_target = ""
+        top_crosspromo_non_bot_source_target_hits = 0
+        top_crosspromo_non_bot_page_pair = ""
+        top_crosspromo_non_bot_page_pair_hits = 0
         if content_sections:
             top_content_section, top_content_section_requests = max(content_sections.items(), key=lambda item: item[1])
         if organic_sections:
@@ -471,6 +541,11 @@ class WindowStats:
         if self.internal_crossproperty_source_sections:
             top_internal_source_section, top_internal_source_referrals = max(
                 self.internal_crossproperty_source_sections.items(),
+                key=lambda item: item[1],
+            )
+        if self.internal_crossproperty_non_bot_source_sections:
+            top_internal_non_bot_source_section, top_internal_non_bot_source_referrals = max(
+                self.internal_crossproperty_non_bot_source_sections.items(),
                 key=lambda item: item[1],
             )
         if self.crosspromo_campaign_sources:
@@ -503,6 +578,31 @@ class WindowStats:
                 self.crosspromo_known_bot_user_agents.items(),
                 key=lambda item: item[1],
             )
+        if self.crosspromo_non_bot_campaign_sources:
+            top_crosspromo_non_bot_source, top_crosspromo_non_bot_source_hits = max(
+                self.crosspromo_non_bot_campaign_sources.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_non_bot_campaign_source_pages:
+            top_crosspromo_non_bot_source_page, top_crosspromo_non_bot_source_page_hits = max(
+                self.crosspromo_non_bot_campaign_source_pages.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_non_bot_campaign_target_sections:
+            top_crosspromo_non_bot_target_section, top_crosspromo_non_bot_target_hits = max(
+                self.crosspromo_non_bot_campaign_target_sections.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_non_bot_campaign_source_target_sections:
+            top_crosspromo_non_bot_source_target, top_crosspromo_non_bot_source_target_hits = max(
+                self.crosspromo_non_bot_campaign_source_target_sections.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_non_bot_campaign_page_path_pairs:
+            top_crosspromo_non_bot_page_pair, top_crosspromo_non_bot_page_pair_hits = max(
+                self.crosspromo_non_bot_campaign_page_path_pairs.items(),
+                key=lambda item: item[1],
+            )
 
         summary = {
             "generated_at": generated_at,
@@ -525,19 +625,30 @@ class WindowStats:
             "crosspromo_campaign_hits_to_healthkit": crosspromo_to_healthkit,
             "crosspromo_campaign_hits_to_sleepkit": crosspromo_to_sleepkit,
             "crosspromo_campaign_hits_to_focuskit": crosspromo_to_focuskit,
+            "crosspromo_non_bot_hits_to_datekit": crosspromo_non_bot_to_datekit,
+            "crosspromo_non_bot_hits_to_budgetkit": crosspromo_non_bot_to_budgetkit,
+            "crosspromo_non_bot_hits_to_healthkit": crosspromo_non_bot_to_healthkit,
+            "crosspromo_non_bot_hits_to_sleepkit": crosspromo_non_bot_to_sleepkit,
+            "crosspromo_non_bot_hits_to_focuskit": crosspromo_non_bot_to_focuskit,
             "crosspromo_source_attributed_hits": crosspromo_source_attributed_hits,
             "crosspromo_hits_with_internal_referrer": self.crosspromo_hits_with_internal_referrer,
             "crosspromo_hits_with_inferred_source": self.crosspromo_hits_with_inferred_source,
             "crosspromo_hits_unattributed": self.crosspromo_hits_unattributed,
+            "crosspromo_non_bot_source_attributed_hits": crosspromo_non_bot_source_attributed_hits,
+            "crosspromo_non_bot_hits_with_internal_referrer": self.crosspromo_non_bot_hits_with_internal_referrer,
+            "crosspromo_non_bot_hits_with_inferred_source": self.crosspromo_non_bot_hits_with_inferred_source,
+            "crosspromo_non_bot_hits_unattributed": self.crosspromo_non_bot_hits_unattributed,
             "crosspromo_hits_with_any_referrer": self.crosspromo_hits_with_any_referrer,
             "crosspromo_hits_without_referrer": self.crosspromo_hits_without_referrer,
+            "crosspromo_non_bot_hits_with_any_referrer": self.crosspromo_non_bot_hits_with_any_referrer,
+            "crosspromo_non_bot_hits_without_referrer": self.crosspromo_non_bot_hits_without_referrer,
             "crosspromo_hits_without_referrer_known_bot": self.crosspromo_hits_without_referrer_known_bot,
             "crosspromo_hits_without_referrer_non_bot": max(
                 0,
                 self.crosspromo_hits_without_referrer - self.crosspromo_hits_without_referrer_known_bot,
             ),
             "crosspromo_known_bot_hits": self.crosspromo_known_bot_hits,
-            "crosspromo_non_bot_hits": max(0, self.crosspromo_campaign_hits - self.crosspromo_known_bot_hits),
+            "crosspromo_non_bot_hits": crosspromo_non_bot_hits,
             "crosspromo_source_mismatch_hits": self.crosspromo_source_mismatch_hits,
             "internal_crossproperty_referrals": self.internal_crossproperty_referrals,
             "internal_crossproperty_referrals_to_datekit": internal_to_datekit,
@@ -545,6 +656,12 @@ class WindowStats:
             "internal_crossproperty_referrals_to_healthkit": internal_to_healthkit,
             "internal_crossproperty_referrals_to_sleepkit": internal_to_sleepkit,
             "internal_crossproperty_referrals_to_focuskit": internal_to_focuskit,
+            "internal_crossproperty_non_bot_referrals": self.internal_crossproperty_non_bot_referrals,
+            "internal_crossproperty_non_bot_referrals_to_datekit": internal_non_bot_to_datekit,
+            "internal_crossproperty_non_bot_referrals_to_budgetkit": internal_non_bot_to_budgetkit,
+            "internal_crossproperty_non_bot_referrals_to_healthkit": internal_non_bot_to_healthkit,
+            "internal_crossproperty_non_bot_referrals_to_sleepkit": internal_non_bot_to_sleepkit,
+            "internal_crossproperty_non_bot_referrals_to_focuskit": internal_non_bot_to_focuskit,
             "known_bot_requests": self.known_bot_requests,
             "known_bot_unique_ips": len(self.known_bot_unique_ips),
             "clean_request_ratio": safe_ratio(self.clean_requests, self.total_requests),
@@ -552,12 +669,24 @@ class WindowStats:
             "suspicious_request_ratio": safe_ratio(self.suspicious_requests, self.total_requests),
             "organic_referral_ratio": safe_ratio(organic_total, self.total_requests),
             "internal_crossproperty_referral_ratio": safe_ratio(self.internal_crossproperty_referrals, self.total_requests),
+            "internal_crossproperty_non_bot_referral_ratio": safe_ratio(
+                self.internal_crossproperty_non_bot_referrals,
+                self.total_requests,
+            ),
             "crosspromo_source_attribution_ratio": safe_ratio(crosspromo_source_attributed_hits, self.crosspromo_campaign_hits),
             "known_bot_request_ratio": safe_ratio(self.known_bot_requests, self.total_requests),
             "crosspromo_known_bot_ratio": safe_ratio(self.crosspromo_known_bot_hits, self.crosspromo_campaign_hits),
+            "crosspromo_non_bot_source_attribution_ratio": safe_ratio(
+                crosspromo_non_bot_source_attributed_hits,
+                crosspromo_non_bot_hits,
+            ),
             "crosspromo_without_referrer_ratio": safe_ratio(
                 self.crosspromo_hits_without_referrer,
                 self.crosspromo_campaign_hits,
+            ),
+            "crosspromo_non_bot_without_referrer_ratio": safe_ratio(
+                self.crosspromo_non_bot_hits_without_referrer,
+                crosspromo_non_bot_hits,
             ),
             "not_found_ratio": safe_ratio(not_found_total, self.total_requests),
             "clean_404_ratio": safe_ratio(clean_404, not_found_total),
@@ -572,6 +701,8 @@ class WindowStats:
             "top_organic_section_referrals": top_organic_section_referrals,
             "top_internal_crossproperty_source_section": top_internal_source_section,
             "top_internal_crossproperty_source_referrals": top_internal_source_referrals,
+            "top_internal_crossproperty_non_bot_source_section": top_internal_non_bot_source_section,
+            "top_internal_crossproperty_non_bot_source_referrals": top_internal_non_bot_source_referrals,
             "top_crosspromo_campaign_source": top_crosspromo_source,
             "top_crosspromo_campaign_source_hits": top_crosspromo_source_hits,
             "top_crosspromo_campaign_source_page": top_crosspromo_source_page,
@@ -584,6 +715,16 @@ class WindowStats:
             "top_crosspromo_campaign_page_pair_hits": top_crosspromo_page_pair_hits,
             "top_crosspromo_known_bot_user_agent": top_crosspromo_known_bot_user_agent,
             "top_crosspromo_known_bot_user_agent_hits": top_crosspromo_known_bot_user_agent_hits,
+            "top_crosspromo_non_bot_source": top_crosspromo_non_bot_source,
+            "top_crosspromo_non_bot_source_hits": top_crosspromo_non_bot_source_hits,
+            "top_crosspromo_non_bot_source_page": top_crosspromo_non_bot_source_page,
+            "top_crosspromo_non_bot_source_page_hits": top_crosspromo_non_bot_source_page_hits,
+            "top_crosspromo_non_bot_target_section": top_crosspromo_non_bot_target_section,
+            "top_crosspromo_non_bot_target_hits": top_crosspromo_non_bot_target_hits,
+            "top_crosspromo_non_bot_source_target_section": top_crosspromo_non_bot_source_target,
+            "top_crosspromo_non_bot_source_target_hits": top_crosspromo_non_bot_source_target_hits,
+            "top_crosspromo_non_bot_page_pair": top_crosspromo_non_bot_page_pair,
+            "top_crosspromo_non_bot_page_pair_hits": top_crosspromo_non_bot_page_pair_hits,
         }
         for section_name in CONTENT_SECTION_NAMES:
             summary[f"content_{section_name}_requests"] = content_sections[section_name]
@@ -614,12 +755,23 @@ def build_window_comparison(
         "crosspromo_campaign_hits_to_healthkit",
         "crosspromo_campaign_hits_to_sleepkit",
         "crosspromo_campaign_hits_to_focuskit",
+        "crosspromo_non_bot_hits_to_datekit",
+        "crosspromo_non_bot_hits_to_budgetkit",
+        "crosspromo_non_bot_hits_to_healthkit",
+        "crosspromo_non_bot_hits_to_sleepkit",
+        "crosspromo_non_bot_hits_to_focuskit",
         "crosspromo_source_attributed_hits",
+        "crosspromo_non_bot_source_attributed_hits",
         "crosspromo_hits_with_internal_referrer",
         "crosspromo_hits_with_inferred_source",
         "crosspromo_hits_unattributed",
+        "crosspromo_non_bot_hits_with_internal_referrer",
+        "crosspromo_non_bot_hits_with_inferred_source",
+        "crosspromo_non_bot_hits_unattributed",
         "crosspromo_hits_with_any_referrer",
         "crosspromo_hits_without_referrer",
+        "crosspromo_non_bot_hits_with_any_referrer",
+        "crosspromo_non_bot_hits_without_referrer",
         "crosspromo_hits_without_referrer_known_bot",
         "crosspromo_hits_without_referrer_non_bot",
         "crosspromo_known_bot_hits",
@@ -631,6 +783,12 @@ def build_window_comparison(
         "internal_crossproperty_referrals_to_healthkit",
         "internal_crossproperty_referrals_to_sleepkit",
         "internal_crossproperty_referrals_to_focuskit",
+        "internal_crossproperty_non_bot_referrals",
+        "internal_crossproperty_non_bot_referrals_to_datekit",
+        "internal_crossproperty_non_bot_referrals_to_budgetkit",
+        "internal_crossproperty_non_bot_referrals_to_healthkit",
+        "internal_crossproperty_non_bot_referrals_to_sleepkit",
+        "internal_crossproperty_non_bot_referrals_to_focuskit",
         "known_bot_requests",
         "known_bot_unique_ips",
         "content_homepage_requests",
@@ -760,18 +918,30 @@ def main():
     print(f"  crosspromo_campaign_hits_to_healthkit: {summary['crosspromo_campaign_hits_to_healthkit']}")
     print(f"  crosspromo_campaign_hits_to_sleepkit: {summary['crosspromo_campaign_hits_to_sleepkit']}")
     print(f"  crosspromo_campaign_hits_to_focuskit: {summary['crosspromo_campaign_hits_to_focuskit']}")
+    print(f"  crosspromo_non_bot_hits_to_datekit: {summary['crosspromo_non_bot_hits_to_datekit']}")
+    print(f"  crosspromo_non_bot_hits_to_budgetkit: {summary['crosspromo_non_bot_hits_to_budgetkit']}")
+    print(f"  crosspromo_non_bot_hits_to_healthkit: {summary['crosspromo_non_bot_hits_to_healthkit']}")
+    print(f"  crosspromo_non_bot_hits_to_sleepkit: {summary['crosspromo_non_bot_hits_to_sleepkit']}")
+    print(f"  crosspromo_non_bot_hits_to_focuskit: {summary['crosspromo_non_bot_hits_to_focuskit']}")
     print(f"  crosspromo_source_attributed_hits: {summary['crosspromo_source_attributed_hits']}")
+    print(f"  crosspromo_non_bot_source_attributed_hits: {summary['crosspromo_non_bot_source_attributed_hits']}")
     print(f"  crosspromo_hits_with_internal_referrer: {summary['crosspromo_hits_with_internal_referrer']}")
     print(f"  crosspromo_hits_with_inferred_source: {summary['crosspromo_hits_with_inferred_source']}")
     print(f"  crosspromo_hits_unattributed: {summary['crosspromo_hits_unattributed']}")
+    print(f"  crosspromo_non_bot_hits_with_internal_referrer: {summary['crosspromo_non_bot_hits_with_internal_referrer']}")
+    print(f"  crosspromo_non_bot_hits_with_inferred_source: {summary['crosspromo_non_bot_hits_with_inferred_source']}")
+    print(f"  crosspromo_non_bot_hits_unattributed: {summary['crosspromo_non_bot_hits_unattributed']}")
     print(f"  crosspromo_hits_with_any_referrer: {summary['crosspromo_hits_with_any_referrer']}")
     print(f"  crosspromo_hits_without_referrer: {summary['crosspromo_hits_without_referrer']}")
+    print(f"  crosspromo_non_bot_hits_with_any_referrer: {summary['crosspromo_non_bot_hits_with_any_referrer']}")
+    print(f"  crosspromo_non_bot_hits_without_referrer: {summary['crosspromo_non_bot_hits_without_referrer']}")
     print(f"  crosspromo_hits_without_referrer_known_bot: {summary['crosspromo_hits_without_referrer_known_bot']}")
     print(f"  crosspromo_hits_without_referrer_non_bot: {summary['crosspromo_hits_without_referrer_non_bot']}")
     print(f"  crosspromo_known_bot_hits: {summary['crosspromo_known_bot_hits']}")
     print(f"  crosspromo_non_bot_hits: {summary['crosspromo_non_bot_hits']}")
     print(f"  crosspromo_source_mismatch_hits: {summary['crosspromo_source_mismatch_hits']}")
     print(f"  internal_crossproperty_referrals: {summary['internal_crossproperty_referrals']}")
+    print(f"  internal_crossproperty_non_bot_referrals: {summary['internal_crossproperty_non_bot_referrals']}")
     print(f"  known_bot_requests: {summary['known_bot_requests']}")
     print(f"  known_bot_unique_ips: {summary['known_bot_unique_ips']}")
     print(f"  top_crosspromo_campaign_source: {summary['top_crosspromo_campaign_source']}")
@@ -782,9 +952,12 @@ def main():
     print(f"  known_bot_request_ratio: {summary['known_bot_request_ratio']}%")
     print(f"  organic_referral_ratio: {summary['organic_referral_ratio']}%")
     print(f"  internal_crossproperty_referral_ratio: {summary['internal_crossproperty_referral_ratio']}%")
+    print(f"  internal_crossproperty_non_bot_referral_ratio: {summary['internal_crossproperty_non_bot_referral_ratio']}%")
     print(f"  crosspromo_source_attribution_ratio: {summary['crosspromo_source_attribution_ratio']}%")
     print(f"  crosspromo_known_bot_ratio: {summary['crosspromo_known_bot_ratio']}%")
+    print(f"  crosspromo_non_bot_source_attribution_ratio: {summary['crosspromo_non_bot_source_attribution_ratio']}%")
     print(f"  crosspromo_without_referrer_ratio: {summary['crosspromo_without_referrer_ratio']}%")
+    print(f"  crosspromo_non_bot_without_referrer_ratio: {summary['crosspromo_non_bot_without_referrer_ratio']}%")
     print()
 
     print("=== CONTENT SECTION BREAKDOWN (clean, non-asset) ===")
@@ -832,12 +1005,23 @@ def main():
             "crosspromo_campaign_hits_to_healthkit",
             "crosspromo_campaign_hits_to_sleepkit",
             "crosspromo_campaign_hits_to_focuskit",
+            "crosspromo_non_bot_hits_to_datekit",
+            "crosspromo_non_bot_hits_to_budgetkit",
+            "crosspromo_non_bot_hits_to_healthkit",
+            "crosspromo_non_bot_hits_to_sleepkit",
+            "crosspromo_non_bot_hits_to_focuskit",
             "crosspromo_source_attributed_hits",
+            "crosspromo_non_bot_source_attributed_hits",
             "crosspromo_hits_with_internal_referrer",
             "crosspromo_hits_with_inferred_source",
             "crosspromo_hits_unattributed",
+            "crosspromo_non_bot_hits_with_internal_referrer",
+            "crosspromo_non_bot_hits_with_inferred_source",
+            "crosspromo_non_bot_hits_unattributed",
             "crosspromo_hits_with_any_referrer",
             "crosspromo_hits_without_referrer",
+            "crosspromo_non_bot_hits_with_any_referrer",
+            "crosspromo_non_bot_hits_without_referrer",
             "crosspromo_hits_without_referrer_known_bot",
             "crosspromo_hits_without_referrer_non_bot",
             "crosspromo_known_bot_hits",
@@ -849,6 +1033,12 @@ def main():
             "internal_crossproperty_referrals_to_healthkit",
             "internal_crossproperty_referrals_to_sleepkit",
             "internal_crossproperty_referrals_to_focuskit",
+            "internal_crossproperty_non_bot_referrals",
+            "internal_crossproperty_non_bot_referrals_to_datekit",
+            "internal_crossproperty_non_bot_referrals_to_budgetkit",
+            "internal_crossproperty_non_bot_referrals_to_healthkit",
+            "internal_crossproperty_non_bot_referrals_to_sleepkit",
+            "internal_crossproperty_non_bot_referrals_to_focuskit",
             "known_bot_requests",
             "known_bot_unique_ips",
         ]:
@@ -918,6 +1108,36 @@ def main():
         print(f"  {count:4d}  {pair}")
     print()
 
+    print("=== CROSSPROMO NON-BOT CAMPAIGN SOURCES ===")
+    for source, count in current_window.crosspromo_non_bot_campaign_sources.most_common(args.max_items):
+        print(f"  {count:4d}  {source}")
+    print()
+
+    print("=== CROSSPROMO NON-BOT CAMPAIGN SOURCE PAGES ===")
+    for source_path, count in current_window.crosspromo_non_bot_campaign_source_pages.most_common(args.max_items):
+        print(f"  {count:4d}  {source_path}")
+    print()
+
+    print("=== CROSSPROMO NON-BOT CAMPAIGN SOURCE SECTIONS ===")
+    for section, count in current_window.crosspromo_non_bot_campaign_source_sections.most_common(args.max_items):
+        print(f"  {section}: {count}")
+    print()
+
+    print("=== CROSSPROMO NON-BOT CAMPAIGN TARGET SECTIONS ===")
+    for section, count in current_window.crosspromo_non_bot_campaign_target_sections.most_common(args.max_items):
+        print(f"  {section}: {count}")
+    print()
+
+    print("=== CROSSPROMO NON-BOT CAMPAIGN SOURCE->TARGET SECTION PAIRS ===")
+    for pair, count in current_window.crosspromo_non_bot_campaign_source_target_sections.most_common(args.max_items):
+        print(f"  {count:4d}  {pair}")
+    print()
+
+    print("=== CROSSPROMO NON-BOT CAMPAIGN SOURCE->TARGET PAGE PAIRS ===")
+    for pair, count in current_window.crosspromo_non_bot_campaign_page_path_pairs.most_common(args.max_items):
+        print(f"  {count:4d}  {pair}")
+    print()
+
     print("=== TOP CROSSPROMO KNOWN BOT USER AGENTS ===")
     for user_agent, count in current_window.crosspromo_known_bot_user_agents.most_common(args.max_items):
         print(f"  {count:4d}  {user_agent}")
@@ -936,6 +1156,20 @@ def main():
         print(f"    {count:4d}  {source_path}")
     print("  top target pages:")
     for target_path, count in current_window.internal_crossproperty_target_pages.most_common(args.max_items):
+        print(f"    {count:4d}  {target_path}")
+    print("  non-bot total:")
+    print(f"    {current_window.internal_crossproperty_non_bot_referrals}")
+    print("  non-bot by target section:")
+    for section, count in current_window.internal_crossproperty_non_bot_target_sections.most_common(args.max_items):
+        print(f"    {section}: {count}")
+    print("  non-bot by source section:")
+    for section, count in current_window.internal_crossproperty_non_bot_source_sections.most_common(args.max_items):
+        print(f"    {section}: {count}")
+    print("  non-bot top source pages:")
+    for source_path, count in current_window.internal_crossproperty_non_bot_source_pages.most_common(args.max_items):
+        print(f"    {count:4d}  {source_path}")
+    print("  non-bot top target pages:")
+    for target_path, count in current_window.internal_crossproperty_non_bot_target_pages.most_common(args.max_items):
         print(f"    {count:4d}  {target_path}")
     print()
 
@@ -989,6 +1223,36 @@ def main():
             "pair",
             args.max_items,
         ),
+        "crosspromo_non_bot_campaign_sources": counter_to_sorted_list(
+            current_window.crosspromo_non_bot_campaign_sources,
+            "source",
+            args.max_items,
+        ),
+        "crosspromo_non_bot_campaign_source_pages": counter_to_sorted_list(
+            current_window.crosspromo_non_bot_campaign_source_pages,
+            "path",
+            args.max_items,
+        ),
+        "crosspromo_non_bot_campaign_source_sections": counter_to_sorted_list(
+            current_window.crosspromo_non_bot_campaign_source_sections,
+            "section",
+            args.max_items,
+        ),
+        "crosspromo_non_bot_campaign_target_sections": counter_to_sorted_list(
+            current_window.crosspromo_non_bot_campaign_target_sections,
+            "section",
+            args.max_items,
+        ),
+        "crosspromo_non_bot_campaign_source_target_sections": counter_to_sorted_list(
+            current_window.crosspromo_non_bot_campaign_source_target_sections,
+            "pair",
+            args.max_items,
+        ),
+        "crosspromo_non_bot_campaign_page_path_pairs": counter_to_sorted_list(
+            current_window.crosspromo_non_bot_campaign_page_path_pairs,
+            "pair",
+            args.max_items,
+        ),
         "crosspromo_known_bot_user_agents": counter_to_sorted_list(
             current_window.crosspromo_known_bot_user_agents,
             "user_agent",
@@ -1011,6 +1275,26 @@ def main():
         ),
         "internal_crossproperty_target_pages": counter_to_sorted_list(
             current_window.internal_crossproperty_target_pages,
+            "path",
+            args.max_items,
+        ),
+        "internal_crossproperty_non_bot_target_sections": counter_to_sorted_list(
+            current_window.internal_crossproperty_non_bot_target_sections,
+            "section",
+            args.max_items,
+        ),
+        "internal_crossproperty_non_bot_source_sections": counter_to_sorted_list(
+            current_window.internal_crossproperty_non_bot_source_sections,
+            "section",
+            args.max_items,
+        ),
+        "internal_crossproperty_non_bot_source_pages": counter_to_sorted_list(
+            current_window.internal_crossproperty_non_bot_source_pages,
+            "path",
+            args.max_items,
+        ),
+        "internal_crossproperty_non_bot_target_pages": counter_to_sorted_list(
+            current_window.internal_crossproperty_non_bot_target_pages,
             "path",
             args.max_items,
         ),
