@@ -77,6 +77,21 @@ SUSPICIOUS_PATH_PATTERNS = [
     re.compile(r"\|_", re.IGNORECASE),
     re.compile(r"/\.git/config$", re.IGNORECASE),
     re.compile(r"^/gponform/diag_form$", re.IGNORECASE),
+    re.compile(r"^/.+\.(?:php|ini|cfg|conf|ya?ml|json|sql|log|key|env)(?:\.(?:bak|old|orig|save)|~)$", re.IGNORECASE),
+    re.compile(
+        r"^/(?:config(?:uration)?|settings|credentials|secrets?|database|db|appsettings|application|serverless)\.(?:php|ini|cfg|conf|ya?ml|json|properties|sql)$",
+        re.IGNORECASE,
+    ),
+    re.compile(r"^/docker-compose(?:\.override)?\.(?:yml|yaml)$", re.IGNORECASE),
+    re.compile(r"^/(?:app/)?config(?:/|$)", re.IGNORECASE),
+    re.compile(r"^/(?:server-status|server-info)$", re.IGNORECASE),
+    re.compile(r"^/(?:debug|error)\.log$", re.IGNORECASE),
+    re.compile(r"^/(?:local_)?settings\.py$", re.IGNORECASE),
+    re.compile(r"^/(?:instance/)?config\.py$", re.IGNORECASE),
+    re.compile(r"^/appsettings(?:\.[^/]+)?\.json$", re.IGNORECASE),
+    re.compile(r"^/terraform\.tfvars$", re.IGNORECASE),
+    re.compile(r"^/(?:package\.json|package-lock\.json|composer\.lock|yarn\.lock|pnpm-lock\.yaml)$", re.IGNORECASE),
+    re.compile(r"^/_next(?:/|$)", re.IGNORECASE),
 ]
 
 
