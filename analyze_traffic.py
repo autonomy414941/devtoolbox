@@ -26,8 +26,8 @@ EXACT_ASSET_PATHS = {
     "/manifest.json",
     "/site.webmanifest",
 }
-CONTENT_SECTION_NAMES = ("homepage", "blog", "tools", "cheatsheets", "datekit", "budgetkit", "healthkit", "sleepkit", "other")
-INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit", "healthkit", "sleepkit")
+CONTENT_SECTION_NAMES = ("homepage", "blog", "tools", "cheatsheets", "datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "other")
+INTERNAL_CROSSPROPERTY_TARGETS = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit")
 CROSSPROMO_CAMPAIGN_NAME = "crosspromo-top-organic"
 INFERRED_SOURCE_SECTION_PATHS = {
     "homepage": "/",
@@ -38,6 +38,7 @@ INFERRED_SOURCE_SECTION_PATHS = {
     "budgetkit": "/budgetkit",
     "healthkit": "/healthkit",
     "sleepkit": "/sleepkit",
+    "focuskit": "/focuskit",
 }
 BLOG_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 ENGINE_PATTERNS = [
@@ -169,6 +170,8 @@ def classify_content_section(path: str) -> str:
         return "healthkit"
     if path == "/sleepkit" or path.startswith("/sleepkit/"):
         return "sleepkit"
+    if path == "/focuskit" or path.startswith("/focuskit/"):
+        return "focuskit"
     return "other"
 
 
@@ -440,10 +443,12 @@ class WindowStats:
         internal_to_budgetkit = int(self.internal_crossproperty_target_sections.get("budgetkit", 0))
         internal_to_healthkit = int(self.internal_crossproperty_target_sections.get("healthkit", 0))
         internal_to_sleepkit = int(self.internal_crossproperty_target_sections.get("sleepkit", 0))
+        internal_to_focuskit = int(self.internal_crossproperty_target_sections.get("focuskit", 0))
         crosspromo_to_datekit = int(self.crosspromo_campaign_target_sections.get("datekit", 0))
         crosspromo_to_budgetkit = int(self.crosspromo_campaign_target_sections.get("budgetkit", 0))
         crosspromo_to_healthkit = int(self.crosspromo_campaign_target_sections.get("healthkit", 0))
         crosspromo_to_sleepkit = int(self.crosspromo_campaign_target_sections.get("sleepkit", 0))
+        crosspromo_to_focuskit = int(self.crosspromo_campaign_target_sections.get("focuskit", 0))
         crosspromo_source_attributed_hits = self.crosspromo_hits_with_internal_referrer + self.crosspromo_hits_with_inferred_source
         top_internal_source_section = "other"
         top_internal_source_referrals = 0
@@ -519,6 +524,7 @@ class WindowStats:
             "crosspromo_campaign_hits_to_budgetkit": crosspromo_to_budgetkit,
             "crosspromo_campaign_hits_to_healthkit": crosspromo_to_healthkit,
             "crosspromo_campaign_hits_to_sleepkit": crosspromo_to_sleepkit,
+            "crosspromo_campaign_hits_to_focuskit": crosspromo_to_focuskit,
             "crosspromo_source_attributed_hits": crosspromo_source_attributed_hits,
             "crosspromo_hits_with_internal_referrer": self.crosspromo_hits_with_internal_referrer,
             "crosspromo_hits_with_inferred_source": self.crosspromo_hits_with_inferred_source,
@@ -538,6 +544,7 @@ class WindowStats:
             "internal_crossproperty_referrals_to_budgetkit": internal_to_budgetkit,
             "internal_crossproperty_referrals_to_healthkit": internal_to_healthkit,
             "internal_crossproperty_referrals_to_sleepkit": internal_to_sleepkit,
+            "internal_crossproperty_referrals_to_focuskit": internal_to_focuskit,
             "known_bot_requests": self.known_bot_requests,
             "known_bot_unique_ips": len(self.known_bot_unique_ips),
             "clean_request_ratio": safe_ratio(self.clean_requests, self.total_requests),
@@ -606,6 +613,7 @@ def build_window_comparison(
         "crosspromo_campaign_hits_to_budgetkit",
         "crosspromo_campaign_hits_to_healthkit",
         "crosspromo_campaign_hits_to_sleepkit",
+        "crosspromo_campaign_hits_to_focuskit",
         "crosspromo_source_attributed_hits",
         "crosspromo_hits_with_internal_referrer",
         "crosspromo_hits_with_inferred_source",
@@ -622,6 +630,7 @@ def build_window_comparison(
         "internal_crossproperty_referrals_to_budgetkit",
         "internal_crossproperty_referrals_to_healthkit",
         "internal_crossproperty_referrals_to_sleepkit",
+        "internal_crossproperty_referrals_to_focuskit",
         "known_bot_requests",
         "known_bot_unique_ips",
         "content_homepage_requests",
@@ -632,6 +641,7 @@ def build_window_comparison(
         "content_budgetkit_requests",
         "content_healthkit_requests",
         "content_sleepkit_requests",
+        "content_focuskit_requests",
         "content_other_requests",
         "organic_homepage_referrals",
         "organic_blog_referrals",
@@ -641,6 +651,7 @@ def build_window_comparison(
         "organic_budgetkit_referrals",
         "organic_healthkit_referrals",
         "organic_sleepkit_referrals",
+        "organic_focuskit_referrals",
         "organic_other_referrals",
     ]
     deltas = {}
@@ -748,6 +759,7 @@ def main():
     print(f"  crosspromo_campaign_hits_to_budgetkit: {summary['crosspromo_campaign_hits_to_budgetkit']}")
     print(f"  crosspromo_campaign_hits_to_healthkit: {summary['crosspromo_campaign_hits_to_healthkit']}")
     print(f"  crosspromo_campaign_hits_to_sleepkit: {summary['crosspromo_campaign_hits_to_sleepkit']}")
+    print(f"  crosspromo_campaign_hits_to_focuskit: {summary['crosspromo_campaign_hits_to_focuskit']}")
     print(f"  crosspromo_source_attributed_hits: {summary['crosspromo_source_attributed_hits']}")
     print(f"  crosspromo_hits_with_internal_referrer: {summary['crosspromo_hits_with_internal_referrer']}")
     print(f"  crosspromo_hits_with_inferred_source: {summary['crosspromo_hits_with_inferred_source']}")
@@ -802,6 +814,7 @@ def main():
             "content_budgetkit_requests",
             "content_healthkit_requests",
             "content_sleepkit_requests",
+            "content_focuskit_requests",
             "suspicious_requests",
             "not_found_requests",
             "organic_referrals",
@@ -812,11 +825,13 @@ def main():
             "organic_budgetkit_referrals",
             "organic_healthkit_referrals",
             "organic_sleepkit_referrals",
+            "organic_focuskit_referrals",
             "crosspromo_campaign_hits",
             "crosspromo_campaign_hits_to_datekit",
             "crosspromo_campaign_hits_to_budgetkit",
             "crosspromo_campaign_hits_to_healthkit",
             "crosspromo_campaign_hits_to_sleepkit",
+            "crosspromo_campaign_hits_to_focuskit",
             "crosspromo_source_attributed_hits",
             "crosspromo_hits_with_internal_referrer",
             "crosspromo_hits_with_inferred_source",
@@ -833,6 +848,7 @@ def main():
             "internal_crossproperty_referrals_to_budgetkit",
             "internal_crossproperty_referrals_to_healthkit",
             "internal_crossproperty_referrals_to_sleepkit",
+            "internal_crossproperty_referrals_to_focuskit",
             "known_bot_requests",
             "known_bot_unique_ips",
         ]:
@@ -907,7 +923,7 @@ def main():
         print(f"  {count:4d}  {user_agent}")
     print()
 
-    print("=== INTERNAL CROSS-PROPERTY REFERRALS (to DateKit/BudgetKit/HealthKit/SleepKit) ===")
+    print("=== INTERNAL CROSS-PROPERTY REFERRALS (to DateKit/BudgetKit/HealthKit/SleepKit/FocusKit) ===")
     print(f"  total: {current_window.internal_crossproperty_referrals}")
     print("  by target section:")
     for section, count in current_window.internal_crossproperty_target_sections.most_common(args.max_items):

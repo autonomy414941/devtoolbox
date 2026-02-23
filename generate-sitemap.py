@@ -22,6 +22,7 @@ DATEKIT_ROOT = Path("/var/www/datekit")
 BUDGETKIT_ROOT = SITE_ROOT / "budgetkit"
 HEALTHKIT_ROOT = SITE_ROOT / "healthkit"
 SLEEPKIT_ROOT = SITE_ROOT / "sleepkit"
+FOCUSKIT_ROOT = SITE_ROOT / "focuskit"
 
 
 @dataclass(frozen=True)
@@ -148,6 +149,7 @@ def main() -> None:
     add_subsite_pages(entries, "/budgetkit", BUDGETKIT_ROOT)
     add_subsite_pages(entries, "/healthkit", HEALTHKIT_ROOT)
     add_subsite_pages(entries, "/sleepkit", SLEEPKIT_ROOT)
+    add_subsite_pages(entries, "/focuskit", FOCUSKIT_ROOT)
 
     tools_dir = SITE_ROOT / "tools"
     tool_pages = sorted(

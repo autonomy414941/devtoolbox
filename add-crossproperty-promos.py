@@ -23,6 +23,7 @@ PROMO_TARGETS = (
     ("budgetkit", "BudgetKit"),
     ("healthkit", "HealthKit"),
     ("sleepkit", "SleepKit"),
+    ("focuskit", "FocusKit"),
 )
 
 
@@ -100,7 +101,7 @@ def upgrade_existing_promo_block(content: str, slug: str) -> str:
     if not match:
         return content
     block = match.group(0)
-    if "/sleepkit/?" in block:
+    if all(f"/{target}/?" in block for target, _ in PROMO_TARGETS):
         return content
     return content[: match.start()] + build_promo_html(slug) + content[match.end() :]
 
@@ -154,10 +155,11 @@ def patch_blog_file(path: str, dry_run: bool) -> str:
         return "updated:upgraded-existing"
 
     has_campaign = f"utm_campaign={PROMO_CAMPAIGN}" in content
-    has_sleepkit_campaign = (
-        f"/sleepkit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}" in content
+    has_all_campaign_targets = all(
+        f"/{target}/?utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}" in content
+        for target, _ in PROMO_TARGETS
     )
-    if has_campaign and has_sleepkit_campaign:
+    if has_campaign and has_all_campaign_targets:
         return "skip:campaign-exists"
 
     insert_pos = find_insert_pos(content)
