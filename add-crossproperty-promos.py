@@ -13,19 +13,19 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ANALYZE_TRAFFIC_SCRIPT = os.path.join(BASE_DIR, "analyze_traffic.py")
 BLOG_DIR = "/var/www/web-ceo/blog"
 PROMO_MARKER = 'data-crossproperty-promo="true"'
-PROMO_VERSION = "2"
+PROMO_VERSION = "3"
 PROMO_VERSION_MARKER = f'data-crossproperty-promo-version="{PROMO_VERSION}"'
 PROMO_CAMPAIGN = "crosspromo-top-organic"
 PROMO_BLOCK_PATTERN = re.compile(
     r'<aside class="crossproperty-promo"[^>]*data-crossproperty-promo="true"[^>]*>.*?</aside>\s*',
     re.DOTALL,
 )
-PROMO_TARGETS = (
-    ("focuskit", "FocusKit focus session, time block, and meeting load calculators"),
-    ("datekit", "DateKit deadline and date math calculator"),
-    ("budgetkit", "BudgetKit monthly budget planner"),
-    ("healthkit", "HealthKit calorie and hydration calculators"),
-    ("sleepkit", "SleepKit sleep cycle and debt planner"),
+PROMO_PRIMARY_TARGET = ("focuskit", "FocusKit deep-work calculators")
+PROMO_SECONDARY_TARGETS = (
+    ("datekit", "DateKit"),
+    ("budgetkit", "BudgetKit"),
+    ("healthkit", "HealthKit"),
+    ("sleepkit", "SleepKit"),
 )
 
 
@@ -83,10 +83,10 @@ def slug_from_blog_path(path: str) -> str:
 
 def build_promo_html(slug: str) -> str:
     params = f"utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}&utm_content={slug}"
-    links = "".join(
-        f'            <li style="margin: 0.2rem 0;"><a href="/{target}/?{params}" '
-        f'style="color: #bfdbfe; text-decoration: underline;">{label}</a></li>\n'
-        for target, label in PROMO_TARGETS
+    primary_target, primary_label = PROMO_PRIMARY_TARGET
+    secondary_links = ", ".join(
+        f'<a href="/{target}/?{params}" style="color: #bfdbfe; text-decoration: underline;">{label}</a>'
+        for target, label in PROMO_SECONDARY_TARGETS
     )
     return (
         "\n"
@@ -95,9 +95,12 @@ def build_promo_html(slug: str) -> str:
         'style="margin: 1.25rem 0 1.5rem; padding: 1rem 1.1rem; border: 1px solid rgba(59,130,246,0.35); '
         'border-radius: 10px; background: rgba(59,130,246,0.08); line-height: 1.65;">\n'
         '            <strong style="color: #bfdbfe;">Plan execution before writing code:</strong>\n'
-        '            <ul style="margin: 0.45rem 0 0; padding-left: 1.1rem;">\n'
-        f"{links}"
-        "            </ul>\n"
+        f'            <p style="margin: 0.45rem 0 0;"><a href="/{primary_target}/?{params}" '
+        'style="display: inline-block; color: #0f172a; text-decoration: none; background: #93c5fd; '
+        'padding: 0.28rem 0.55rem; border-radius: 6px; font-weight: 700;">'
+        f'{primary_label}</a> for focus sessions, time blocks, and meeting load checks.</p>\n'
+        f'            <p style="margin: 0.45rem 0 0; color: #dbeafe;">Need other planning calculators? {secondary_links}. '
+        f'<a href="/kits/?{params}" style="color: #bfdbfe; text-decoration: underline; font-weight: 600;">All Kits</a>.</p>\n'
         "        </aside>\n"
     )
 
@@ -148,22 +151,28 @@ def patch_blog_file(path: str, dry_run: bool) -> str:
     if not os.path.exists(file_path):
         return "skip:not-found"
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        content = f.read()
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+    except OSError:
+        return "skip:read-error"
 
     if PROMO_MARKER in content:
         upgraded = upgrade_existing_promo_block(content, slug)
         if upgraded == content:
             return "skip:already-patched"
         if not dry_run:
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(upgraded)
+            try:
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write(upgraded)
+            except OSError:
+                return "skip:write-error"
         return "updated:upgraded-existing"
 
     has_campaign = f"utm_campaign={PROMO_CAMPAIGN}" in content
     has_all_campaign_targets = all(
         f"/{target}/?utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}" in content
-        for target, _ in PROMO_TARGETS
+        for target, _ in (PROMO_PRIMARY_TARGET, *PROMO_SECONDARY_TARGETS)
     )
     if has_campaign and has_all_campaign_targets:
         return "skip:campaign-exists"
@@ -174,8 +183,11 @@ def patch_blog_file(path: str, dry_run: bool) -> str:
 
     updated = content[:insert_pos] + build_promo_html(slug) + content[insert_pos:]
     if not dry_run:
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(updated)
+        try:
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(updated)
+        except OSError:
+            return "skip:write-error"
     if has_campaign:
         return "updated:campaign-upgrade"
     return "updated:new"
