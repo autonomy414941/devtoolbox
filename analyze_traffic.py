@@ -89,6 +89,29 @@ BOT_UA_PATTERNS = [
     re.compile(r"(?:^|[^a-z])(headless|lighthouse|pagespeed)(?:[^a-z]|$)", re.IGNORECASE),
     re.compile(r"(?:^|[^a-z])(curl|wget|python-requests|scrapy|httpclient|go-http-client)(?:[^a-z]|$)", re.IGNORECASE),
 ]
+SUSPECTED_CROSSPROMO_DATACENTER_IP_PREFIXES = (
+    "43.130.",
+    "43.131.",
+    "43.132.",
+    "43.133.",
+    "43.135.",
+    "43.152.",
+    "43.153.",
+    "43.155.",
+    "43.156.",
+    "43.157.",
+    "43.158.",
+    "43.166.",
+    "43.167.",
+    "49.51.",
+    "101.33.",
+    "124.156.",
+    "170.106.",
+)
+SUSPECTED_CROSSPROMO_SPOOFED_MOBILE_UA = re.compile(
+    r"^Mozilla/5\.0 \(iPhone; CPU iPhone OS 13_2_3 like Mac OS X\) AppleWebKit/605\.1\.15 "
+    r"\(KHTML, like Gecko\) Version/13\.0\.3 Mobile/15E148 Safari/604\.1$"
+)
 SUSPICIOUS_PATH_PATTERNS = [
     re.compile(r"^/(?:wp-admin(?:/|$)|wp-login\.php$|xmlrpc\.php$)", re.IGNORECASE),
     re.compile(r"/vendor/phpunit/", re.IGNORECASE),
@@ -237,6 +260,18 @@ def is_known_bot_user_agent(user_agent: str) -> bool:
         if pattern.search(normalized):
             return True
     return False
+
+
+def is_suspected_crosspromo_automation(ip: str, normalized_user_agent: str, referrer: str, query: str) -> bool:
+    if f"utm_campaign={CROSSPROMO_CAMPAIGN_NAME}" not in query:
+        return False
+    if referrer and referrer != "-":
+        return False
+    if not normalized_user_agent:
+        return False
+    if not SUSPECTED_CROSSPROMO_SPOOFED_MOBILE_UA.fullmatch(normalized_user_agent):
+        return False
+    return ip.startswith(SUSPECTED_CROSSPROMO_DATACENTER_IP_PREFIXES)
 
 
 def parse_internal_referrer_path(referrer: str) -> str:
@@ -397,6 +432,9 @@ class WindowStats:
         self.crosspromo_non_bot_hits_with_any_referrer = 0
         self.crosspromo_non_bot_hits_without_referrer = 0
         self.crosspromo_hits_without_referrer_known_bot = 0
+        self.crosspromo_suspected_automation_hits = 0
+        self.crosspromo_suspected_automation_unique_ips = set()
+        self.crosspromo_suspected_automation_user_agents = Counter()
         self.recent_content_paths_by_client: dict[tuple[str, str], deque[tuple[datetime, str]]] = {}
 
     @staticmethod
@@ -477,18 +515,30 @@ class WindowStats:
                 self.crosspromo_campaign_hits += 1
                 self.crosspromo_campaign_pages[path] += 1
                 target_section = classify_content_section(path)
+                suspected_crosspromo_automation = is_suspected_crosspromo_automation(
+                    ip,
+                    normalized_user_agent,
+                    referrer,
+                    query,
+                )
+                crosspromo_known_bot = known_bot_ua or suspected_crosspromo_automation
+                if suspected_crosspromo_automation:
+                    self.crosspromo_suspected_automation_hits += 1
+                    self.crosspromo_suspected_automation_unique_ips.add(ip)
+                    if normalized_user_agent:
+                        self.crosspromo_suspected_automation_user_agents[normalized_user_agent] += 1
                 self.crosspromo_campaign_target_sections[target_section] += 1
-                if not known_bot_ua:
+                if not crosspromo_known_bot:
                     self.crosspromo_non_bot_campaign_target_sections[target_section] += 1
                 if referrer and referrer != "-":
                     self.crosspromo_hits_with_any_referrer += 1
-                    if not known_bot_ua:
+                    if not crosspromo_known_bot:
                         self.crosspromo_non_bot_hits_with_any_referrer += 1
                 else:
                     self.crosspromo_hits_without_referrer += 1
-                    if not known_bot_ua:
+                    if not crosspromo_known_bot:
                         self.crosspromo_non_bot_hits_without_referrer += 1
-                if known_bot_ua:
+                if crosspromo_known_bot:
                     self.crosspromo_known_bot_hits += 1
                     if normalized_user_agent:
                         self.crosspromo_known_bot_user_agents[normalized_user_agent] += 1
@@ -502,7 +552,7 @@ class WindowStats:
                         continue
                     self.crosspromo_campaign_sources[source] += 1
                     self.crosspromo_campaign_source_target_sections[f"{source}->{target_section}"] += 1
-                    if not known_bot_ua:
+                    if not crosspromo_known_bot:
                         self.crosspromo_non_bot_campaign_sources[source] += 1
                         self.crosspromo_non_bot_campaign_source_target_sections[f"{source}->{target_section}"] += 1
                     inferred_source_path = infer_internal_source_path(source)
@@ -515,17 +565,17 @@ class WindowStats:
                         normalized_inferred_paths.add(normalized_inferred_path)
                 if normalized_inferred_paths:
                     self.crosspromo_hits_with_param_source += 1
-                    if not known_bot_ua:
+                    if not crosspromo_known_bot:
                         self.crosspromo_non_bot_hits_with_param_source += 1
                     if not referrer or referrer == "-":
                         self.crosspromo_hits_with_param_source_without_referrer += 1
-                        if not known_bot_ua:
+                        if not crosspromo_known_bot:
                             self.crosspromo_non_bot_hits_with_param_source_without_referrer += 1
                     for normalized_source_path in normalized_inferred_paths:
                         source_section = classify_content_section(normalized_source_path)
                         self.crosspromo_campaign_param_source_pages[normalized_source_path] += 1
                         self.crosspromo_campaign_param_source_sections[source_section] += 1
-                        if not known_bot_ua:
+                        if not crosspromo_known_bot:
                             self.crosspromo_non_bot_campaign_param_source_pages[normalized_source_path] += 1
                             self.crosspromo_non_bot_campaign_param_source_sections[source_section] += 1
                 if internal_referrer_path:
@@ -534,7 +584,7 @@ class WindowStats:
                     self.crosspromo_campaign_source_pages[internal_referrer_path] += 1
                     self.crosspromo_campaign_source_sections[source_section] += 1
                     self.crosspromo_campaign_page_path_pairs[f"{internal_referrer_path}->{path}"] += 1
-                    if not known_bot_ua:
+                    if not crosspromo_known_bot:
                         self.crosspromo_non_bot_hits_with_internal_referrer += 1
                         self.crosspromo_non_bot_campaign_source_pages[internal_referrer_path] += 1
                         self.crosspromo_non_bot_campaign_source_sections[source_section] += 1
@@ -543,16 +593,16 @@ class WindowStats:
                         self.crosspromo_source_mismatch_hits += 1
                 elif inferred_source_paths:
                     self.crosspromo_hits_with_inferred_source += 1
-                    if not known_bot_ua:
+                    if not crosspromo_known_bot:
                         self.crosspromo_non_bot_hits_with_inferred_source += 1
                     inferred_source_verified = self._has_recent_inferred_source_match(client_key, normalized_inferred_paths, ts)
                     if inferred_source_verified:
                         self.crosspromo_inferred_verified_hits += 1
-                        if not known_bot_ua:
+                        if not crosspromo_known_bot:
                             self.crosspromo_non_bot_inferred_verified_hits += 1
                     else:
                         self.crosspromo_inferred_unverified_hits += 1
-                        if not known_bot_ua:
+                        if not crosspromo_known_bot:
                             self.crosspromo_non_bot_inferred_unverified_hits += 1
                     recorded_paths = set()
                     inferred_internal_crossproperty_recorded = False
@@ -575,7 +625,7 @@ class WindowStats:
                             else:
                                 self.internal_crossproperty_inferred_unverified_referrals += 1
                                 self.internal_crossproperty_inferred_unverified_target_sections[target_section] += 1
-                            if not known_bot_ua:
+                            if not crosspromo_known_bot:
                                 self.internal_crossproperty_inferred_non_bot_referrals += 1
                                 self.internal_crossproperty_inferred_non_bot_target_sections[target_section] += 1
                                 if inferred_source_verified:
@@ -588,13 +638,13 @@ class WindowStats:
                         self.crosspromo_campaign_source_pages[normalized_source_path] += 1
                         self.crosspromo_campaign_source_sections[source_section] += 1
                         self.crosspromo_campaign_page_path_pairs[f"{normalized_source_path}->{path}"] += 1
-                        if not known_bot_ua:
+                        if not crosspromo_known_bot:
                             self.crosspromo_non_bot_campaign_source_pages[normalized_source_path] += 1
                             self.crosspromo_non_bot_campaign_source_sections[source_section] += 1
                             self.crosspromo_non_bot_campaign_page_path_pairs[f"{normalized_source_path}->{path}"] += 1
                 else:
                     self.crosspromo_hits_unattributed += 1
-                    if not known_bot_ua:
+                    if not crosspromo_known_bot:
                         self.crosspromo_non_bot_hits_unattributed += 1
 
         if referrer and referrer != "-":
@@ -760,6 +810,8 @@ class WindowStats:
         crosspromo_non_bot_source_attributed_hits = (
             self.crosspromo_non_bot_hits_with_internal_referrer + self.crosspromo_non_bot_hits_with_inferred_source
         )
+        crosspromo_suspected_automation_hits = self.crosspromo_suspected_automation_hits
+        crosspromo_suspected_automation_unique_ips = len(self.crosspromo_suspected_automation_unique_ips)
         crosspromo_inferred_verified_hits = self.crosspromo_inferred_verified_hits
         crosspromo_inferred_unverified_hits = self.crosspromo_inferred_unverified_hits
         crosspromo_non_bot_inferred_verified_hits = self.crosspromo_non_bot_inferred_verified_hits
@@ -784,6 +836,8 @@ class WindowStats:
         top_crosspromo_page_pair_hits = 0
         top_crosspromo_known_bot_user_agent = ""
         top_crosspromo_known_bot_user_agent_hits = 0
+        top_crosspromo_suspected_automation_user_agent = ""
+        top_crosspromo_suspected_automation_user_agent_hits = 0
         top_crosspromo_non_bot_source = ""
         top_crosspromo_non_bot_source_hits = 0
         top_crosspromo_non_bot_source_page = ""
@@ -856,6 +910,14 @@ class WindowStats:
         if self.crosspromo_known_bot_user_agents:
             top_crosspromo_known_bot_user_agent, top_crosspromo_known_bot_user_agent_hits = max(
                 self.crosspromo_known_bot_user_agents.items(),
+                key=lambda item: item[1],
+            )
+        if self.crosspromo_suspected_automation_user_agents:
+            (
+                top_crosspromo_suspected_automation_user_agent,
+                top_crosspromo_suspected_automation_user_agent_hits,
+            ) = max(
+                self.crosspromo_suspected_automation_user_agents.items(),
                 key=lambda item: item[1],
             )
         if self.crosspromo_non_bot_campaign_sources:
@@ -948,6 +1010,8 @@ class WindowStats:
             ),
             "crosspromo_known_bot_hits": self.crosspromo_known_bot_hits,
             "crosspromo_non_bot_hits": crosspromo_non_bot_hits,
+            "crosspromo_suspected_automation_hits": crosspromo_suspected_automation_hits,
+            "crosspromo_suspected_automation_unique_ips": crosspromo_suspected_automation_unique_ips,
             "crosspromo_source_mismatch_hits": self.crosspromo_source_mismatch_hits,
             "internal_crossproperty_referrals": self.internal_crossproperty_referrals,
             "internal_crossproperty_referrals_to_datekit": internal_to_datekit,
@@ -1039,6 +1103,10 @@ class WindowStats:
             "crosspromo_source_attribution_ratio": safe_ratio(crosspromo_source_attributed_hits, self.crosspromo_campaign_hits),
             "known_bot_request_ratio": safe_ratio(self.known_bot_requests, self.total_requests),
             "crosspromo_known_bot_ratio": safe_ratio(self.crosspromo_known_bot_hits, self.crosspromo_campaign_hits),
+            "crosspromo_suspected_automation_ratio": safe_ratio(
+                crosspromo_suspected_automation_hits,
+                self.crosspromo_campaign_hits,
+            ),
             "crosspromo_non_bot_source_attribution_ratio": safe_ratio(
                 crosspromo_non_bot_source_attributed_hits,
                 crosspromo_non_bot_hits,
@@ -1128,6 +1196,8 @@ class WindowStats:
             "top_crosspromo_campaign_page_pair_hits": top_crosspromo_page_pair_hits,
             "top_crosspromo_known_bot_user_agent": top_crosspromo_known_bot_user_agent,
             "top_crosspromo_known_bot_user_agent_hits": top_crosspromo_known_bot_user_agent_hits,
+            "top_crosspromo_suspected_automation_user_agent": top_crosspromo_suspected_automation_user_agent,
+            "top_crosspromo_suspected_automation_user_agent_hits": top_crosspromo_suspected_automation_user_agent_hits,
             "top_crosspromo_non_bot_source": top_crosspromo_non_bot_source,
             "top_crosspromo_non_bot_source_hits": top_crosspromo_non_bot_source_hits,
             "top_crosspromo_non_bot_source_page": top_crosspromo_non_bot_source_page,
@@ -1468,6 +1538,8 @@ def main():
     print(f"  crosspromo_hits_without_referrer_non_bot: {summary['crosspromo_hits_without_referrer_non_bot']}")
     print(f"  crosspromo_known_bot_hits: {summary['crosspromo_known_bot_hits']}")
     print(f"  crosspromo_non_bot_hits: {summary['crosspromo_non_bot_hits']}")
+    print(f"  crosspromo_suspected_automation_hits: {summary['crosspromo_suspected_automation_hits']}")
+    print(f"  crosspromo_suspected_automation_unique_ips: {summary['crosspromo_suspected_automation_unique_ips']}")
     print(f"  crosspromo_source_mismatch_hits: {summary['crosspromo_source_mismatch_hits']}")
     print(f"  internal_crossproperty_referrals: {summary['internal_crossproperty_referrals']}")
     print(f"  internal_crossproperty_non_bot_referrals: {summary['internal_crossproperty_non_bot_referrals']}")
@@ -1512,6 +1584,7 @@ def main():
     )
     print(f"  crosspromo_source_attribution_ratio: {summary['crosspromo_source_attribution_ratio']}%")
     print(f"  crosspromo_known_bot_ratio: {summary['crosspromo_known_bot_ratio']}%")
+    print(f"  crosspromo_suspected_automation_ratio: {summary['crosspromo_suspected_automation_ratio']}%")
     print(f"  crosspromo_non_bot_source_attribution_ratio: {summary['crosspromo_non_bot_source_attribution_ratio']}%")
     print(f"  crosspromo_without_referrer_ratio: {summary['crosspromo_without_referrer_ratio']}%")
     print(f"  crosspromo_non_bot_without_referrer_ratio: {summary['crosspromo_non_bot_without_referrer_ratio']}%")
@@ -1860,6 +1933,11 @@ def main():
         print(f"  {count:4d}  {user_agent}")
     print()
 
+    print("=== TOP CROSSPROMO SUSPECTED AUTOMATION USER AGENTS ===")
+    for user_agent, count in current_window.crosspromo_suspected_automation_user_agents.most_common(args.max_items):
+        print(f"  {count:4d}  {user_agent}")
+    print()
+
     print(
         "=== INTERNAL CROSS-PROPERTY REFERRALS "
         "(to DateKit/BudgetKit/HealthKit/SleepKit/FocusKit/OpsKit/StudyKit/CareerKit) ==="
@@ -2027,6 +2105,11 @@ def main():
         ),
         "crosspromo_known_bot_user_agents": counter_to_sorted_list(
             current_window.crosspromo_known_bot_user_agents,
+            "user_agent",
+            args.max_items,
+        ),
+        "crosspromo_suspected_automation_user_agents": counter_to_sorted_list(
+            current_window.crosspromo_suspected_automation_user_agents,
             "user_agent",
             args.max_items,
         ),
