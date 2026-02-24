@@ -57,6 +57,18 @@ INTERNAL_CROSSPROPERTY_TARGETS = (
     "taxkit",
 )
 CROSSPROMO_CAMPAIGN_NAME = "crosspromo-top-organic"
+CROSSPROMO_REDIRECT_TARGETS = {
+    "datekit",
+    "budgetkit",
+    "healthkit",
+    "sleepkit",
+    "focuskit",
+    "opskit",
+    "studykit",
+    "careerkit",
+    "housingkit",
+    "kits",
+}
 INFERRED_SOURCE_LOOKBACK = timedelta(minutes=30)
 INFERRED_SOURCE_MAX_RECENT_PATHS = 200
 INFERRED_SOURCE_SECTION_PATHS = {
@@ -277,6 +289,14 @@ def is_suspected_crosspromo_automation(ip: str, normalized_user_agent: str, refe
     if not SUSPECTED_CROSSPROMO_SPOOFED_MOBILE_UA.fullmatch(normalized_user_agent):
         return False
     return ip.startswith(SUSPECTED_CROSSPROMO_DATACENTER_IP_PREFIXES)
+
+
+def is_crosspromo_redirect_hop(path: str) -> bool:
+    normalized = normalize_path(path)
+    if not normalized.startswith("/go/"):
+        return False
+    target = normalized.removeprefix("/go/").strip("/")
+    return target in CROSSPROMO_REDIRECT_TARGETS
 
 
 def parse_internal_referrer_path(referrer: str) -> str:
@@ -516,7 +536,7 @@ class WindowStats:
                     self.suspicious_not_found_pages[path] += 1
                 else:
                     self.clean_not_found_pages[path] += 1
-            if f"utm_campaign={CROSSPROMO_CAMPAIGN_NAME}" in query:
+            if f"utm_campaign={CROSSPROMO_CAMPAIGN_NAME}" in query and not is_crosspromo_redirect_hop(path):
                 self.crosspromo_campaign_hits += 1
                 self.crosspromo_campaign_pages[path] += 1
                 target_section = classify_content_section(path)
