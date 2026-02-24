@@ -67,6 +67,13 @@ KITS = [
         "icon": "&#x1f4bc;",
         "summary": "Salary, raise, overtime, and offer comparison calculators for career planning.",
     },
+    {
+        "slug": "housingkit",
+        "name": "HousingKit",
+        "url": "/housingkit/",
+        "icon": "&#x1f3e0;",
+        "summary": "Mortgage, affordability, refinance, and rent-vs-buy calculators for home planning.",
+    },
 ]
 
 KIT_ROOTS = {
@@ -78,6 +85,7 @@ KIT_ROOTS = {
     "opskit": SITE_ROOT / "opskit",
     "studykit": SITE_ROOT / "studykit",
     "careerkit": SITE_ROOT / "careerkit",
+    "housingkit": SITE_ROOT / "housingkit",
 }
 
 KIT_CARD_BLOCK = """
@@ -120,6 +128,11 @@ KIT_CARD_BLOCK = """
                     <div class="tool-icon">&#x1f4bc;</div>
                     <h3>CareerKit</h3>
                     <p>Compare offers, project raises, and plan compensation decisions</p>
+                </a>
+                <a href="/housingkit/" class="tool-card" data-tags="mortgage calculator affordability calculator rent vs buy calculator refinance break even calculator">
+                    <div class="tool-icon">&#x1f3e0;</div>
+                    <h3>HousingKit</h3>
+                    <p>Model mortgage costs, affordability, and rent-vs-buy outcomes</p>
                 </a>
 """
 
@@ -169,19 +182,19 @@ def render_kits_page(counts: dict[str, int]) -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life Kits Directory — Date, Budget, Health, Sleep, Focus, Ops, Study, and Career Calculators</title>
-    <meta name="description" content="Discover all DevToolbox planning suites in one place: DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, and CareerKit. __TOTAL_CALCULATORS__ free calculators with no signup.">
+    <title>Life Kits Directory — Date, Budget, Health, Sleep, Focus, Ops, Study, Career, and Housing Calculators</title>
+    <meta name="description" content="Discover all DevToolbox planning suites in one place: DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, CareerKit, and HousingKit. __TOTAL_CALCULATORS__ free calculators with no signup.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://devtoolbox.dedyn.io/kits/">
     <meta property="og:title" content="Life Kits Directory — Free Planning Calculator Suites">
-    <meta property="og:description" content="Explore DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, and CareerKit from one discovery hub.">
+    <meta property="og:description" content="Explore DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, CareerKit, and HousingKit from one discovery hub.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://devtoolbox.dedyn.io/kits/">
     <meta property="og:site_name" content="DevToolbox">
     <meta property="og:image" content="https://devtoolbox.dedyn.io/og/default.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Life Kits Directory — Free Planning Calculator Suites">
-    <meta name="twitter:description" content="Date, budget, health, sleep, focus, ops, study, and career calculator suites in one place.">
+    <meta name="twitter:description" content="Date, budget, health, sleep, focus, ops, study, career, and housing calculator suites in one place.">
     <meta name="twitter:image" content="https://devtoolbox.dedyn.io/og/default.png">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -194,7 +207,7 @@ def render_kits_page(counts: dict[str, int]) -> str:
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         "name": "Life Kits Directory",
-        "description": "Directory of date, budget, health, sleep, focus, ops, study, and career planning calculator suites.",
+        "description": "Directory of date, budget, health, sleep, focus, ops, study, career, and housing planning calculator suites.",
         "url": "https://devtoolbox.dedyn.io/kits/",
         "isPartOf": {
             "@type": "WebSite",
@@ -223,7 +236,7 @@ __ITEMLIST_JSON__
           "name": "Do these calculator suites require signup?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No. All calculators across DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, and CareerKit are free and available without signup."
+              "text": "No. All calculators across DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, CareerKit, and HousingKit are free and available without signup."
           }
         },
         {
@@ -266,13 +279,13 @@ __ITEMLIST_JSON__
     </nav>
     <main class="tool-page">
         <h1>Life Kits Directory</h1>
-        <p class="description">Switch quickly between all planning calculator suites. __TOTAL_CALCULATORS__ calculators are currently available across eight focused kits.</p>
+        <p class="description">Switch quickly between all planning calculator suites. __TOTAL_CALCULATORS__ calculators are currently available across focused kits.</p>
         <div class="grid" style="margin-top: 1.25rem;">
 __CARDS_HTML__
         </div>
         <section class="panel card" style="margin-top: 1.5rem; padding: 1rem 1.25rem; border: 1px solid rgba(59,130,246,0.25); border-radius: 8px; background: rgba(59,130,246,0.08);">
             <h2 style="font-size: 1.2rem; margin-bottom: 0.5rem;">How to Use This Directory</h2>
-            <p style="margin: 0;">Use DateKit for scheduling math, BudgetKit for money decisions, HealthKit and SleepKit for wellness planning, FocusKit for deep-work execution planning, OpsKit for reliability operations planning, StudyKit for academic planning, and CareerKit for compensation decisions. Each suite cross-links to related paths so you can move between tasks without restarting your workflow.</p>
+            <p style="margin: 0;">Use DateKit for scheduling math, BudgetKit for money decisions, HealthKit and SleepKit for wellness planning, FocusKit for deep-work execution planning, OpsKit for reliability operations planning, StudyKit for academic planning, CareerKit for compensation decisions, and HousingKit for home-cost planning. Each suite cross-links to related paths so you can move between tasks without restarting your workflow.</p>
         </section>
     </main>
     <footer>
@@ -322,7 +335,7 @@ def ensure_homepage_kit_cards(homepage_html: str) -> str:
 
     grid_html = match.group(2)
     grid_html = re.sub(
-        r'\s*<a href="/(?:datekit|budgetkit|healthkit|sleepkit|focuskit|opskit|studykit|careerkit)/" class="tool-card"[^>]*>.*?</a>\s*',
+        r'\s*<a href="/(?:datekit|budgetkit|healthkit|sleepkit|focuskit|opskit|studykit|careerkit|housingkit)/" class="tool-card"[^>]*>.*?</a>\s*',
         "\n",
         grid_html,
         flags=re.DOTALL,

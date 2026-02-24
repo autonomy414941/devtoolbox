@@ -39,9 +39,10 @@ CONTENT_SECTION_NAMES = (
     "opskit",
     "studykit",
     "careerkit",
+    "housingkit",
     "other",
 )
-KIT_SECTION_NAMES = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "opskit", "studykit", "careerkit")
+KIT_SECTION_NAMES = ("datekit", "budgetkit", "healthkit", "sleepkit", "focuskit", "opskit", "studykit", "careerkit", "housingkit")
 INTERNAL_CROSSPROPERTY_TARGETS = (
     "datekit",
     "budgetkit",
@@ -51,6 +52,7 @@ INTERNAL_CROSSPROPERTY_TARGETS = (
     "opskit",
     "studykit",
     "careerkit",
+    "housingkit",
 )
 CROSSPROMO_CAMPAIGN_NAME = "crosspromo-top-organic"
 INFERRED_SOURCE_LOOKBACK = timedelta(minutes=30)
@@ -68,6 +70,7 @@ INFERRED_SOURCE_SECTION_PATHS = {
     "opskit": "/opskit",
     "studykit": "/studykit",
     "careerkit": "/careerkit",
+    "housingkit": "/housingkit",
 }
 BLOG_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 ENGINE_PATTERNS = [
@@ -207,6 +210,8 @@ def classify_content_section(path: str) -> str:
         return "studykit"
     if path == "/careerkit" or path.startswith("/careerkit/"):
         return "careerkit"
+    if path == "/housingkit" or path.startswith("/housingkit/"):
+        return "housingkit"
     return "other"
 
 
@@ -352,6 +357,14 @@ class WindowStats:
         self.crosspromo_inferred_unverified_hits = 0
         self.crosspromo_non_bot_inferred_verified_hits = 0
         self.crosspromo_non_bot_inferred_unverified_hits = 0
+        self.crosspromo_hits_with_param_source = 0
+        self.crosspromo_non_bot_hits_with_param_source = 0
+        self.crosspromo_hits_with_param_source_without_referrer = 0
+        self.crosspromo_non_bot_hits_with_param_source_without_referrer = 0
+        self.crosspromo_campaign_param_source_pages = Counter()
+        self.crosspromo_campaign_param_source_sections = Counter()
+        self.crosspromo_non_bot_campaign_param_source_pages = Counter()
+        self.crosspromo_non_bot_campaign_param_source_sections = Counter()
         self.crosspromo_source_mismatch_hits = 0
         self.internal_crossproperty_referrals = 0
         self.internal_crossproperty_target_sections = Counter()
@@ -500,6 +513,21 @@ class WindowStats:
                     normalized_inferred_path = normalize_path(inferred_source_path)
                     if normalized_inferred_path:
                         normalized_inferred_paths.add(normalized_inferred_path)
+                if normalized_inferred_paths:
+                    self.crosspromo_hits_with_param_source += 1
+                    if not known_bot_ua:
+                        self.crosspromo_non_bot_hits_with_param_source += 1
+                    if not referrer or referrer == "-":
+                        self.crosspromo_hits_with_param_source_without_referrer += 1
+                        if not known_bot_ua:
+                            self.crosspromo_non_bot_hits_with_param_source_without_referrer += 1
+                    for normalized_source_path in normalized_inferred_paths:
+                        source_section = classify_content_section(normalized_source_path)
+                        self.crosspromo_campaign_param_source_pages[normalized_source_path] += 1
+                        self.crosspromo_campaign_param_source_sections[source_section] += 1
+                        if not known_bot_ua:
+                            self.crosspromo_non_bot_campaign_param_source_pages[normalized_source_path] += 1
+                            self.crosspromo_non_bot_campaign_param_source_sections[source_section] += 1
                 if internal_referrer_path:
                     self.crosspromo_hits_with_internal_referrer += 1
                     source_section = classify_content_section(internal_referrer_path)
@@ -721,6 +749,12 @@ class WindowStats:
         crosspromo_non_bot_to_opskit = int(self.crosspromo_non_bot_campaign_target_sections.get("opskit", 0))
         crosspromo_non_bot_to_studykit = int(self.crosspromo_non_bot_campaign_target_sections.get("studykit", 0))
         crosspromo_non_bot_to_careerkit = int(self.crosspromo_non_bot_campaign_target_sections.get("careerkit", 0))
+        crosspromo_param_source_hits = self.crosspromo_hits_with_param_source
+        crosspromo_non_bot_param_source_hits = self.crosspromo_non_bot_hits_with_param_source
+        crosspromo_param_source_without_referrer_hits = self.crosspromo_hits_with_param_source_without_referrer
+        crosspromo_non_bot_param_source_without_referrer_hits = (
+            self.crosspromo_non_bot_hits_with_param_source_without_referrer
+        )
         crosspromo_source_attributed_hits = self.crosspromo_hits_with_internal_referrer + self.crosspromo_hits_with_inferred_source
         crosspromo_non_bot_hits = max(0, self.crosspromo_campaign_hits - self.crosspromo_known_bot_hits)
         crosspromo_non_bot_source_attributed_hits = (
@@ -886,6 +920,12 @@ class WindowStats:
             "crosspromo_non_bot_hits_to_studykit": crosspromo_non_bot_to_studykit,
             "crosspromo_non_bot_hits_to_careerkit": crosspromo_non_bot_to_careerkit,
             "crosspromo_source_attributed_hits": crosspromo_source_attributed_hits,
+            "crosspromo_hits_with_param_source": crosspromo_param_source_hits,
+            "crosspromo_non_bot_hits_with_param_source": crosspromo_non_bot_param_source_hits,
+            "crosspromo_hits_with_param_source_without_referrer": crosspromo_param_source_without_referrer_hits,
+            "crosspromo_non_bot_hits_with_param_source_without_referrer": (
+                crosspromo_non_bot_param_source_without_referrer_hits
+            ),
             "crosspromo_hits_with_internal_referrer": self.crosspromo_hits_with_internal_referrer,
             "crosspromo_hits_with_inferred_source": self.crosspromo_hits_with_inferred_source,
             "crosspromo_inferred_verified_hits": crosspromo_inferred_verified_hits,
@@ -1011,6 +1051,22 @@ class WindowStats:
                 self.crosspromo_non_bot_hits_without_referrer,
                 crosspromo_non_bot_hits,
             ),
+            "crosspromo_param_source_ratio": safe_ratio(
+                crosspromo_param_source_hits,
+                self.crosspromo_campaign_hits,
+            ),
+            "crosspromo_non_bot_param_source_ratio": safe_ratio(
+                crosspromo_non_bot_param_source_hits,
+                crosspromo_non_bot_hits,
+            ),
+            "crosspromo_param_source_without_referrer_ratio": safe_ratio(
+                crosspromo_param_source_without_referrer_hits,
+                self.crosspromo_hits_without_referrer,
+            ),
+            "crosspromo_non_bot_param_source_without_referrer_ratio": safe_ratio(
+                crosspromo_non_bot_param_source_without_referrer_hits,
+                self.crosspromo_non_bot_hits_without_referrer,
+            ),
             "crosspromo_inferred_verification_ratio": safe_ratio(
                 crosspromo_inferred_verified_hits,
                 self.crosspromo_hits_with_inferred_source,
@@ -1129,6 +1185,10 @@ def build_window_comparison(
         "crosspromo_non_bot_hits_to_careerkit",
         "crosspromo_source_attributed_hits",
         "crosspromo_non_bot_source_attributed_hits",
+        "crosspromo_hits_with_param_source",
+        "crosspromo_non_bot_hits_with_param_source",
+        "crosspromo_hits_with_param_source_without_referrer",
+        "crosspromo_non_bot_hits_with_param_source_without_referrer",
         "crosspromo_hits_with_internal_referrer",
         "crosspromo_hits_with_inferred_source",
         "crosspromo_inferred_verified_hits",
@@ -1220,6 +1280,7 @@ def build_window_comparison(
         "content_opskit_requests",
         "content_studykit_requests",
         "content_careerkit_requests",
+        "content_housingkit_requests",
         "content_other_requests",
         "organic_homepage_referrals",
         "organic_blog_referrals",
@@ -1233,6 +1294,7 @@ def build_window_comparison(
         "organic_opskit_referrals",
         "organic_studykit_referrals",
         "organic_careerkit_referrals",
+        "organic_housingkit_referrals",
         "organic_other_referrals",
         "organic_non_bot_homepage_referrals",
         "organic_non_bot_blog_referrals",
@@ -1246,6 +1308,7 @@ def build_window_comparison(
         "organic_non_bot_opskit_referrals",
         "organic_non_bot_studykit_referrals",
         "organic_non_bot_careerkit_referrals",
+        "organic_non_bot_housingkit_referrals",
         "organic_non_bot_other_referrals",
     ]
     deltas = {}
@@ -1377,6 +1440,16 @@ def main():
     print(f"  crosspromo_non_bot_hits_to_careerkit: {summary['crosspromo_non_bot_hits_to_careerkit']}")
     print(f"  crosspromo_source_attributed_hits: {summary['crosspromo_source_attributed_hits']}")
     print(f"  crosspromo_non_bot_source_attributed_hits: {summary['crosspromo_non_bot_source_attributed_hits']}")
+    print(f"  crosspromo_hits_with_param_source: {summary['crosspromo_hits_with_param_source']}")
+    print(f"  crosspromo_non_bot_hits_with_param_source: {summary['crosspromo_non_bot_hits_with_param_source']}")
+    print(
+        "  crosspromo_hits_with_param_source_without_referrer: "
+        f"{summary['crosspromo_hits_with_param_source_without_referrer']}"
+    )
+    print(
+        "  crosspromo_non_bot_hits_with_param_source_without_referrer: "
+        f"{summary['crosspromo_non_bot_hits_with_param_source_without_referrer']}"
+    )
     print(f"  crosspromo_hits_with_internal_referrer: {summary['crosspromo_hits_with_internal_referrer']}")
     print(f"  crosspromo_hits_with_inferred_source: {summary['crosspromo_hits_with_inferred_source']}")
     print(f"  crosspromo_inferred_verified_hits: {summary['crosspromo_inferred_verified_hits']}")
@@ -1442,6 +1515,16 @@ def main():
     print(f"  crosspromo_non_bot_source_attribution_ratio: {summary['crosspromo_non_bot_source_attribution_ratio']}%")
     print(f"  crosspromo_without_referrer_ratio: {summary['crosspromo_without_referrer_ratio']}%")
     print(f"  crosspromo_non_bot_without_referrer_ratio: {summary['crosspromo_non_bot_without_referrer_ratio']}%")
+    print(f"  crosspromo_param_source_ratio: {summary['crosspromo_param_source_ratio']}%")
+    print(f"  crosspromo_non_bot_param_source_ratio: {summary['crosspromo_non_bot_param_source_ratio']}%")
+    print(
+        "  crosspromo_param_source_without_referrer_ratio: "
+        f"{summary['crosspromo_param_source_without_referrer_ratio']}%"
+    )
+    print(
+        "  crosspromo_non_bot_param_source_without_referrer_ratio: "
+        f"{summary['crosspromo_non_bot_param_source_without_referrer_ratio']}%"
+    )
     print(f"  crosspromo_inferred_verification_ratio: {summary['crosspromo_inferred_verification_ratio']}%")
     print(
         "  crosspromo_non_bot_inferred_verification_ratio: "
@@ -1550,6 +1633,10 @@ def main():
             "crosspromo_non_bot_hits_to_careerkit",
             "crosspromo_source_attributed_hits",
             "crosspromo_non_bot_source_attributed_hits",
+            "crosspromo_hits_with_param_source",
+            "crosspromo_non_bot_hits_with_param_source",
+            "crosspromo_hits_with_param_source_without_referrer",
+            "crosspromo_non_bot_hits_with_param_source_without_referrer",
             "crosspromo_hits_with_internal_referrer",
             "crosspromo_hits_with_inferred_source",
             "crosspromo_inferred_verified_hits",
@@ -1698,8 +1785,18 @@ def main():
         print(f"  {count:4d}  {source_path}")
     print()
 
+    print("=== CROSSPROMO CAMPAIGN PARAM-SOURCE PAGES (from utm_content) ===")
+    for source_path, count in current_window.crosspromo_campaign_param_source_pages.most_common(args.max_items):
+        print(f"  {count:4d}  {source_path}")
+    print()
+
     print("=== CROSSPROMO CAMPAIGN SOURCE SECTIONS ===")
     for section, count in current_window.crosspromo_campaign_source_sections.most_common(args.max_items):
+        print(f"  {section}: {count}")
+    print()
+
+    print("=== CROSSPROMO CAMPAIGN PARAM-SOURCE SECTIONS (from utm_content) ===")
+    for section, count in current_window.crosspromo_campaign_param_source_sections.most_common(args.max_items):
         print(f"  {section}: {count}")
     print()
 
@@ -1728,8 +1825,18 @@ def main():
         print(f"  {count:4d}  {source_path}")
     print()
 
+    print("=== CROSSPROMO NON-BOT CAMPAIGN PARAM-SOURCE PAGES (from utm_content) ===")
+    for source_path, count in current_window.crosspromo_non_bot_campaign_param_source_pages.most_common(args.max_items):
+        print(f"  {count:4d}  {source_path}")
+    print()
+
     print("=== CROSSPROMO NON-BOT CAMPAIGN SOURCE SECTIONS ===")
     for section, count in current_window.crosspromo_non_bot_campaign_source_sections.most_common(args.max_items):
+        print(f"  {section}: {count}")
+    print()
+
+    print("=== CROSSPROMO NON-BOT CAMPAIGN PARAM-SOURCE SECTIONS (from utm_content) ===")
+    for section, count in current_window.crosspromo_non_bot_campaign_param_source_sections.most_common(args.max_items):
         print(f"  {section}: {count}")
     print()
 
@@ -1848,8 +1955,18 @@ def main():
             "path",
             args.max_items,
         ),
+        "crosspromo_campaign_param_source_pages": counter_to_sorted_list(
+            current_window.crosspromo_campaign_param_source_pages,
+            "path",
+            args.max_items,
+        ),
         "crosspromo_campaign_source_sections": counter_to_sorted_list(
             current_window.crosspromo_campaign_source_sections,
+            "section",
+            args.max_items,
+        ),
+        "crosspromo_campaign_param_source_sections": counter_to_sorted_list(
+            current_window.crosspromo_campaign_param_source_sections,
             "section",
             args.max_items,
         ),
@@ -1878,8 +1995,18 @@ def main():
             "path",
             args.max_items,
         ),
+        "crosspromo_non_bot_campaign_param_source_pages": counter_to_sorted_list(
+            current_window.crosspromo_non_bot_campaign_param_source_pages,
+            "path",
+            args.max_items,
+        ),
         "crosspromo_non_bot_campaign_source_sections": counter_to_sorted_list(
             current_window.crosspromo_non_bot_campaign_source_sections,
+            "section",
+            args.max_items,
+        ),
+        "crosspromo_non_bot_campaign_param_source_sections": counter_to_sorted_list(
+            current_window.crosspromo_non_bot_campaign_param_source_sections,
             "section",
             args.max_items,
         ),

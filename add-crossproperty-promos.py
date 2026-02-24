@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ANALYZE_TRAFFIC_SCRIPT = os.path.join(BASE_DIR, "analyze_traffic.py")
 BLOG_DIR = "/var/www/web-ceo/blog"
 PROMO_MARKER = 'data-crossproperty-promo="true"'
-PROMO_VERSION = "6"
+PROMO_VERSION = "7"
 PROMO_VERSION_MARKER = f'data-crossproperty-promo-version="{PROMO_VERSION}"'
 PROMO_CAMPAIGN = "crosspromo-top-organic"
 PROMO_BLOCK_PATTERN = re.compile(
@@ -70,11 +70,18 @@ PROMO_TARGETS = (
         "primary_label": "CareerKit compensation calculators",
         "primary_suffix": "for raise impact, overtime pay, and offer comparisons.",
     },
+    {
+        "slug": "housingkit",
+        "link_label": "HousingKit",
+        "primary_label": "HousingKit home-cost calculators",
+        "primary_suffix": "for mortgage, affordability, and rent-vs-buy planning.",
+    },
 )
 PROMO_TARGET_BY_SLUG = {item["slug"]: item for item in PROMO_TARGETS}
-PRIMARY_ROTATION = ("opskit", "careerkit", "studykit", "focuskit", "datekit", "budgetkit", "healthkit", "sleepkit")
+PRIMARY_ROTATION = ("opskit", "careerkit", "housingkit", "studykit", "focuskit", "datekit", "budgetkit", "healthkit", "sleepkit")
 PRIMARY_HINTS = (
     (("kubernetes", "docker", "terraform", "ansible", "nginx", "sre", "incident", "sla", "ci-cd"), "opskit"),
+    (("mortgage", "rent", "housing", "home", "refinance", "real-estate", "property"), "housingkit"),
     (("salary", "career", "interview", "resume", "offer", "negotiation", "promotion"), "careerkit"),
     (("study", "exam", "gpa", "learning"), "studykit"),
     (("focus", "productivity", "pomodoro", "time-block"), "focuskit"),
