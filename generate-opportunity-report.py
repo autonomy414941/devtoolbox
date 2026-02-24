@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import math
 from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
@@ -25,6 +26,13 @@ def as_int(value) -> int:
         return int(value)
     except (TypeError, ValueError):
         return 0
+
+
+def as_float(value) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
 
 
 def clamp(value: float, minimum: float = 0.0, maximum: float = 1.0) -> float:
@@ -52,8 +60,17 @@ def load_history(path: Path, limit: int) -> list[dict]:
     return list(samples)
 
 
+def pct_change(first: int, last: int) -> float:
+    if first <= 0:
+        return 100.0 if last > 0 else 0.0
+    return ((last - first) / first) * 100.0
+
+
 def build_rows(score: dict, history: list[dict]) -> list[dict]:
     rows: list[dict] = []
+    crosspromo_high_confidence_ratio = clamp(
+        as_float(score.get("crosspromo_non_bot_high_confidence_share_pct", 0.0)) / 100.0
+    )
     for kit in KIT_NAMES:
         content_key = f"content_{kit}_requests_24h"
         organic_key = f"organic_non_bot_{kit}_referrals_24h"
@@ -64,22 +81,46 @@ def build_rows(score: dict, history: list[dict]) -> list[dict]:
         organic_non_bot_referrals = as_int(score.get(organic_key, 0))
         internal_high_confidence_referrals = as_int(score.get(internal_key, 0))
         crosspromo_non_bot_hits = as_int(score.get(crosspromo_key, 0))
+        human_signal_hits = organic_non_bot_referrals + internal_high_confidence_referrals + crosspromo_non_bot_hits
+        quality_adjusted_human_signal_hits = (
+            organic_non_bot_referrals
+            + internal_high_confidence_referrals
+            + (crosspromo_non_bot_hits * crosspromo_high_confidence_ratio)
+        )
 
         if content_requests > 0:
             organic_rate = organic_non_bot_referrals / content_requests
             internal_rate = internal_high_confidence_referrals / content_requests
+            human_signal_rate = human_signal_hits / content_requests
+            quality_adjusted_human_signal_rate = quality_adjusted_human_signal_hits / content_requests
         else:
             organic_rate = 0.0
             internal_rate = 0.0
+            human_signal_rate = 0.0
+            quality_adjusted_human_signal_rate = 0.0
 
         growth_pct = 0.0
+        human_signal_growth_pct = 0.0
         if len(history) >= 2:
             first = as_int(history[0].get(content_key, 0))
             last = as_int(history[-1].get(content_key, 0))
-            if first <= 0:
-                growth_pct = 100.0 if last > 0 else 0.0
-            else:
-                growth_pct = ((last - first) / first) * 100.0
+            growth_pct = pct_change(first, last)
+
+            first_human_signal = (
+                as_int(history[0].get(organic_key, 0))
+                + as_int(history[0].get(internal_key, 0))
+                + as_int(history[0].get(crosspromo_key, 0))
+            )
+            last_human_signal = (
+                as_int(history[-1].get(organic_key, 0))
+                + as_int(history[-1].get(internal_key, 0))
+                + as_int(history[-1].get(crosspromo_key, 0))
+            )
+            human_signal_growth_pct = pct_change(first_human_signal, last_human_signal)
+
+        crosspromo_dependency_ratio = 0.0
+        if human_signal_hits > 0:
+            crosspromo_dependency_ratio = crosspromo_non_bot_hits / human_signal_hits
 
         rows.append(
             {
@@ -88,9 +129,16 @@ def build_rows(score: dict, history: list[dict]) -> list[dict]:
                 "organic_non_bot_referrals_24h": organic_non_bot_referrals,
                 "internal_high_confidence_non_bot_referrals_24h": internal_high_confidence_referrals,
                 "crosspromo_non_bot_hits_24h": crosspromo_non_bot_hits,
+                "human_signal_hits_24h": human_signal_hits,
+                "quality_adjusted_human_signal_hits_24h": round(quality_adjusted_human_signal_hits, 2),
                 "organic_non_bot_referral_rate": organic_rate,
                 "internal_high_confidence_referral_rate": internal_rate,
+                "human_signal_rate": human_signal_rate,
+                "quality_adjusted_human_signal_rate": quality_adjusted_human_signal_rate,
+                "crosspromo_dependency_ratio": crosspromo_dependency_ratio,
+                "crosspromo_high_confidence_ratio": crosspromo_high_confidence_ratio,
                 "content_growth_pct_window": round(growth_pct, 2),
+                "human_signal_growth_pct_window": round(human_signal_growth_pct, 2),
             }
         )
     return rows
@@ -98,13 +146,22 @@ def build_rows(score: dict, history: list[dict]) -> list[dict]:
 
 def score_rows(rows: list[dict]) -> list[dict]:
     max_content = max((row["content_requests_24h"] for row in rows), default=0)
+    max_quality_adjusted_human_rate = max((row["quality_adjusted_human_signal_rate"] for row in rows), default=0.0)
     max_organic_rate = max((row["organic_non_bot_referral_rate"] for row in rows), default=0.0)
     max_internal_rate = max((row["internal_high_confidence_referral_rate"] for row in rows), default=0.0)
 
     for row in rows:
         demand_score = 0.0
         if max_content > 0:
-            demand_score = row["content_requests_24h"] / max_content
+            demand_score = math.sqrt(row["content_requests_24h"] / max_content)
+
+        if max_quality_adjusted_human_rate > 0:
+            quality_gap_score = 1.0 - min(
+                row["quality_adjusted_human_signal_rate"] / max_quality_adjusted_human_rate,
+                1.0,
+            )
+        else:
+            quality_gap_score = 1.0
 
         if max_organic_rate > 0:
             organic_gap_score = 1.0 - min(row["organic_non_bot_referral_rate"] / max_organic_rate, 1.0)
@@ -116,22 +173,39 @@ def score_rows(rows: list[dict]) -> list[dict]:
         else:
             internal_gap_score = 1.0
 
-        momentum_score = clamp(max(row["content_growth_pct_window"], 0.0) / 200.0)
+        growth_imbalance_score = clamp(
+            (max(row["content_growth_pct_window"], 0.0) - max(row["human_signal_growth_pct_window"], 0.0)) / 150.0
+        )
+        signal_quality_factor = clamp(
+            1.0 - (row["crosspromo_dependency_ratio"] * (1.0 - row["crosspromo_high_confidence_ratio"]))
+        )
         activity_floor = clamp(row["content_requests_24h"] / 50.0)
         opportunity_raw = (
-            0.5 * demand_score + 0.3 * organic_gap_score + 0.15 * internal_gap_score + 0.05 * momentum_score
+            0.4 * demand_score
+            + 0.35 * quality_gap_score
+            + 0.15 * organic_gap_score
+            + 0.05 * internal_gap_score
+            + 0.05 * growth_imbalance_score
         )
-        opportunity_score = round(100.0 * opportunity_raw * activity_floor, 2)
+        opportunity_score = round(100.0 * opportunity_raw * activity_floor * signal_quality_factor, 2)
 
         reasons: list[str] = []
+        if row["content_requests_24h"] >= 50 and row["quality_adjusted_human_signal_hits_24h"] == 0:
+            reasons.append("no high-confidence human discovery signals despite measurable traffic")
         if row["content_requests_24h"] >= 50 and row["organic_non_bot_referrals_24h"] == 0:
             reasons.append("no organic non-bot referrals despite measurable traffic")
         if row["content_requests_24h"] >= 50 and row["internal_high_confidence_non_bot_referrals_24h"] == 0:
             reasons.append("no high-confidence internal referrals despite measurable traffic")
-        if row["content_growth_pct_window"] >= 25 and row["organic_non_bot_referral_rate"] == 0:
-            reasons.append("traffic is growing but discovery quality remains zero")
+        if (
+            row["crosspromo_dependency_ratio"] >= 0.6
+            and row["crosspromo_high_confidence_ratio"] < 0.5
+            and row["crosspromo_non_bot_hits_24h"] > 0
+        ):
+            reasons.append("human signal is dominated by low-confidence crosspromo traffic")
+        if row["content_growth_pct_window"] >= 25 and row["human_signal_growth_pct_window"] <= 0:
+            reasons.append("traffic is growing but human-signal discovery is flat")
         if not reasons:
-            reasons.append("organic and internal discovery rates are below stronger peer kits")
+            reasons.append("quality-adjusted human discovery rate is below stronger peer kits")
 
         if opportunity_score >= 70:
             priority_tier = "high"
@@ -141,9 +215,19 @@ def score_rows(rows: list[dict]) -> list[dict]:
             priority_tier = "watch"
 
         recommended_primary_category = "S"
-        if row["internal_high_confidence_non_bot_referrals_24h"] == 0 and row["content_requests_24h"] >= 50:
+        if row["content_requests_24h"] >= 50 and row["internal_high_confidence_non_bot_referrals_24h"] == 0:
             recommended_primary_category = "I"
-        if row["crosspromo_non_bot_hits_24h"] == 0 and row["content_requests_24h"] >= 50:
+        if (
+            row["crosspromo_dependency_ratio"] >= 0.6
+            and row["crosspromo_high_confidence_ratio"] < 0.5
+            and row["crosspromo_non_bot_hits_24h"] > 0
+        ):
+            recommended_primary_category = "A"
+        elif (
+            row["crosspromo_non_bot_hits_24h"] == 0
+            and row["organic_non_bot_referrals_24h"] == 0
+            and row["content_requests_24h"] >= 50
+        ):
             recommended_primary_category = "M"
 
         row.update(
@@ -157,6 +241,19 @@ def score_rows(rows: list[dict]) -> list[dict]:
                     row["internal_high_confidence_referral_rate"] * 100.0,
                     3,
                 ),
+                "human_signal_rate_pct": round(row["human_signal_rate"] * 100.0, 3),
+                "quality_adjusted_human_signal_rate_pct": round(
+                    row["quality_adjusted_human_signal_rate"] * 100.0,
+                    3,
+                ),
+                "crosspromo_dependency_share_pct": round(row["crosspromo_dependency_ratio"] * 100.0, 3),
+                "crosspromo_high_confidence_share_pct_assumed": round(
+                    row["crosspromo_high_confidence_ratio"] * 100.0,
+                    3,
+                ),
+                "signal_quality_factor_pct": round(signal_quality_factor * 100.0, 2),
+                "quality_gap_score_pct": round(quality_gap_score * 100.0, 2),
+                "growth_imbalance_score_pct": round(growth_imbalance_score * 100.0, 2),
             }
         )
 
@@ -172,10 +269,12 @@ def build_report(score: dict, history: list[dict]) -> dict:
         "history_samples_analyzed": len(history),
         "kits_analyzed": len(KIT_NAMES),
         "scoring": {
-            "formula": "score = activity_floor * (0.5*demand + 0.3*organic_gap + 0.15*internal_gap + 0.05*momentum)",
+            "formula": "score = activity_floor * signal_quality * (0.4*demand + 0.35*quality_gap + 0.15*organic_gap + 0.05*internal_gap + 0.05*growth_imbalance)",
             "activity_floor_full_at_content_requests": 50,
-            "momentum_full_at_growth_pct": 200,
-            "higher_score_means": "higher current demand with weaker organic/internal discovery coverage",
+            "growth_imbalance_full_at_pct_diff": 150,
+            "signal_quality_factor": "penalizes kits that depend on low-confidence crosspromo traffic",
+            "quality_adjustment_for_crosspromo_non_bot": "crosspromo_non_bot_hits weighted by global crosspromo_non_bot_high_confidence_share_pct",
+            "higher_score_means": "higher demand with weaker high-confidence human discovery coverage",
         },
         "top_opportunities": top_opportunities,
         "kit_rankings": scored_rows,
