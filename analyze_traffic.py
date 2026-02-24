@@ -721,6 +721,7 @@ class WindowStats:
         internal_to_opskit = int(self.internal_crossproperty_target_sections.get("opskit", 0))
         internal_to_studykit = int(self.internal_crossproperty_target_sections.get("studykit", 0))
         internal_to_careerkit = int(self.internal_crossproperty_target_sections.get("careerkit", 0))
+        internal_to_housingkit = int(self.internal_crossproperty_target_sections.get("housingkit", 0))
         internal_non_bot_to_datekit = int(self.internal_crossproperty_non_bot_target_sections.get("datekit", 0))
         internal_non_bot_to_budgetkit = int(self.internal_crossproperty_non_bot_target_sections.get("budgetkit", 0))
         internal_non_bot_to_healthkit = int(self.internal_crossproperty_non_bot_target_sections.get("healthkit", 0))
@@ -729,6 +730,7 @@ class WindowStats:
         internal_non_bot_to_opskit = int(self.internal_crossproperty_non_bot_target_sections.get("opskit", 0))
         internal_non_bot_to_studykit = int(self.internal_crossproperty_non_bot_target_sections.get("studykit", 0))
         internal_non_bot_to_careerkit = int(self.internal_crossproperty_non_bot_target_sections.get("careerkit", 0))
+        internal_non_bot_to_housingkit = int(self.internal_crossproperty_non_bot_target_sections.get("housingkit", 0))
         internal_inferred_to_datekit = int(self.internal_crossproperty_inferred_target_sections.get("datekit", 0))
         internal_inferred_to_budgetkit = int(self.internal_crossproperty_inferred_target_sections.get("budgetkit", 0))
         internal_inferred_to_healthkit = int(self.internal_crossproperty_inferred_target_sections.get("healthkit", 0))
@@ -737,6 +739,7 @@ class WindowStats:
         internal_inferred_to_opskit = int(self.internal_crossproperty_inferred_target_sections.get("opskit", 0))
         internal_inferred_to_studykit = int(self.internal_crossproperty_inferred_target_sections.get("studykit", 0))
         internal_inferred_to_careerkit = int(self.internal_crossproperty_inferred_target_sections.get("careerkit", 0))
+        internal_inferred_to_housingkit = int(self.internal_crossproperty_inferred_target_sections.get("housingkit", 0))
         internal_inferred_non_bot_to_datekit = int(
             self.internal_crossproperty_inferred_non_bot_target_sections.get("datekit", 0)
         )
@@ -761,6 +764,9 @@ class WindowStats:
         internal_inferred_non_bot_to_careerkit = int(
             self.internal_crossproperty_inferred_non_bot_target_sections.get("careerkit", 0)
         )
+        internal_inferred_non_bot_to_housingkit = int(
+            self.internal_crossproperty_inferred_non_bot_target_sections.get("housingkit", 0)
+        )
         internal_effective_to_datekit = internal_to_datekit + internal_inferred_to_datekit
         internal_effective_to_budgetkit = internal_to_budgetkit + internal_inferred_to_budgetkit
         internal_effective_to_healthkit = internal_to_healthkit + internal_inferred_to_healthkit
@@ -769,6 +775,7 @@ class WindowStats:
         internal_effective_to_opskit = internal_to_opskit + internal_inferred_to_opskit
         internal_effective_to_studykit = internal_to_studykit + internal_inferred_to_studykit
         internal_effective_to_careerkit = internal_to_careerkit + internal_inferred_to_careerkit
+        internal_effective_to_housingkit = internal_to_housingkit + internal_inferred_to_housingkit
         internal_effective_non_bot_to_datekit = internal_non_bot_to_datekit + internal_inferred_non_bot_to_datekit
         internal_effective_non_bot_to_budgetkit = internal_non_bot_to_budgetkit + internal_inferred_non_bot_to_budgetkit
         internal_effective_non_bot_to_healthkit = internal_non_bot_to_healthkit + internal_inferred_non_bot_to_healthkit
@@ -777,6 +784,9 @@ class WindowStats:
         internal_effective_non_bot_to_opskit = internal_non_bot_to_opskit + internal_inferred_non_bot_to_opskit
         internal_effective_non_bot_to_studykit = internal_non_bot_to_studykit + internal_inferred_non_bot_to_studykit
         internal_effective_non_bot_to_careerkit = internal_non_bot_to_careerkit + internal_inferred_non_bot_to_careerkit
+        internal_effective_non_bot_to_housingkit = (
+            internal_non_bot_to_housingkit + internal_inferred_non_bot_to_housingkit
+        )
         internal_crossproperty_effective_referrals = (
             self.internal_crossproperty_referrals + self.internal_crossproperty_inferred_referrals
         )
@@ -791,6 +801,7 @@ class WindowStats:
         crosspromo_to_opskit = int(self.crosspromo_campaign_target_sections.get("opskit", 0))
         crosspromo_to_studykit = int(self.crosspromo_campaign_target_sections.get("studykit", 0))
         crosspromo_to_careerkit = int(self.crosspromo_campaign_target_sections.get("careerkit", 0))
+        crosspromo_to_housingkit = int(self.crosspromo_campaign_target_sections.get("housingkit", 0))
         crosspromo_non_bot_to_datekit = int(self.crosspromo_non_bot_campaign_target_sections.get("datekit", 0))
         crosspromo_non_bot_to_budgetkit = int(self.crosspromo_non_bot_campaign_target_sections.get("budgetkit", 0))
         crosspromo_non_bot_to_healthkit = int(self.crosspromo_non_bot_campaign_target_sections.get("healthkit", 0))
@@ -799,6 +810,7 @@ class WindowStats:
         crosspromo_non_bot_to_opskit = int(self.crosspromo_non_bot_campaign_target_sections.get("opskit", 0))
         crosspromo_non_bot_to_studykit = int(self.crosspromo_non_bot_campaign_target_sections.get("studykit", 0))
         crosspromo_non_bot_to_careerkit = int(self.crosspromo_non_bot_campaign_target_sections.get("careerkit", 0))
+        crosspromo_non_bot_to_housingkit = int(self.crosspromo_non_bot_campaign_target_sections.get("housingkit", 0))
         crosspromo_param_source_hits = self.crosspromo_hits_with_param_source
         crosspromo_non_bot_param_source_hits = self.crosspromo_non_bot_hits_with_param_source
         crosspromo_param_source_without_referrer_hits = self.crosspromo_hits_with_param_source_without_referrer
@@ -973,6 +985,7 @@ class WindowStats:
             "crosspromo_campaign_hits_to_opskit": crosspromo_to_opskit,
             "crosspromo_campaign_hits_to_studykit": crosspromo_to_studykit,
             "crosspromo_campaign_hits_to_careerkit": crosspromo_to_careerkit,
+            "crosspromo_campaign_hits_to_housingkit": crosspromo_to_housingkit,
             "crosspromo_non_bot_hits_to_datekit": crosspromo_non_bot_to_datekit,
             "crosspromo_non_bot_hits_to_budgetkit": crosspromo_non_bot_to_budgetkit,
             "crosspromo_non_bot_hits_to_healthkit": crosspromo_non_bot_to_healthkit,
@@ -981,6 +994,7 @@ class WindowStats:
             "crosspromo_non_bot_hits_to_opskit": crosspromo_non_bot_to_opskit,
             "crosspromo_non_bot_hits_to_studykit": crosspromo_non_bot_to_studykit,
             "crosspromo_non_bot_hits_to_careerkit": crosspromo_non_bot_to_careerkit,
+            "crosspromo_non_bot_hits_to_housingkit": crosspromo_non_bot_to_housingkit,
             "crosspromo_source_attributed_hits": crosspromo_source_attributed_hits,
             "crosspromo_hits_with_param_source": crosspromo_param_source_hits,
             "crosspromo_non_bot_hits_with_param_source": crosspromo_non_bot_param_source_hits,
@@ -1022,6 +1036,7 @@ class WindowStats:
             "internal_crossproperty_referrals_to_opskit": internal_to_opskit,
             "internal_crossproperty_referrals_to_studykit": internal_to_studykit,
             "internal_crossproperty_referrals_to_careerkit": internal_to_careerkit,
+            "internal_crossproperty_referrals_to_housingkit": internal_to_housingkit,
             "internal_crossproperty_non_bot_referrals": self.internal_crossproperty_non_bot_referrals,
             "internal_crossproperty_non_bot_referrals_to_datekit": internal_non_bot_to_datekit,
             "internal_crossproperty_non_bot_referrals_to_budgetkit": internal_non_bot_to_budgetkit,
@@ -1031,6 +1046,7 @@ class WindowStats:
             "internal_crossproperty_non_bot_referrals_to_opskit": internal_non_bot_to_opskit,
             "internal_crossproperty_non_bot_referrals_to_studykit": internal_non_bot_to_studykit,
             "internal_crossproperty_non_bot_referrals_to_careerkit": internal_non_bot_to_careerkit,
+            "internal_crossproperty_non_bot_referrals_to_housingkit": internal_non_bot_to_housingkit,
             "internal_crossproperty_inferred_referrals": self.internal_crossproperty_inferred_referrals,
             "internal_crossproperty_inferred_referrals_to_datekit": internal_inferred_to_datekit,
             "internal_crossproperty_inferred_referrals_to_budgetkit": internal_inferred_to_budgetkit,
@@ -1040,6 +1056,7 @@ class WindowStats:
             "internal_crossproperty_inferred_referrals_to_opskit": internal_inferred_to_opskit,
             "internal_crossproperty_inferred_referrals_to_studykit": internal_inferred_to_studykit,
             "internal_crossproperty_inferred_referrals_to_careerkit": internal_inferred_to_careerkit,
+            "internal_crossproperty_inferred_referrals_to_housingkit": internal_inferred_to_housingkit,
             "internal_crossproperty_inferred_non_bot_referrals": self.internal_crossproperty_inferred_non_bot_referrals,
             "internal_crossproperty_inferred_non_bot_referrals_to_datekit": internal_inferred_non_bot_to_datekit,
             "internal_crossproperty_inferred_non_bot_referrals_to_budgetkit": internal_inferred_non_bot_to_budgetkit,
@@ -1049,6 +1066,7 @@ class WindowStats:
             "internal_crossproperty_inferred_non_bot_referrals_to_opskit": internal_inferred_non_bot_to_opskit,
             "internal_crossproperty_inferred_non_bot_referrals_to_studykit": internal_inferred_non_bot_to_studykit,
             "internal_crossproperty_inferred_non_bot_referrals_to_careerkit": internal_inferred_non_bot_to_careerkit,
+            "internal_crossproperty_inferred_non_bot_referrals_to_housingkit": internal_inferred_non_bot_to_housingkit,
             "internal_crossproperty_inferred_verified_referrals": internal_inferred_verified_referrals,
             "internal_crossproperty_inferred_non_bot_verified_referrals": internal_inferred_non_bot_verified_referrals,
             "internal_crossproperty_inferred_unverified_referrals": internal_inferred_unverified_referrals,
@@ -1062,6 +1080,7 @@ class WindowStats:
             "internal_crossproperty_effective_referrals_to_opskit": internal_effective_to_opskit,
             "internal_crossproperty_effective_referrals_to_studykit": internal_effective_to_studykit,
             "internal_crossproperty_effective_referrals_to_careerkit": internal_effective_to_careerkit,
+            "internal_crossproperty_effective_referrals_to_housingkit": internal_effective_to_housingkit,
             "internal_crossproperty_effective_non_bot_referrals": internal_crossproperty_effective_non_bot_referrals,
             "internal_crossproperty_effective_non_bot_referrals_to_datekit": internal_effective_non_bot_to_datekit,
             "internal_crossproperty_effective_non_bot_referrals_to_budgetkit": internal_effective_non_bot_to_budgetkit,
@@ -1071,6 +1090,7 @@ class WindowStats:
             "internal_crossproperty_effective_non_bot_referrals_to_opskit": internal_effective_non_bot_to_opskit,
             "internal_crossproperty_effective_non_bot_referrals_to_studykit": internal_effective_non_bot_to_studykit,
             "internal_crossproperty_effective_non_bot_referrals_to_careerkit": internal_effective_non_bot_to_careerkit,
+            "internal_crossproperty_effective_non_bot_referrals_to_housingkit": internal_effective_non_bot_to_housingkit,
             "known_bot_requests": self.known_bot_requests,
             "known_bot_unique_ips": len(self.known_bot_unique_ips),
             "clean_request_ratio": safe_ratio(self.clean_requests, self.total_requests),
@@ -1245,6 +1265,7 @@ def build_window_comparison(
         "crosspromo_campaign_hits_to_opskit",
         "crosspromo_campaign_hits_to_studykit",
         "crosspromo_campaign_hits_to_careerkit",
+        "crosspromo_campaign_hits_to_housingkit",
         "crosspromo_non_bot_hits_to_datekit",
         "crosspromo_non_bot_hits_to_budgetkit",
         "crosspromo_non_bot_hits_to_healthkit",
@@ -1253,6 +1274,7 @@ def build_window_comparison(
         "crosspromo_non_bot_hits_to_opskit",
         "crosspromo_non_bot_hits_to_studykit",
         "crosspromo_non_bot_hits_to_careerkit",
+        "crosspromo_non_bot_hits_to_housingkit",
         "crosspromo_source_attributed_hits",
         "crosspromo_non_bot_source_attributed_hits",
         "crosspromo_hits_with_param_source",
@@ -1287,6 +1309,7 @@ def build_window_comparison(
         "internal_crossproperty_referrals_to_opskit",
         "internal_crossproperty_referrals_to_studykit",
         "internal_crossproperty_referrals_to_careerkit",
+        "internal_crossproperty_referrals_to_housingkit",
         "internal_crossproperty_non_bot_referrals",
         "internal_crossproperty_non_bot_referrals_to_datekit",
         "internal_crossproperty_non_bot_referrals_to_budgetkit",
@@ -1296,6 +1319,7 @@ def build_window_comparison(
         "internal_crossproperty_non_bot_referrals_to_opskit",
         "internal_crossproperty_non_bot_referrals_to_studykit",
         "internal_crossproperty_non_bot_referrals_to_careerkit",
+        "internal_crossproperty_non_bot_referrals_to_housingkit",
         "internal_crossproperty_inferred_referrals",
         "internal_crossproperty_inferred_referrals_to_datekit",
         "internal_crossproperty_inferred_referrals_to_budgetkit",
@@ -1305,6 +1329,7 @@ def build_window_comparison(
         "internal_crossproperty_inferred_referrals_to_opskit",
         "internal_crossproperty_inferred_referrals_to_studykit",
         "internal_crossproperty_inferred_referrals_to_careerkit",
+        "internal_crossproperty_inferred_referrals_to_housingkit",
         "internal_crossproperty_inferred_non_bot_referrals",
         "internal_crossproperty_inferred_non_bot_referrals_to_datekit",
         "internal_crossproperty_inferred_non_bot_referrals_to_budgetkit",
@@ -1314,6 +1339,7 @@ def build_window_comparison(
         "internal_crossproperty_inferred_non_bot_referrals_to_opskit",
         "internal_crossproperty_inferred_non_bot_referrals_to_studykit",
         "internal_crossproperty_inferred_non_bot_referrals_to_careerkit",
+        "internal_crossproperty_inferred_non_bot_referrals_to_housingkit",
         "internal_crossproperty_inferred_verified_referrals",
         "internal_crossproperty_inferred_non_bot_verified_referrals",
         "internal_crossproperty_inferred_unverified_referrals",
@@ -1327,6 +1353,7 @@ def build_window_comparison(
         "internal_crossproperty_effective_referrals_to_opskit",
         "internal_crossproperty_effective_referrals_to_studykit",
         "internal_crossproperty_effective_referrals_to_careerkit",
+        "internal_crossproperty_effective_referrals_to_housingkit",
         "internal_crossproperty_effective_non_bot_referrals",
         "internal_crossproperty_effective_non_bot_referrals_to_datekit",
         "internal_crossproperty_effective_non_bot_referrals_to_budgetkit",
@@ -1336,6 +1363,7 @@ def build_window_comparison(
         "internal_crossproperty_effective_non_bot_referrals_to_opskit",
         "internal_crossproperty_effective_non_bot_referrals_to_studykit",
         "internal_crossproperty_effective_non_bot_referrals_to_careerkit",
+        "internal_crossproperty_effective_non_bot_referrals_to_housingkit",
         "known_bot_requests",
         "known_bot_unique_ips",
         "content_homepage_requests",
@@ -1500,6 +1528,7 @@ def main():
     print(f"  crosspromo_campaign_hits_to_opskit: {summary['crosspromo_campaign_hits_to_opskit']}")
     print(f"  crosspromo_campaign_hits_to_studykit: {summary['crosspromo_campaign_hits_to_studykit']}")
     print(f"  crosspromo_campaign_hits_to_careerkit: {summary['crosspromo_campaign_hits_to_careerkit']}")
+    print(f"  crosspromo_campaign_hits_to_housingkit: {summary['crosspromo_campaign_hits_to_housingkit']}")
     print(f"  crosspromo_non_bot_hits_to_datekit: {summary['crosspromo_non_bot_hits_to_datekit']}")
     print(f"  crosspromo_non_bot_hits_to_budgetkit: {summary['crosspromo_non_bot_hits_to_budgetkit']}")
     print(f"  crosspromo_non_bot_hits_to_healthkit: {summary['crosspromo_non_bot_hits_to_healthkit']}")
@@ -1508,6 +1537,7 @@ def main():
     print(f"  crosspromo_non_bot_hits_to_opskit: {summary['crosspromo_non_bot_hits_to_opskit']}")
     print(f"  crosspromo_non_bot_hits_to_studykit: {summary['crosspromo_non_bot_hits_to_studykit']}")
     print(f"  crosspromo_non_bot_hits_to_careerkit: {summary['crosspromo_non_bot_hits_to_careerkit']}")
+    print(f"  crosspromo_non_bot_hits_to_housingkit: {summary['crosspromo_non_bot_hits_to_housingkit']}")
     print(f"  crosspromo_source_attributed_hits: {summary['crosspromo_source_attributed_hits']}")
     print(f"  crosspromo_non_bot_source_attributed_hits: {summary['crosspromo_non_bot_source_attributed_hits']}")
     print(f"  crosspromo_hits_with_param_source: {summary['crosspromo_hits_with_param_source']}")
@@ -1659,6 +1689,7 @@ def main():
             "content_opskit_requests",
             "content_studykit_requests",
             "content_careerkit_requests",
+            "content_housingkit_requests",
             "suspicious_requests",
             "not_found_requests",
             "organic_referrals",
@@ -1676,6 +1707,7 @@ def main():
             "organic_opskit_referrals",
             "organic_studykit_referrals",
             "organic_careerkit_referrals",
+            "organic_housingkit_referrals",
             "organic_non_bot_blog_referrals",
             "organic_non_bot_tools_referrals",
             "organic_non_bot_cheatsheets_referrals",
@@ -1687,6 +1719,7 @@ def main():
             "organic_non_bot_opskit_referrals",
             "organic_non_bot_studykit_referrals",
             "organic_non_bot_careerkit_referrals",
+            "organic_non_bot_housingkit_referrals",
             "crosspromo_campaign_hits",
             "crosspromo_campaign_hits_to_datekit",
             "crosspromo_campaign_hits_to_budgetkit",
@@ -1696,6 +1729,7 @@ def main():
             "crosspromo_campaign_hits_to_opskit",
             "crosspromo_campaign_hits_to_studykit",
             "crosspromo_campaign_hits_to_careerkit",
+            "crosspromo_campaign_hits_to_housingkit",
             "crosspromo_non_bot_hits_to_datekit",
             "crosspromo_non_bot_hits_to_budgetkit",
             "crosspromo_non_bot_hits_to_healthkit",
@@ -1704,6 +1738,7 @@ def main():
             "crosspromo_non_bot_hits_to_opskit",
             "crosspromo_non_bot_hits_to_studykit",
             "crosspromo_non_bot_hits_to_careerkit",
+            "crosspromo_non_bot_hits_to_housingkit",
             "crosspromo_source_attributed_hits",
             "crosspromo_non_bot_source_attributed_hits",
             "crosspromo_hits_with_param_source",
@@ -1738,6 +1773,7 @@ def main():
             "internal_crossproperty_referrals_to_opskit",
             "internal_crossproperty_referrals_to_studykit",
             "internal_crossproperty_referrals_to_careerkit",
+            "internal_crossproperty_referrals_to_housingkit",
             "internal_crossproperty_non_bot_referrals",
             "internal_crossproperty_non_bot_referrals_to_datekit",
             "internal_crossproperty_non_bot_referrals_to_budgetkit",
@@ -1747,6 +1783,7 @@ def main():
             "internal_crossproperty_non_bot_referrals_to_opskit",
             "internal_crossproperty_non_bot_referrals_to_studykit",
             "internal_crossproperty_non_bot_referrals_to_careerkit",
+            "internal_crossproperty_non_bot_referrals_to_housingkit",
             "internal_crossproperty_inferred_referrals",
             "internal_crossproperty_inferred_referrals_to_datekit",
             "internal_crossproperty_inferred_referrals_to_budgetkit",
@@ -1756,6 +1793,7 @@ def main():
             "internal_crossproperty_inferred_referrals_to_opskit",
             "internal_crossproperty_inferred_referrals_to_studykit",
             "internal_crossproperty_inferred_referrals_to_careerkit",
+            "internal_crossproperty_inferred_referrals_to_housingkit",
             "internal_crossproperty_inferred_non_bot_referrals",
             "internal_crossproperty_inferred_non_bot_referrals_to_datekit",
             "internal_crossproperty_inferred_non_bot_referrals_to_budgetkit",
@@ -1765,6 +1803,7 @@ def main():
             "internal_crossproperty_inferred_non_bot_referrals_to_opskit",
             "internal_crossproperty_inferred_non_bot_referrals_to_studykit",
             "internal_crossproperty_inferred_non_bot_referrals_to_careerkit",
+            "internal_crossproperty_inferred_non_bot_referrals_to_housingkit",
             "internal_crossproperty_inferred_verified_referrals",
             "internal_crossproperty_inferred_non_bot_verified_referrals",
             "internal_crossproperty_inferred_unverified_referrals",
@@ -1778,6 +1817,7 @@ def main():
             "internal_crossproperty_effective_referrals_to_opskit",
             "internal_crossproperty_effective_referrals_to_studykit",
             "internal_crossproperty_effective_referrals_to_careerkit",
+            "internal_crossproperty_effective_referrals_to_housingkit",
             "internal_crossproperty_effective_non_bot_referrals",
             "internal_crossproperty_effective_non_bot_referrals_to_datekit",
             "internal_crossproperty_effective_non_bot_referrals_to_budgetkit",
@@ -1787,6 +1827,7 @@ def main():
             "internal_crossproperty_effective_non_bot_referrals_to_opskit",
             "internal_crossproperty_effective_non_bot_referrals_to_studykit",
             "internal_crossproperty_effective_non_bot_referrals_to_careerkit",
+            "internal_crossproperty_effective_non_bot_referrals_to_housingkit",
             "known_bot_requests",
             "known_bot_unique_ips",
         ]:
