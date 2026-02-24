@@ -29,6 +29,7 @@ OPSKIT_ROOT = SITE_ROOT / "opskit"
 STUDYKIT_ROOT = SITE_ROOT / "studykit"
 CAREERKIT_ROOT = SITE_ROOT / "careerkit"
 HOUSINGKIT_ROOT = SITE_ROOT / "housingkit"
+TAXKIT_ROOT = SITE_ROOT / "taxkit"
 KITS_ROOT = SITE_ROOT / "kits"
 SUBSITE_MOUNTS: tuple[tuple[str, Path], ...] = (
     ("/datekit", DATEKIT_ROOT),
@@ -40,6 +41,7 @@ SUBSITE_MOUNTS: tuple[tuple[str, Path], ...] = (
     ("/studykit", STUDYKIT_ROOT),
     ("/careerkit", CAREERKIT_ROOT),
     ("/housingkit", HOUSINGKIT_ROOT),
+    ("/taxkit", TAXKIT_ROOT),
 )
 
 
