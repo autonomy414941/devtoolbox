@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ANALYZE_TRAFFIC_SCRIPT = os.path.join(BASE_DIR, "analyze_traffic.py")
 BLOG_DIR = "/var/www/web-ceo/blog"
 PROMO_MARKER = 'data-crossproperty-promo="true"'
-PROMO_VERSION = "5"
+PROMO_VERSION = "6"
 PROMO_VERSION_MARKER = f'data-crossproperty-promo-version="{PROMO_VERSION}"'
 PROMO_CAMPAIGN = "crosspromo-top-organic"
 PROMO_BLOCK_PATTERN = re.compile(
@@ -156,8 +156,9 @@ def pick_primary_target(slug: str) -> dict[str, str]:
 def build_promo_html(slug: str) -> str:
     params = f"utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}&utm_content={slug}"
     primary = pick_primary_target(slug)
+    primary_href = f"/go/{primary['slug']}/?{params}"
     secondary_links = ", ".join(
-        f'<a href="/{target["slug"]}/?{params}" style="color: #bfdbfe; text-decoration: underline;">{target["link_label"]}</a>'
+        f'<a href="/go/{target["slug"]}/?{params}" style="color: #bfdbfe; text-decoration: underline;">{target["link_label"]}</a>'
         for target in PROMO_TARGETS
         if target["slug"] != primary["slug"]
     )
@@ -168,12 +169,12 @@ def build_promo_html(slug: str) -> str:
         'style="margin: 1.25rem 0 1.5rem; padding: 1rem 1.1rem; border: 1px solid rgba(59,130,246,0.35); '
         'border-radius: 10px; background: rgba(59,130,246,0.08); line-height: 1.65;">\n'
         '            <strong style="color: #bfdbfe;">Plan execution before writing code:</strong>\n'
-        f'            <p style="margin: 0.45rem 0 0;"><a href="/{primary["slug"]}/?{params}" '
+        f'            <p style="margin: 0.45rem 0 0;"><a href="{primary_href}" '
         'style="display: inline-block; color: #0f172a; text-decoration: none; background: #93c5fd; '
         'padding: 0.28rem 0.55rem; border-radius: 6px; font-weight: 700;">'
         f'{primary["primary_label"]}</a> {primary["primary_suffix"]}</p>\n'
         f'            <p style="margin: 0.45rem 0 0; color: #dbeafe;">Need other planning calculators for life, ops, or study workflows? {secondary_links}. '
-        f'<a href="/kits/?{params}" style="color: #bfdbfe; text-decoration: underline; font-weight: 600;">All Kits</a>.</p>\n'
+        f'<a href="/go/kits/?{params}" style="color: #bfdbfe; text-decoration: underline; font-weight: 600;">All Kits</a>.</p>\n'
         "        </aside>\n"
     )
 
@@ -244,7 +245,7 @@ def patch_blog_file(path: str, dry_run: bool) -> str:
 
     has_campaign = f"utm_campaign={PROMO_CAMPAIGN}" in content
     has_all_campaign_targets = all(
-        f"/{target['slug']}/?utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}" in content
+        f"/go/{target['slug']}/?utm_source=devtoolbox&utm_medium=internal&utm_campaign={PROMO_CAMPAIGN}" in content
         for target in PROMO_TARGETS
     )
     if has_campaign and has_all_campaign_targets:

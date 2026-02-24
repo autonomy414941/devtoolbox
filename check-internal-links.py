@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
 
+INTENTIONAL_REDIRECT_PREFIXES = ("/go/",)
+
 
 class AnchorParser(HTMLParser):
     def __init__(self) -> None:
@@ -161,6 +163,7 @@ def main() -> int:
 
     broken_targets: List[dict] = []
     redirect_targets: List[dict] = []
+    intentional_redirect_targets: List[dict] = []
     ok_target_count = 0
 
     for path, count in link_counts.items():
@@ -177,18 +180,25 @@ def main() -> int:
             broken_targets.append(item)
         elif 300 <= status < 400:
             item["location"] = location_or_error
-            redirect_targets.append(item)
+            if any(path.startswith(prefix) for prefix in INTENTIONAL_REDIRECT_PREFIXES):
+                intentional_redirect_targets.append(item)
+                ok_target_count += 1
+            else:
+                redirect_targets.append(item)
         else:
             ok_target_count += 1
 
     broken_targets.sort(key=lambda x: (-x["count"], x["path"]))  # type: ignore[index]
     redirect_targets.sort(key=lambda x: (-x["count"], x["path"]))  # type: ignore[index]
+    intentional_redirect_targets.sort(key=lambda x: (-x["count"], x["path"]))  # type: ignore[index]
 
     broken_link_instances = sum(int(x["count"]) for x in broken_targets)
     redirect_link_instances = sum(int(x["count"]) for x in redirect_targets)
+    intentional_redirect_link_instances = sum(int(x["count"]) for x in intentional_redirect_targets)
     unique_targets = len(link_counts)
     broken_target_count = len(broken_targets)
     redirect_target_count = len(redirect_targets)
+    intentional_redirect_target_count = len(intentional_redirect_targets)
     broken_ratio = 0.0
     if scanned_links > 0:
         broken_ratio = round((broken_link_instances / scanned_links) * 100, 4)
@@ -202,12 +212,15 @@ def main() -> int:
         "unique_internal_targets": unique_targets,
         "ok_target_count": ok_target_count,
         "redirect_target_count": redirect_target_count,
+        "intentional_redirect_target_count": intentional_redirect_target_count,
         "broken_target_count": broken_target_count,
         "broken_link_instances": broken_link_instances,
         "redirect_link_instances": redirect_link_instances,
+        "intentional_redirect_link_instances": intentional_redirect_link_instances,
         "broken_link_ratio_pct": broken_ratio,
         "top_broken_targets": broken_targets[: max(1, int(args.max_items))],
         "top_redirect_targets": redirect_targets[: max(1, int(args.max_items))],
+        "top_intentional_redirect_targets": intentional_redirect_targets[: max(1, int(args.max_items))],
     }
 
     if args.json:
@@ -218,6 +231,8 @@ def main() -> int:
     print(f"unique_internal_targets: {unique_targets}")
     print(f"broken_target_count: {broken_target_count}")
     print(f"broken_link_instances: {broken_link_instances}")
+    print(f"intentional_redirect_target_count: {intentional_redirect_target_count}")
+    print(f"intentional_redirect_link_instances: {intentional_redirect_link_instances}")
     print(f"broken_link_ratio_pct: {broken_ratio}")
 
     if broken_targets:
