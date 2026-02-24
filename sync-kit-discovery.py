@@ -81,6 +81,20 @@ KITS = [
         "icon": "&#x1f9fe;",
         "summary": "Quarterly estimated tax and paycheck take-home calculators for tax planning.",
     },
+    {
+        "slug": "autokit",
+        "name": "AutoKit",
+        "url": "/autokit/",
+        "icon": "&#x1f698;",
+        "summary": "Auto loan, commute cost, and total ownership calculators for car planning.",
+    },
+    {
+        "slug": "gitkit",
+        "name": "GitKit",
+        "url": "/gitkit/",
+        "icon": "&#x1f5c3;",
+        "summary": "Branch naming, commit message, and rebase planning tools for Git workflows.",
+    },
 ]
 
 KIT_ROOTS = {
@@ -94,6 +108,8 @@ KIT_ROOTS = {
     "careerkit": SITE_ROOT / "careerkit",
     "housingkit": SITE_ROOT / "housingkit",
     "taxkit": SITE_ROOT / "taxkit",
+    "autokit": SITE_ROOT / "autokit",
+    "gitkit": SITE_ROOT / "gitkit",
 }
 
 KIT_CARD_BLOCK = """
@@ -147,6 +163,16 @@ KIT_CARD_BLOCK = """
                     <h3>TaxKit</h3>
                     <p>Estimate quarterly taxes and paycheck take-home pay with custom rates</p>
                 </a>
+                <a href="/autokit/" class="tool-card" data-tags="auto loan calculator commute cost calculator total ownership calculator car payment planner">
+                    <div class="tool-icon">&#x1f698;</div>
+                    <h3>AutoKit</h3>
+                    <p>Estimate loan payments, commute costs, and total car ownership expenses</p>
+                </a>
+                <a href="/gitkit/" class="tool-card" data-tags="git branch name generator conventional commit builder interactive rebase planner">
+                    <div class="tool-icon">&#x1f5c3;</div>
+                    <h3>GitKit</h3>
+                    <p>Generate branch names, commit messages, and rebase plans for cleaner Git workflows</p>
+                </a>
 """
 
 
@@ -195,19 +221,19 @@ def render_kits_page(counts: dict[str, int]) -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life Kits Directory — Date, Budget, Health, Sleep, Focus, Ops, Study, Career, Housing, and Tax Calculators</title>
-    <meta name="description" content="Discover all DevToolbox planning suites in one place: DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, CareerKit, HousingKit, and TaxKit. __TOTAL_CALCULATORS__ free calculators with no signup.">
+    <title>Kits Directory — Date, Budget, Health, Sleep, Focus, Ops, Study, Career, Housing, Tax, Auto, and Git Tools</title>
+    <meta name="description" content="Discover all DevToolbox suites in one place: DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, CareerKit, HousingKit, TaxKit, AutoKit, and GitKit. __TOTAL_CALCULATORS__ free tools with no signup.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://devtoolbox.dedyn.io/kits/">
-    <meta property="og:title" content="Life Kits Directory — Free Planning Calculator Suites">
-    <meta property="og:description" content="Explore DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, CareerKit, HousingKit, and TaxKit from one discovery hub.">
+    <meta property="og:title" content="Kits Directory — Free Planning and Workflow Suites">
+    <meta property="og:description" content="Explore DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, CareerKit, HousingKit, TaxKit, AutoKit, and GitKit from one discovery hub.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://devtoolbox.dedyn.io/kits/">
     <meta property="og:site_name" content="DevToolbox">
     <meta property="og:image" content="https://devtoolbox.dedyn.io/og/default.png">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Life Kits Directory — Free Planning Calculator Suites">
-    <meta name="twitter:description" content="Date, budget, health, sleep, focus, ops, study, career, housing, and tax calculator suites in one place.">
+    <meta name="twitter:title" content="Kits Directory — Free Planning and Workflow Suites">
+    <meta name="twitter:description" content="Date, budget, health, sleep, focus, ops, study, career, housing, tax, auto, and Git workflow suites in one place.">
     <meta name="twitter:image" content="https://devtoolbox.dedyn.io/og/default.png">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -219,8 +245,8 @@ def render_kits_page(counts: dict[str, int]) -> str:
     {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        "name": "Life Kits Directory",
-        "description": "Directory of date, budget, health, sleep, focus, ops, study, career, housing, and tax planning calculator suites.",
+        "name": "Kits Directory",
+        "description": "Directory of date, budget, health, sleep, focus, ops, study, career, housing, tax, auto, and Git workflow suites.",
         "url": "https://devtoolbox.dedyn.io/kits/",
         "isPartOf": {
             "@type": "WebSite",
@@ -233,7 +259,7 @@ def render_kits_page(counts: dict[str, int]) -> str:
     {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "name": "Planning Calculator Suites",
+        "name": "Planning and Workflow Suites",
         "itemListElement": [
 __ITEMLIST_JSON__
         ]
@@ -249,7 +275,7 @@ __ITEMLIST_JSON__
           "name": "Do these calculator suites require signup?",
           "acceptedAnswer": {
             "@type": "Answer",
-              "text": "No. All calculators across DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, CareerKit, HousingKit, and TaxKit are free and available without signup."
+              "text": "No. All tools across DateKit, BudgetKit, HealthKit, SleepKit, FocusKit, OpsKit, StudyKit, CareerKit, HousingKit, TaxKit, AutoKit, and GitKit are free and available without signup."
           }
         },
         {
@@ -288,17 +314,17 @@ __ITEMLIST_JSON__
         </nav>
     </header>
     <nav class="breadcrumb" aria-label="Breadcrumb">
-        <a href="/">Home</a><span class="separator">/</span><span class="current">Life Kits</span>
+        <a href="/">Home</a><span class="separator">/</span><span class="current">Kits</span>
     </nav>
     <main class="tool-page">
-        <h1>Life Kits Directory</h1>
-        <p class="description">Switch quickly between all planning calculator suites. __TOTAL_CALCULATORS__ calculators are currently available across focused kits.</p>
+        <h1>Kits Directory</h1>
+        <p class="description">Switch quickly between all planning and workflow suites. __TOTAL_CALCULATORS__ tools are currently available across focused kits.</p>
         <div class="grid" style="margin-top: 1.25rem;">
 __CARDS_HTML__
         </div>
         <section class="panel card" style="margin-top: 1.5rem; padding: 1rem 1.25rem; border: 1px solid rgba(59,130,246,0.25); border-radius: 8px; background: rgba(59,130,246,0.08);">
             <h2 style="font-size: 1.2rem; margin-bottom: 0.5rem;">How to Use This Directory</h2>
-            <p style="margin: 0;">Use DateKit for scheduling math, BudgetKit for money decisions, HealthKit and SleepKit for wellness planning, FocusKit for deep-work execution planning, OpsKit for reliability operations planning, StudyKit for academic planning, CareerKit for compensation decisions, HousingKit for home-cost planning, and TaxKit for quarterly and paycheck tax planning. Each suite cross-links to related paths so you can move between tasks without restarting your workflow.</p>
+            <p style="margin: 0;">Use DateKit for scheduling math, BudgetKit for money decisions, HealthKit and SleepKit for wellness planning, FocusKit for deep-work execution planning, OpsKit for reliability operations planning, StudyKit for academic planning, CareerKit for compensation decisions, HousingKit for home-cost planning, TaxKit for quarterly and paycheck tax planning, AutoKit for loan and ownership-cost planning, and GitKit for branch naming, commit hygiene, and rebase preparation. Each suite cross-links to related paths so you can move between tasks without restarting your workflow.</p>
         </section>
     </main>
     <footer>
@@ -348,7 +374,7 @@ def ensure_homepage_kit_cards(homepage_html: str) -> str:
 
     grid_html = match.group(2)
     grid_html = re.sub(
-        r'\s*<a href="/(?:datekit|budgetkit|healthkit|sleepkit|focuskit|opskit|studykit|careerkit|housingkit|taxkit)/" class="tool-card"[^>]*>.*?</a>\s*',
+        r'\s*<a href="/(?:datekit|budgetkit|healthkit|sleepkit|focuskit|opskit|studykit|careerkit|housingkit|taxkit|autokit|gitkit)/" class="tool-card"[^>]*>.*?</a>\s*',
         "\n",
         grid_html,
         flags=re.DOTALL,
