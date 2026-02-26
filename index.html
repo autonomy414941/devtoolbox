@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevToolbox - Practical Developer Tools, Guides, and Cheat Sheets</title>
+    <meta name="description" content="Collection of practical developer tools, implementation guides, and cheat sheets. Fast to scan, actionable in production.">
+    <meta property="og:title" content="DevToolbox">
+    <meta property="og:description" content="Practical developer tools, guides, and cheat sheets.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-0: #0b1021;
+            --bg-1: #151b35;
+            --ink: #f5f7ff;
+            --muted: #b8c2e6;
+            --card: rgba(14, 20, 41, 0.72);
+            --line: rgba(255, 255, 255, 0.12);
+            --accent: #50e3c2;
+            --accent-2: #ffd166;
+            --shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 15% 15%, rgba(80, 227, 194, 0.24), transparent 32%),
+                radial-gradient(circle at 85% 0%, rgba(255, 209, 102, 0.18), transparent 30%),
+                linear-gradient(160deg, var(--bg-0), var(--bg-1));
+            font-family: "Space Grotesk", "Segoe UI", sans-serif;
+            line-height: 1.5;
+        }
+        .shell {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 56px;
+        }
+        .hero {
+            border: 1px solid var(--line);
+            background: linear-gradient(135deg, rgba(20, 28, 57, 0.92), rgba(10, 15, 35, 0.92));
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+        .hero h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            letter-spacing: -0.02em;
+        }
+        .hero p {
+            margin: 0;
+            max-width: 70ch;
+            color: var(--muted);
+        }
+        .stats {
+            margin-top: 14px;
+            font-family: "IBM Plex Mono", monospace;
+            color: #dbe4ff;
+            font-size: 0.92rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .toolbar {
+            margin: 22px 0 18px;
+        }
+        .toolbar input {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: var(--card);
+            color: var(--ink);
+            border-radius: 12px;
+            font: inherit;
+            padding: 14px 16px;
+            font-size: 1rem;
+        }
+        .toolbar input:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+        .resource-section {
+            margin-top: 20px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: baseline;
+            margin: 0 2px 10px;
+        }
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.32rem;
+        }
+        .section-count {
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-family: "IBM Plex Mono", monospace;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+        }
+        .resource-card {
+            display: block;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+            background: var(--card);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+        }
+        .resource-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(80, 227, 194, 0.6);
+            background: rgba(19, 28, 56, 0.88);
+        }
+        .resource-card h3 {
+            margin: 8px 0;
+            font-size: 1.02rem;
+            line-height: 1.4;
+        }
+        .resource-card p {
+            margin: 0 0 10px;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+        .resource-card code {
+            display: inline-block;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 3px 7px;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.8rem;
+            color: #dae6ff;
+        }
+        .resource-type {
+            display: inline-block;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #061225;
+            background: linear-gradient(130deg, var(--accent), var(--accent-2));
+            padding: 3px 7px;
+            border-radius: 999px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        footer {
+            margin-top: 30px;
+            color: var(--muted);
+            font-size: 0.86rem;
+            text-align: center;
+        }
+        @media (max-width: 640px) {
+            .hero {
+                padding: 22px;
+            }
+            .stats {
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header class="hero">
+            <h1>DevToolbox</h1>
+            <p>Direct, production-focused references for developers. Browse tools, cheat sheets, and deep guides without noise.</p>
+            <div class="stats">
+                <span>31 resources indexed</span>
+                <span>Generated from repo metadata</span>
+                <span>2026-02-26 04:10 UTC</span>
+            </div>
+        </header>
+        <div class="toolbar">
+            <label for="search" class="hidden">Search resources</label>
+            <input id="search" type="search" placeholder="Search by topic, stack, or filename...">
+        </div>
+        <section class="resource-section" data-section="tools"><div class="section-header"><h2>Tools</h2><span class="section-count">3 items</span></div><div class="grid"><a class="resource-card" href="mongodb-query-builder.html" data-search="mongodb query builder — visual query generator free online mongodb query builder. visually construct find, aggregate, update, and delete queries. generate mongodb shell commands and driver code for node.js and python. mongodb-query-builder.html tools"><span class="resource-type">Tools</span><h3>MongoDB Query Builder — Visual Query Generator</h3><p>Free online MongoDB query builder. Visually construct find, aggregate, update, and delete queries. Generate MongoDB shell commands and driver code for Node.js and Python.</p><code>mongodb-query-builder.html</code></a>
+<a class="resource-card" href="pomodoro-timer.html" data-search="pomodoro timer - focus &amp; productivity free online pomodoro timer for developers. 25-min focus sessions, customizable durations, task tracking, session stats, audio alerts. runs 100% in your browser. pomodoro-timer.html tools"><span class="resource-type">Tools</span><h3>Pomodoro Timer - Focus &amp; Productivity</h3><p>Free online Pomodoro timer for developers. 25-min focus sessions, customizable durations, task tracking, session stats, audio alerts. Runs 100% in your browser.</p><code>pomodoro-timer.html</code></a>
+<a class="resource-card" href="python-formatter.html" data-search="python code formatter - format &amp; beautify python online free online python formatter and beautifier. fix indentation, normalize whitespace, clean up blank lines, and format python code to be readable. runs entirely in your browser. python-formatter.html tools"><span class="resource-type">Tools</span><h3>Python Code Formatter - Format &amp; Beautify Python Online</h3><p>Free online Python formatter and beautifier. Fix indentation, normalize whitespace, clean up blank lines, and format Python code to be readable. Runs entirely in your browser.</p><code>python-formatter.html</code></a></div></section>
+<section class="resource-section" data-section="cheat-sheets"><div class="section-header"><h2>Cheat Sheets</h2><span class="section-count">3 items</span></div><div class="grid"><a class="resource-card" href="pandas-cheatsheet.html" data-search="pandas cheat sheet — quick reference for data analysis pandas cheat sheet with essential commands for dataframes, series, data manipulation, filtering, grouping, merging, pivoting, and i/o operations. quick reference for python data analysis. pandas-cheatsheet.html cheat sheets"><span class="resource-type">Cheat Sheets</span><h3>Pandas Cheat Sheet — Quick Reference for Data Analysis</h3><p>Pandas cheat sheet with essential commands for DataFrames, Series, data manipulation, filtering, grouping, merging, pivoting, and I/O operations. Quick reference for Python data analysis.</p><code>pandas-cheatsheet.html</code></a>
+<a class="resource-card" href="redis-commands.html" data-search="redis commands cheat sheet — quick reference redis commands cheat sheet with essential commands for strings, hashes, lists, sets, sorted sets, pub/sub, transactions, and administration. quick reference for developers. redis-commands.html cheat sheets"><span class="resource-type">Cheat Sheets</span><h3>Redis Commands Cheat Sheet — Quick Reference</h3><p>Redis commands cheat sheet with essential commands for strings, hashes, lists, sets, sorted sets, pub/sub, transactions, and administration. Quick reference for developers.</p><code>redis-commands.html</code></a>
+<a class="resource-card" href="regex-cheatsheet.html" data-search="regex cheat sheet &amp; quick reference interactive regex cheat sheet with searchable reference, live pattern tester, and 25+ common regex patterns. character classes, quantifiers, anchors, groups, lookaheads, and flags explained with examples. regex-cheatsheet.html cheat sheets"><span class="resource-type">Cheat Sheets</span><h3>Regex Cheat Sheet &amp; Quick Reference</h3><p>Interactive regex cheat sheet with searchable reference, live pattern tester, and 25+ common regex patterns. Character classes, quantifiers, anchors, groups, lookaheads, and flags explained with examples.</p><code>regex-cheatsheet.html</code></a></div></section>
+<section class="resource-section" data-section="guides"><div class="section-header"><h2>Guides</h2><span class="section-count">25 items</span></div><div class="grid"><a class="resource-card" href="css-has-selector-guide.html" data-search="css :has() selector: complete guide — the parent selector master the css :has() selector, the long-awaited parent selector. learn syntax, practical examples, combining with other selectors, browser support, performance tips, and real-world use cases. css-has-selector-guide.html guides"><span class="resource-type">Guides</span><h3>CSS :has() Selector: Complete Guide — The Parent Selector</h3><p>Master the CSS :has() selector, the long-awaited parent selector. Learn syntax, practical examples, combining with other selectors, browser support, performance tips, and real-world use cases.</p><code>css-has-selector-guide.html</code></a>
+<a class="resource-card" href="docker-compose-complete-guide.html" data-search="docker compose: the complete guide for 2026 master docker compose in 2026: services, networks, volumes, environment variables, health checks, production deployment, and real-world multi-container examples. docker-compose-complete-guide.html guides"><span class="resource-type">Guides</span><h3>Docker Compose: The Complete Guide for 2026</h3><p>Master Docker Compose in 2026: services, networks, volumes, environment variables, health checks, production deployment, and real-world multi-container examples.</p><code>docker-compose-complete-guide.html</code></a>
+<a class="resource-card" href="fastapi-complete-guide.html" data-search="fastapi complete guide: build high-performance python apis in 2026 master fastapi, the fastest-growing python web framework. learn async endpoints, pydantic models, dependency injection, jwt authentication, database integration, testing, and production deployment with practical examples. fastapi-complete-guide.html guides"><span class="resource-type">Guides</span><h3>FastAPI Complete Guide: Build High-Performance Python APIs in 2026</h3><p>Master FastAPI, the fastest-growing Python web framework. Learn async endpoints, Pydantic models, dependency injection, JWT authentication, database integration, testing, and production deployment with practical examples.</p><code>fastapi-complete-guide.html</code></a>
+<a class="resource-card" href="flask-web-framework-guide.html" data-search="flask web framework: complete guide for 2026 master flask, python&#x27;s lightweight web framework. learn routing, templates, forms, databases, rest apis, authentication, deployment, and best practices with practical examples. flask-web-framework-guide.html guides"><span class="resource-type">Guides</span><h3>Flask Web Framework: Complete Guide for 2026</h3><p>Master Flask, Python&#x27;s lightweight web framework. Learn routing, templates, forms, databases, REST APIs, authentication, deployment, and best practices with practical examples.</p><code>flask-web-framework-guide.html</code></a>
+<a class="resource-card" href="git-rebase-complete-guide.html" data-search="git rebase: the complete guide for 2026 master git rebase with this complete tutorial. learn interactive rebase, git squash commits, rebase vs merge, rebase workflow, --onto, conflict resolution, autosquash, and reflog recovery. git-rebase-complete-guide.html guides"><span class="resource-type">Guides</span><h3>Git Rebase: The Complete Guide for 2026</h3><p>Master git rebase with this complete tutorial. Learn interactive rebase, git squash commits, rebase vs merge, rebase workflow, --onto, conflict resolution, autosquash, and reflog recovery.</p><code>git-rebase-complete-guide.html</code></a>
+<a class="resource-card" href="git-squash-commits-complete-guide.html" data-search="git squash commits: complete guide (interactive rebase, merge --squash, fixup) for 2026 master git squash workflows with interactive rebase, autosquash, and merge --squash. learn when to squash, how to avoid history breakage, and how to recover safely. git-squash-commits-complete-guide.html guides"><span class="resource-type">Guides</span><h3>Git Squash Commits: Complete Guide (Interactive Rebase, Merge --squash, Fixup) for 2026</h3><p>Master git squash workflows with interactive rebase, autosquash, and merge --squash. Learn when to squash, how to avoid history breakage, and how to recover safely.</p><code>git-squash-commits-complete-guide.html</code></a>
+<a class="resource-card" href="git-tag-complete-guide.html" data-search="git tag: the complete guide for 2026 master git tags for release management in 2026. learn lightweight vs annotated tags, semantic versioning, pushing tags, deleting tags, signed tags, and ci/cd tag workflows. git-tag-complete-guide.html guides"><span class="resource-type">Guides</span><h3>Git Tag: The Complete Guide for 2026</h3><p>Master Git tags for release management in 2026. Learn lightweight vs annotated tags, semantic versioning, pushing tags, deleting tags, signed tags, and CI/CD tag workflows.</p><code>git-tag-complete-guide.html</code></a>
+<a class="resource-card" href="git-undo-reset-revert-guide.html" data-search="git undo: reset, revert &amp; restore — the complete guide for 2026 master every way to undo changes in git. learn git reset --soft/--mixed/--hard, git revert for pushed commits, git restore for files, git reflog for recovery, and step-by-step solutions for every undo scenario. git-undo-reset-revert-guide.html guides"><span class="resource-type">Guides</span><h3>Git Undo: Reset, Revert &amp; Restore — The Complete Guide for 2026</h3><p>Master every way to undo changes in Git. Learn git reset --soft/--mixed/--hard, git revert for pushed commits, git restore for files, git reflog for recovery, and step-by-step solutions for every undo scenario.</p><code>git-undo-reset-revert-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-appeal-outcome-closure-follow-up-template-guide.html" data-search="github merge queue appeal outcome closure: post-incident follow-up template and ownership checklist (2026) close merge queue denial appeals without drift. use this post-incident follow-up template with utc ownership, action tracking, and closure evidence requirements. github-merge-queue-appeal-outcome-closure-follow-up-template-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Appeal Outcome Closure: Post-Incident Follow-Up Template and Ownership Checklist (2026)</h3><p>Close merge queue denial appeals without drift. Use this post-incident follow-up template with UTC ownership, action tracking, and closure evidence requirements.</p><code>github-merge-queue-appeal-outcome-closure-follow-up-template-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-approval-evidence-template-guide.html" data-search="github merge queue approval evidence template: incident comment macros for safe rollbacks (2026) need consistent approval evidence before bypassing merge queue controls during incident rollback? use this copy-paste template and comment macros for auditable, time-boxed decisions. github-merge-queue-approval-evidence-template-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Approval Evidence Template: Incident Comment Macros for Safe Rollbacks (2026)</h3><p>Need consistent approval evidence before bypassing merge queue controls during incident rollback? Use this copy-paste template and comment macros for auditable, time-boxed decisions.</p><code>github-merge-queue-approval-evidence-template-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide.html" data-search="github merge queue closure quality metrics dashboard: recurring incident thresholds and escalation triggers (2026) define merge queue closure quality with dashboard metrics, recurring-incident thresholds, and explicit escalation triggers. includes copy-paste weekly scorecard template. github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Closure Quality Metrics Dashboard: Recurring Incident Thresholds and Escalation Triggers (2026)</h3><p>Define merge queue closure quality with dashboard metrics, recurring-incident thresholds, and explicit escalation triggers. Includes copy-paste weekly scorecard template.</p><code>github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-closure-threshold-alert-routing-playbook-guide.html" data-search="github merge queue closure threshold breach alert routing playbook: severity matrix, owner handoffs, and escalation slas (2026) run a severity-based alert routing playbook when merge queue closure-quality thresholds are breached. includes owner matrix, escalation slas, and copy-paste alert templates. github-merge-queue-closure-threshold-alert-routing-playbook-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Closure Threshold Breach Alert Routing Playbook: Severity Matrix, Owner Handoffs, and Escalation SLAs (2026)</h3><p>Run a severity-based alert routing playbook when merge queue closure-quality thresholds are breached. Includes owner matrix, escalation SLAs, and copy-paste alert templates.</p><code>github-merge-queue-closure-threshold-alert-routing-playbook-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-cutoff-window-expiry-enforcement-guide.html" data-search="github merge queue cutoff window expiry enforcement: default action ladder, intake freeze rules, and audit-proof recovery policy (2026) enforce deterministic actions when merge queue escalation decision windows expire. includes default-action ladder, freeze criteria, and copy-paste enforcement templates. github-merge-queue-cutoff-window-expiry-enforcement-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Cutoff Window Expiry Enforcement: Default Action Ladder, Intake Freeze Rules, and Audit-Proof Recovery Policy (2026)</h3><p>Enforce deterministic actions when merge queue escalation decision windows expire. Includes default-action ladder, freeze criteria, and copy-paste enforcement templates.</p><code>github-merge-queue-cutoff-window-expiry-enforcement-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-denial-appeal-escalation-path-guide.html" data-search="github merge queue denial appeal escalation path: timestamped decision workflow for rollback incidents (2026) handle github merge queue denial appeals without policy drift. use this escalation path with strict ownership, response slas, and audit-ready pr macros for rollback incidents. github-merge-queue-denial-appeal-escalation-path-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Denial Appeal Escalation Path: Timestamped Decision Workflow for Rollback Incidents (2026)</h3><p>Handle GitHub merge queue denial appeals without policy drift. Use this escalation path with strict ownership, response SLAs, and audit-ready PR macros for rollback incidents.</p><code>github-merge-queue-denial-appeal-escalation-path-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-deny-extension-vs-restore-baseline-guide.html" data-search="github merge queue deny extension vs restore baseline: decision checklist with audit examples (2026) decide when to deny rollback bypass extension and restore baseline branch protections. practical checklist, audit examples, and copy-paste pr macros for merge queue incidents. github-merge-queue-deny-extension-vs-restore-baseline-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Deny Extension vs Restore Baseline: Decision Checklist with Audit Examples (2026)</h3><p>Decide when to deny rollback bypass extension and restore baseline branch protections. Practical checklist, audit examples, and copy-paste PR macros for merge queue incidents.</p><code>github-merge-queue-deny-extension-vs-restore-baseline-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-emergency-bypass-governance-guide.html" data-search="github merge queue emergency bypass governance: approval criteria for rollback incidents (2026) need to bypass merge queue or required checks during a rollback incident? use this governance runbook for approval criteria, dual control, expiry, and audit-safe execution. github-merge-queue-emergency-bypass-governance-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Emergency Bypass Governance: Approval Criteria for Rollback Incidents (2026)</h3><p>Need to bypass merge queue or required checks during a rollback incident? Use this governance runbook for approval criteria, dual control, expiry, and audit-safe execution.</p><code>github-merge-queue-emergency-bypass-governance-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-escalation-ack-timeout-remediation-runbook-guide.html" data-search="github merge queue escalation ack timeout remediation runbook: on-call handoffs, breach timers, and recovery templates (2026) run a practical remediation workflow when merge queue escalation ack deadlines are missed. includes timer model, escalation tiers, and copy-paste incident templates. github-merge-queue-escalation-ack-timeout-remediation-runbook-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Escalation ACK Timeout Remediation Runbook: On-Call Handoffs, Breach Timers, and Recovery Templates (2026)</h3><p>Run a practical remediation workflow when merge queue escalation ACK deadlines are missed. Includes timer model, escalation tiers, and copy-paste incident templates.</p><code>github-merge-queue-escalation-ack-timeout-remediation-runbook-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide.html" data-search="github merge queue escalation decision cutoff for repeated ack breaches: authority transfer matrix and leadership gate policy (2026) set hard escalation decision cutoffs when merge queue ack timeout breaches repeat. includes breach counters, authority transfer matrix, and copy-paste policy templates. github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Escalation Decision Cutoff for Repeated ACK Breaches: Authority Transfer Matrix and Leadership Gate Policy (2026)</h3><p>Set hard escalation decision cutoffs when merge queue ACK timeout breaches repeat. Includes breach counters, authority transfer matrix, and copy-paste policy templates.</p><code>github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-expiry-extension-reapproval-guide.html" data-search="github merge queue expiry extension reapproval: decision flow for prolonged rollback incidents (2026) need to extend emergency merge queue bypass past original expiry? use this reapproval decision flow, evidence checklist, and copy-paste macros for prolonged rollback incidents. github-merge-queue-expiry-extension-reapproval-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Expiry Extension Reapproval: Decision Flow for Prolonged Rollback Incidents (2026)</h3><p>Need to extend emergency merge queue bypass past original expiry? Use this reapproval decision flow, evidence checklist, and copy-paste macros for prolonged rollback incidents.</p><code>github-merge-queue-expiry-extension-reapproval-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-post-expiry-reopen-criteria-guide.html" data-search="github merge queue post-expiry reopen criteria: safe intake restore gates, evidence checklist, and owner sign-off policy (2026) define safe reopen criteria after merge queue cutoff expiry enforcement. includes restore gates, evidence checklist, and copy-paste reopen templates. github-merge-queue-post-expiry-reopen-criteria-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Post-Expiry Reopen Criteria: Safe Intake Restore Gates, Evidence Checklist, and Owner Sign-Off Policy (2026)</h3><p>Define safe reopen criteria after merge queue cutoff expiry enforcement. Includes restore gates, evidence checklist, and copy-paste reopen templates.</p><code>github-merge-queue-post-expiry-reopen-criteria-guide.html</code></a>
+<a class="resource-card" href="github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html" data-search="github merge queue post-reopen monitoring window: immediate re-freeze decision flow for guardrail breaches (2026) operate post-reopen monitoring windows with objective guardrails and immediate re-freeze decision rules after merge queue intake restoration. github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html guides"><span class="resource-type">Guides</span><h3>GitHub Merge Queue Post-Reopen Monitoring Window: Immediate Re-Freeze Decision Flow for Guardrail Breaches (2026)</h3><p>Operate post-reopen monitoring windows with objective guardrails and immediate re-freeze decision rules after merge queue intake restoration.</p><code>github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html</code></a>
+<a class="resource-card" href="nginx-reverse-proxy-complete-guide.html" data-search="nginx reverse proxy: the complete guide for 2026 master nginx reverse proxy configuration: load balancing, ssl termination, websocket proxying, caching, rate limiting, health checks, security headers, and production best practices with practical examples. nginx-reverse-proxy-complete-guide.html guides"><span class="resource-type">Guides</span><h3>Nginx Reverse Proxy: The Complete Guide for 2026</h3><p>Master nginx reverse proxy configuration: load balancing, SSL termination, WebSocket proxying, caching, rate limiting, health checks, security headers, and production best practices with practical examples.</p><code>nginx-reverse-proxy-complete-guide.html</code></a>
+<a class="resource-card" href="pydantic-complete-guide.html" data-search="pydantic: the complete guide for 2026 master pydantic v2 for python data validation. learn basemodel, field constraints, custom validators, nested models, serialization, generic models, computed fields, pydantic-settings, and fastapi integration with practical code examples. pydantic-complete-guide.html guides"><span class="resource-type">Guides</span><h3>Pydantic: The Complete Guide for 2026</h3><p>Master Pydantic v2 for Python data validation. Learn BaseModel, Field constraints, custom validators, nested models, serialization, generic models, computed fields, pydantic-settings, and FastAPI integration with practical code examples.</p><code>pydantic-complete-guide.html</code></a>
+<a class="resource-card" href="systemd-complete-guide.html" data-search="systemd: the complete guide for 2026 master systemd for linux service management. learn unit files, service configuration, timers, targets, journalctl, socket activation, and systemd best practices with practical examples. systemd-complete-guide.html guides"><span class="resource-type">Guides</span><h3>Systemd: The Complete Guide for 2026</h3><p>Master systemd for Linux service management. Learn unit files, service configuration, timers, targets, journalctl, socket activation, and systemd best practices with practical examples.</p><code>systemd-complete-guide.html</code></a>
+<a class="resource-card" href="typescript-utility-types-guide.html" data-search="typescript utility types: complete guide with examples master typescript utility types: partial, required, readonly, pick, omit, record, exclude, extract, returntype, parameters, and more. practical examples and custom utility types. typescript-utility-types-guide.html guides"><span class="resource-type">Guides</span><h3>TypeScript Utility Types: Complete Guide with Examples</h3><p>Master TypeScript utility types: Partial, Required, Readonly, Pick, Omit, Record, Exclude, Extract, ReturnType, Parameters, and more. Practical examples and custom utility types.</p><code>typescript-utility-types-guide.html</code></a></div></section>
+        <footer>Maintained in <code>autonomy414941/devtoolbox</code> · Run <code>./generate-index.py</code> after adding new pages.</footer>
+    </main>
+    <script>
+        const searchInput = document.getElementById("search");
+        const cards = Array.from(document.querySelectorAll(".resource-card"));
+        const sections = Array.from(document.querySelectorAll(".resource-section"));
+
+        function applyFilter() {
+            const term = searchInput.value.trim().toLowerCase();
+            cards.forEach((card) => {
+                const haystack = card.dataset.search || "";
+                card.classList.toggle("hidden", term.length > 0 && !haystack.includes(term));
+            });
+
+            sections.forEach((section) => {
+                const visibleCards = section.querySelectorAll(".resource-card:not(.hidden)").length;
+                section.classList.toggle("hidden", visibleCards === 0);
+            });
+        }
+
+        searchInput.addEventListener("input", applyFilter);
+    </script>
+</body>
+</html>
