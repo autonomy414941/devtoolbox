@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>DevToolbox Updates</title>
+    <link>https://devtoolbox.dedyn.io/</link>
+    <description>Recent tools and guides from DevToolbox.</description>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 26 Feb 2026 00:00:00 GMT</lastBuildDate>
+    <item>
+      <title>JSON Formatter - Format, Minify, Validate, and Sort Keys</title>
+      <link>https://devtoolbox.dedyn.io/json-formatter.html</link>
+      <guid>https://devtoolbox.dedyn.io/json-formatter.html</guid>
+      <pubDate>Thu, 26 Feb 2026 00:00:00 GMT</pubDate>
+      <description>Browser-based JSON formatter with validation and key sorting.</description>
+    </item>
+    <item>
+      <title>Python Code Formatter - Format and Beautify Python Online</title>
+      <link>https://devtoolbox.dedyn.io/python-formatter.html</link>
+      <guid>https://devtoolbox.dedyn.io/python-formatter.html</guid>
+      <pubDate>Wed, 25 Feb 2026 00:00:00 GMT</pubDate>
+      <description>Fast Python formatting tool that runs fully in your browser.</description>
+    </item>
+    <item>
+      <title>MongoDB Query Builder - Visual Query Generator</title>
+      <link>https://devtoolbox.dedyn.io/mongodb-query-builder.html</link>
+      <guid>https://devtoolbox.dedyn.io/mongodb-query-builder.html</guid>
+      <pubDate>Wed, 25 Feb 2026 00:00:00 GMT</pubDate>
+      <description>Build MongoDB queries with a visual editor and export-ready output.</description>
+    </item>
+    <item>
+      <title>FastAPI Complete Guide: Build High-Performance Python APIs</title>
+      <link>https://devtoolbox.dedyn.io/fastapi-complete-guide.html</link>
+      <guid>https://devtoolbox.dedyn.io/fastapi-complete-guide.html</guid>
+      <pubDate>Tue, 24 Feb 2026 00:00:00 GMT</pubDate>
+      <description>Practical FastAPI reference from fundamentals to production deployment.</description>
+    </item>
+    <item>
+      <title>Nginx Reverse Proxy: The Complete Guide</title>
+      <link>https://devtoolbox.dedyn.io/nginx-reverse-proxy-complete-guide.html</link>
+      <guid>https://devtoolbox.dedyn.io/nginx-reverse-proxy-complete-guide.html</guid>
+      <pubDate>Tue, 24 Feb 2026 00:00:00 GMT</pubDate>
+      <description>Production-focused nginx reverse proxy guide with real configuration examples.</description>
+    </item>
+  </channel>
+</rss>

@@ -2,7 +2,7 @@
 
 Practical developer resources in a single static site:
 
-- Browser tools (`python-formatter`, `mongodb-query-builder`, `pomodoro-timer`)
+- Browser tools (`python-formatter`, `json-formatter`, `mongodb-query-builder`, `pomodoro-timer`)
 - Fast cheat sheets (`pandas`, `regex`, `redis`)
 - Production-focused implementation guides (Git, Docker, Nginx, FastAPI, systemd, and more)
 
@@ -54,8 +54,12 @@ Then open `http://localhost:8000`.
 
 # Validate Python scripts
 python3 -m py_compile generate-index.py generate-sitemap.py check-internal-links.py
+
+# Verify internal anchors against a local preview
+python3 -m http.server 8000
+python3 check-internal-links.py --site-root . --base-url http://127.0.0.1:8000
 ```
 
 ## License
 
-No license file is currently included in this repository.
+[MIT](LICENSE)

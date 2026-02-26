@@ -96,17 +96,17 @@
     <header>
         <nav>
             <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
-            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+            <div class="nav-links"><a href="/index.html#tools">Tools</a><a href="/index.html#cheat-sheets">Cheat Sheets</a><a href="/index.html#guides">Blog</a></div>
         </nav>
     </header>
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Nginx Reverse Proxy</span></nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/index.html#guides">Blog</a><span class="separator">/</span><span class="current">Nginx Reverse Proxy</span></nav>
 
     <section aria-label="Cross property spotlight" style="max-width: 1100px; margin: 1.25rem auto 0; padding: 0 2rem;">
         <div style="background: linear-gradient(120deg, rgba(16, 185, 129, 0.14), rgba(59, 130, 246, 0.14)); border: 1px solid rgba(148, 163, 184, 0.35); border-radius: 12px; padding: 0.95rem 1.15rem; color: #e2e8f0; line-height: 1.6;">
             <strong style="color: #f8fafc;">More practical tools:</strong>
-            Planning dates and schedules? <a href="/datekit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign=crosspromo-top-organic&utm_content=nginx-reverse-proxy-complete-guide" style="color: #f8fafc; text-decoration: underline;">Try DateKit calculators</a>.
-            Managing money goals? <a href="/budgetkit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign=crosspromo-top-organic&utm_content=nginx-reverse-proxy-complete-guide" style="color: #f8fafc; text-decoration: underline;">Open BudgetKit planners</a>.
-            Need deep-work planning? <a href="/focuskit/weekly-focus-planner.html?utm_source=devtoolbox&utm_medium=internal&utm_campaign=focuskit-opportunity-sprint&utm_content=nginx-reverse-proxy-complete-guide" style="color: #f8fafc; text-decoration: underline;">Try FocusKit Weekly Planner</a>.
+            Planning dates and schedules? <a href="https://github.com/autonomy414941/datekit" style="color: #f8fafc; text-decoration: underline;">Try DateKit calculators</a>.
+            Managing money goals? <a href="https://github.com/autonomy414941/budgetkit" style="color: #f8fafc; text-decoration: underline;">Open BudgetKit planners</a>.
+            Need deep-work planning? <a href="https://github.com/autonomy414941/focuskit" style="color: #f8fafc; text-decoration: underline;">Try FocusKit Weekly Planner</a>.
         </div>
     </section>
     <script type="application/ld+json">
@@ -205,7 +205,7 @@
         <p>This guide covers everything you need to configure nginx as a production reverse proxy: basic proxying, load balancing algorithms, SSL termination, WebSocket support, caching, rate limiting, security hardening, and troubleshooting the errors you will inevitably encounter.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Tip:</strong> If your upstream app or admin port is only reachable on a private network, you can safely access it via SSH port forwarding. Use our <a href="/tools/ssh-tunnel-builder" style="color: #3b82f6;">SSH Tunnel Builder</a> to generate <code>-L</code>/<code>-R</code>/<code>-D</code> commands with keepalives and ProxyJump. For paging and ownership escalation when ACK deadlines are missed, use <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>. For repeated breaches that require a forced decision boundary, use the <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide" style="color: #3b82f6;">Merge Queue Escalation Decision Cutoff Guide</a>. If cutoff decision windows lapse with no executed path, apply the <a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide" style="color: #3b82f6;">Merge Queue Cutoff Window Expiry Enforcement Guide</a>. After reopening intake, govern the high-risk window with the <a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide" style="color: #3b82f6;">Merge Queue Post-Reopen Monitoring Window Guide</a>.
+            <strong style="color: #3b82f6;">&#9881; Tip:</strong> If your upstream app or admin port is only reachable on a private network, you can safely access it via SSH port forwarding. Use our <a href="/index.html?search=ssh-tunnel-builder" style="color: #3b82f6;">SSH Tunnel Builder</a> to generate <code>-L</code>/<code>-R</code>/<code>-D</code> commands with keepalives and ProxyJump. For paging and ownership escalation when ACK deadlines are missed, use <a href="/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide.html" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>. For repeated breaches that require a forced decision boundary, use the <a href="/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide.html" style="color: #3b82f6;">Merge Queue Escalation Decision Cutoff Guide</a>. If cutoff decision windows lapse with no executed path, apply the <a href="/github-merge-queue-cutoff-window-expiry-enforcement-guide.html" style="color: #3b82f6;">Merge Queue Cutoff Window Expiry Enforcement Guide</a>. After reopening intake, govern the high-risk window with the <a href="/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html" style="color: #3b82f6;">Merge Queue Post-Reopen Monitoring Window Guide</a>.
         </div>
 
         <div class="toc">
@@ -877,75 +877,75 @@ http {
         <h2>Continue Learning</h2>
 
         <ul>
-            <li><a href="/blog/nginx-configuration-complete-guide">Nginx Configuration: The Complete Guide</a> &mdash; deep dive into nginx directives, contexts, and configuration patterns</li>
-            <li><a href="/blog/docker-compose-complete-guide">Docker Compose: The Complete Guide</a> &mdash; orchestrate nginx with backend services in containers</li>
-            <li><a href="/blog/ssh-config-complete-guide">SSH Config: The Complete Guide</a> &mdash; secure remote access and tunneling for your servers</li>
-            <li><a href="/blog/github-merge-queue-merge-group-trigger-guide">GitHub Merge Queue merge_group Trigger Guide</a> &mdash; CI trigger runbook for rollback PRs that stay pending during production incidents</li>
-            <li><a href="/blog/github-merge-queue-flaky-required-checks-guide">GitHub Merge Queue Flaky Required Checks Guide</a> &mdash; stabilize random required-check failures during incident rollbacks</li>
-            <li><a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide">GitHub Merge Queue Required Checks Timed Out or Cancelled Guide</a> &mdash; incident workflow for timeout and cancellation loops blocking rollback PR merges</li>
-            <li><a href="/blog/github-merge-queue-required-check-name-mismatch-guide">GitHub Merge Queue Required Check Name Mismatch Guide</a> &mdash; fix waiting-for-status rollback deadlocks caused by required-check context drift</li>
-            <li><a href="/blog/github-merge-queue-stale-review-dismissal-guide">GitHub Merge Queue Stale Review Dismissal Guide</a> &mdash; resolve rollback PR approval-loss loops from stale review invalidation during queue updates</li>
-            <li><a href="/blog/github-merge-queue-expiry-extension-reapproval-guide">GitHub Merge Queue Expiry Extension Reapproval Guide</a> &mdash; time-box extension decisions when rollback bypass windows are about to expire</li>
-            <li><a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide">GitHub Merge Queue Denial Appeal Escalation Path Guide</a> &mdash; escalation workflow when extension denials are contested during production rollback incidents</li>
-            <li><a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide">GitHub Merge Queue Closure Quality Metrics Dashboard Guide</a> &mdash; KPI dashboard and trigger thresholds for recurring rollback incidents after initial closure</li>
-            <li><a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide">GitHub Merge Queue Escalation Decision Cutoff for Repeated ACK Breaches Guide</a> &mdash; enforce authority-transfer cutoffs when timeout loops recur across incidents</li>
-            <li><a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide">GitHub Merge Queue Post-Reopen Monitoring Window Guide</a> &mdash; monitor reopened intake with hard triggers and immediate re-freeze decision flow</li>
-            <li><a href="/blog/docker-security-complete-guide">Docker Security: The Complete Guide</a> &mdash; harden your containerized applications behind the reverse proxy</li>
+            <li><a href="/index.html?search=nginx-configuration-complete-guide">Nginx Configuration: The Complete Guide</a> &mdash; deep dive into nginx directives, contexts, and configuration patterns</li>
+            <li><a href="/docker-compose-complete-guide.html">Docker Compose: The Complete Guide</a> &mdash; orchestrate nginx with backend services in containers</li>
+            <li><a href="/index.html?search=ssh-config-complete-guide">SSH Config: The Complete Guide</a> &mdash; secure remote access and tunneling for your servers</li>
+            <li><a href="/index.html?search=github-merge-queue-merge-group-trigger-guide">GitHub Merge Queue merge_group Trigger Guide</a> &mdash; CI trigger runbook for rollback PRs that stay pending during production incidents</li>
+            <li><a href="/index.html?search=github-merge-queue-flaky-required-checks-guide">GitHub Merge Queue Flaky Required Checks Guide</a> &mdash; stabilize random required-check failures during incident rollbacks</li>
+            <li><a href="/index.html?search=github-merge-queue-required-check-timeout-cancelled-guide">GitHub Merge Queue Required Checks Timed Out or Cancelled Guide</a> &mdash; incident workflow for timeout and cancellation loops blocking rollback PR merges</li>
+            <li><a href="/index.html?search=github-merge-queue-required-check-name-mismatch-guide">GitHub Merge Queue Required Check Name Mismatch Guide</a> &mdash; fix waiting-for-status rollback deadlocks caused by required-check context drift</li>
+            <li><a href="/index.html?search=github-merge-queue-stale-review-dismissal-guide">GitHub Merge Queue Stale Review Dismissal Guide</a> &mdash; resolve rollback PR approval-loss loops from stale review invalidation during queue updates</li>
+            <li><a href="/github-merge-queue-expiry-extension-reapproval-guide.html">GitHub Merge Queue Expiry Extension Reapproval Guide</a> &mdash; time-box extension decisions when rollback bypass windows are about to expire</li>
+            <li><a href="/github-merge-queue-denial-appeal-escalation-path-guide.html">GitHub Merge Queue Denial Appeal Escalation Path Guide</a> &mdash; escalation workflow when extension denials are contested during production rollback incidents</li>
+            <li><a href="/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide.html">GitHub Merge Queue Closure Quality Metrics Dashboard Guide</a> &mdash; KPI dashboard and trigger thresholds for recurring rollback incidents after initial closure</li>
+            <li><a href="/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide.html">GitHub Merge Queue Escalation Decision Cutoff for Repeated ACK Breaches Guide</a> &mdash; enforce authority-transfer cutoffs when timeout loops recur across incidents</li>
+            <li><a href="/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html">GitHub Merge Queue Post-Reopen Monitoring Window Guide</a> &mdash; monitor reopened intake with hard triggers and immediate re-freeze decision flow</li>
+            <li><a href="/index.html?search=docker-security-complete-guide">Docker Security: The Complete Guide</a> &mdash; harden your containerized applications behind the reverse proxy</li>
         </ul>
     </main>
 
     <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
         <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-            <a href="/blog/nginx-configuration-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/index.html?search=nginx-configuration-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Nginx Configuration Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Deep dive into nginx directives and configuration</div>
             </a>
-            <a href="/blog/docker-compose-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/docker-compose-complete-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Compose Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Orchestrate nginx with backend services</div>
             </a>
-            <a href="/blog/docker-security-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/index.html?search=docker-security-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Security Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Harden your containerized applications</div>
             </a>
-            <a href="/blog/ssh-config-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/index.html?search=ssh-config-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">SSH Config Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Secure remote access and SSH tunneling</div>
             </a>
-            <a href="/blog/github-merge-queue-merge-group-trigger-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/index.html?search=github-merge-queue-merge-group-trigger-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue merge_group Trigger Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">When release rollback PR checks never start, fix workflow events without bypassing branch protection.</div>
             </a>
-            <a href="/blog/github-merge-queue-flaky-required-checks-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/index.html?search=github-merge-queue-flaky-required-checks-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Flaky Required Checks Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Practical steps to reduce intermittent CI failures that delay rollback deploys.</div>
             </a>
-            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/index.html?search=github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Timed Out or Cancelled</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Queue-safe rollback playbook for required checks cancelled by churn or timing out under load.</div>
             </a>
-            <a href="/blog/github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/index.html?search=github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Required Check Name Mismatch Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Align required-check names with emitted contexts when rollback PRs stay in waiting-for-status state.</div>
             </a>
-            <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/index.html?search=github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Stale Review Dismissal Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Incident playbook for rollback PR approvals repeatedly dismissed as stale after queue churn.</div>
             </a>
-            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/github-merge-queue-expiry-extension-reapproval-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Expiry Extension Reapproval Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Keep bypass windows bounded with reapproval checkpoints during prolonged rollback recovery.</div>
             </a>
-            <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/github-merge-queue-denial-appeal-escalation-path-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Denial Appeal Escalation Path</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Handle contested denial requests with explicit owner tiers and strict UTC decision deadlines.</div>
             </a>
-            <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Closure Quality Metrics Dashboard</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Set recurring-incident thresholds and escalation triggers for post-rollback governance.</div>
             </a>
-            <a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
+            <a href="/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Post-Reopen Monitoring Window Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Contain post-reopen relapse risk with objective guardrails and immediate re-freeze triggers.</div>
             </a>

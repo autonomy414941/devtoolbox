@@ -96,17 +96,17 @@
     <header>
         <nav>
             <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
-            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+            <div class="nav-links"><a href="/index.html#tools">Tools</a><a href="/index.html#cheat-sheets">Cheat Sheets</a><a href="/index.html#guides">Blog</a></div>
         </nav>
     </header>
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Systemd: The Complete Guide</span></nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/index.html#guides">Blog</a><span class="separator">/</span><span class="current">Systemd: The Complete Guide</span></nav>
 
     <section aria-label="Cross property spotlight" style="max-width: 1100px; margin: 1.25rem auto 0; padding: 0 2rem;">
         <div style="background: linear-gradient(120deg, rgba(16, 185, 129, 0.14), rgba(59, 130, 246, 0.14)); border: 1px solid rgba(148, 163, 184, 0.35); border-radius: 12px; padding: 0.95rem 1.15rem; color: #e2e8f0; line-height: 1.6;">
             <strong style="color: #f8fafc;">More practical tools:</strong>
-            Planning dates and schedules? <a href="/datekit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign=crosspromo-top-organic&utm_content=systemd-complete-guide" style="color: #f8fafc; text-decoration: underline;">Try DateKit calculators</a>.
-            Managing money goals? <a href="/budgetkit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign=crosspromo-top-organic&utm_content=systemd-complete-guide" style="color: #f8fafc; text-decoration: underline;">Open BudgetKit planners</a>.
-            Need deep-work planning? <a href="/focuskit/weekly-focus-planner.html?utm_source=devtoolbox&utm_medium=internal&utm_campaign=focuskit-opportunity-sprint&utm_content=systemd-complete-guide" style="color: #f8fafc; text-decoration: underline;">Try FocusKit Weekly Planner</a>.
+            Planning dates and schedules? <a href="https://github.com/autonomy414941/datekit" style="color: #f8fafc; text-decoration: underline;">Try DateKit calculators</a>.
+            Managing money goals? <a href="https://github.com/autonomy414941/budgetkit" style="color: #f8fafc; text-decoration: underline;">Open BudgetKit planners</a>.
+            Need deep-work planning? <a href="https://github.com/autonomy414941/focuskit" style="color: #f8fafc; text-decoration: underline;">Try FocusKit Weekly Planner</a>.
         </div>
     </section>
     <script type="application/ld+json">
@@ -143,7 +143,7 @@
         <p>This guide covers systemd from fundamentals to advanced production patterns. Every section includes practical unit file examples and commands you can use immediately. Whether you are deploying a Node.js application, hardening a production server, replacing cron jobs, or debugging boot failures, this is the reference you need.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Related guides:</strong> Use systemd timers as a modern cron alternative &mdash; see our <a href="/blog/bash-scripting-complete-guide" style="color: #3b82f6;">Bash Scripting Guide</a> for the scripts they run, and our <a href="/blog/linux-commands-complete-guide" style="color: #3b82f6;">Linux Commands Guide</a> for the foundation. For incident response ownership when timer-based ACK deadlines are breached, see <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>. When breaches repeat and handoffs stall, enforce cutoffs with the <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide" style="color: #3b82f6;">Merge Queue Escalation Decision Cutoff Guide</a>. If the decision window expires after cutoff, run default actions from the <a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide" style="color: #3b82f6;">Merge Queue Cutoff Window Expiry Enforcement Guide</a>. After reopen approval, track breach signals with the <a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide" style="color: #3b82f6;">Merge Queue Post-Reopen Monitoring Window Guide</a>.
+            <strong style="color: #3b82f6;">&#9881; Related guides:</strong> Use systemd timers as a modern cron alternative &mdash; see our <a href="/index.html?search=bash-scripting-complete-guide" style="color: #3b82f6;">Bash Scripting Guide</a> for the scripts they run, and our <a href="/index.html?search=linux-commands-complete-guide" style="color: #3b82f6;">Linux Commands Guide</a> for the foundation. For incident response ownership when timer-based ACK deadlines are breached, see <a href="/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide.html" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>. When breaches repeat and handoffs stall, enforce cutoffs with the <a href="/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide.html" style="color: #3b82f6;">Merge Queue Escalation Decision Cutoff Guide</a>. If the decision window expires after cutoff, run default actions from the <a href="/github-merge-queue-cutoff-window-expiry-enforcement-guide.html" style="color: #3b82f6;">Merge Queue Cutoff Window Expiry Enforcement Guide</a>. After reopen approval, track breach signals with the <a href="/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html" style="color: #3b82f6;">Merge Queue Post-Reopen Monitoring Window Guide</a>.
         </div>
 
         <style>
@@ -524,7 +524,7 @@ WantedBy=timers.target</code></pre>
         <p>Enable the timer (not the service):</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Build it faster:</strong> Use our <a href="/tools/systemd-timer-generator" style="color: #3b82f6;">Systemd Timer Generator</a> to convert cron schedules to <code>OnCalendar</code> and generate the matching <code>.timer</code> + <code>.service</code> unit files.
+            <strong style="color: #3b82f6;">&#9881; Build it faster:</strong> Use our <a href="/index.html?search=systemd-timer-generator" style="color: #3b82f6;">Systemd Timer Generator</a> to convert cron schedules to <code>OnCalendar</code> and generate the matching <code>.timer</code> + <code>.service</code> unit files.
         </div>
 
 <pre><code>sudo systemctl daemon-reload
@@ -858,88 +858,88 @@ sudo systemctl start myapp           # Try again</code></pre>
         <h2>Related Resources</h2>
 
         <ul>
-            <li><a href="/blog/linux-commands-complete-guide">Linux Commands: The Complete Guide</a> &mdash; foundational commands every sysadmin needs alongside systemd</li>
-            <li><a href="/blog/docker-complete-guide">Docker: The Complete Guide</a> &mdash; containerize services that systemd manages on the host</li>
-            <li><a href="/blog/nginx-configuration-complete-guide">Nginx Configuration: The Complete Guide</a> &mdash; configure the web server that systemd starts and monitors</li>
-            <li><a href="/blog/github-merge-queue-merge-group-trigger-guide">GitHub Merge Queue merge_group Trigger Guide</a> &mdash; incident rollback fix when CI checks never start in queue context</li>
-            <li><a href="/blog/github-merge-queue-flaky-required-checks-guide">GitHub Merge Queue Flaky Required Checks Guide</a> &mdash; reduce rollback delays from intermittent required-check failures</li>
-            <li><a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide">GitHub Merge Queue Required Checks Timed Out or Cancelled Guide</a> &mdash; unblock rollback PRs when required checks timeout or cancel repeatedly</li>
-            <li><a href="/blog/github-merge-queue-required-check-name-mismatch-guide">GitHub Merge Queue Required Check Name Mismatch Guide</a> &mdash; resolve waiting-for-status deadlocks caused by required-check name drift</li>
-            <li><a href="/blog/github-merge-queue-stale-review-dismissal-guide">GitHub Merge Queue Stale Review Dismissal Guide</a> &mdash; fix rollback PR approval loops when stale-review rules invalidate approvals after queue churn</li>
-            <li><a href="/blog/github-merge-queue-emergency-bypass-governance-guide">GitHub Merge Queue Emergency Bypass Governance Guide</a> &mdash; controlled approval model for incident rollback when queue-safe path cannot meet recovery SLA</li>
-            <li><a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide">GitHub Merge Queue Deny Extension vs Restore Baseline Guide</a> &mdash; checklist for rejecting weak extension requests and restoring default protections with audit evidence</li>
-            <li><a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide">GitHub Merge Queue Appeal Outcome Closure Follow-Up Template Guide</a> &mdash; finalize appeal outcomes with explicit owners and 24h/7d/30d follow-up checkpoints</li>
-            <li><a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">GitHub Merge Queue Closure Threshold Breach Alert Routing Playbook</a> &mdash; route threshold breaches with severity ownership, escalation SLAs, and explicit handoff evidence</li>
-            <li><a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide">GitHub Merge Queue Escalation Decision Cutoff for Repeated ACK Breaches Guide</a> &mdash; trigger hard decision gates after recurring ACK misses to prevent ownership drift</li>
-            <li><a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide">GitHub Merge Queue Post-Reopen Monitoring Window Guide</a> &mdash; run post-reopen guardrail windows with immediate re-freeze triggers when control metrics regress</li>
-            <li><a href="/blog/bash-scripting-complete-guide">Bash Scripting: The Complete Guide</a> &mdash; write the scripts that systemd timers and services execute</li>
+            <li><a href="/index.html?search=linux-commands-complete-guide">Linux Commands: The Complete Guide</a> &mdash; foundational commands every sysadmin needs alongside systemd</li>
+            <li><a href="/index.html?search=docker-complete-guide">Docker: The Complete Guide</a> &mdash; containerize services that systemd manages on the host</li>
+            <li><a href="/index.html?search=nginx-configuration-complete-guide">Nginx Configuration: The Complete Guide</a> &mdash; configure the web server that systemd starts and monitors</li>
+            <li><a href="/index.html?search=github-merge-queue-merge-group-trigger-guide">GitHub Merge Queue merge_group Trigger Guide</a> &mdash; incident rollback fix when CI checks never start in queue context</li>
+            <li><a href="/index.html?search=github-merge-queue-flaky-required-checks-guide">GitHub Merge Queue Flaky Required Checks Guide</a> &mdash; reduce rollback delays from intermittent required-check failures</li>
+            <li><a href="/index.html?search=github-merge-queue-required-check-timeout-cancelled-guide">GitHub Merge Queue Required Checks Timed Out or Cancelled Guide</a> &mdash; unblock rollback PRs when required checks timeout or cancel repeatedly</li>
+            <li><a href="/index.html?search=github-merge-queue-required-check-name-mismatch-guide">GitHub Merge Queue Required Check Name Mismatch Guide</a> &mdash; resolve waiting-for-status deadlocks caused by required-check name drift</li>
+            <li><a href="/index.html?search=github-merge-queue-stale-review-dismissal-guide">GitHub Merge Queue Stale Review Dismissal Guide</a> &mdash; fix rollback PR approval loops when stale-review rules invalidate approvals after queue churn</li>
+            <li><a href="/github-merge-queue-emergency-bypass-governance-guide.html">GitHub Merge Queue Emergency Bypass Governance Guide</a> &mdash; controlled approval model for incident rollback when queue-safe path cannot meet recovery SLA</li>
+            <li><a href="/github-merge-queue-deny-extension-vs-restore-baseline-guide.html">GitHub Merge Queue Deny Extension vs Restore Baseline Guide</a> &mdash; checklist for rejecting weak extension requests and restoring default protections with audit evidence</li>
+            <li><a href="/github-merge-queue-appeal-outcome-closure-follow-up-template-guide.html">GitHub Merge Queue Appeal Outcome Closure Follow-Up Template Guide</a> &mdash; finalize appeal outcomes with explicit owners and 24h/7d/30d follow-up checkpoints</li>
+            <li><a href="/github-merge-queue-closure-threshold-alert-routing-playbook-guide.html">GitHub Merge Queue Closure Threshold Breach Alert Routing Playbook</a> &mdash; route threshold breaches with severity ownership, escalation SLAs, and explicit handoff evidence</li>
+            <li><a href="/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide.html">GitHub Merge Queue Escalation Decision Cutoff for Repeated ACK Breaches Guide</a> &mdash; trigger hard decision gates after recurring ACK misses to prevent ownership drift</li>
+            <li><a href="/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html">GitHub Merge Queue Post-Reopen Monitoring Window Guide</a> &mdash; run post-reopen guardrail windows with immediate re-freeze triggers when control metrics regress</li>
+            <li><a href="/index.html?search=bash-scripting-complete-guide">Bash Scripting: The Complete Guide</a> &mdash; write the scripts that systemd timers and services execute</li>
         </ul>
     </main>
 
     <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
         <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-            <a href="/blog/linux-commands-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=linux-commands-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Linux Commands Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Essential commands every Linux sysadmin needs</div>
             </a>
-            <a href="/blog/docker-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=docker-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Containerize applications and orchestrate deployments</div>
             </a>
-            <a href="/blog/nginx-configuration-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=nginx-configuration-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Nginx Configuration Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Configure the web server systemd manages</div>
             </a>
-            <a href="/blog/github-merge-queue-merge-group-trigger-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-merge-group-trigger-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue merge_group Trigger Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Useful incident runbook when deploy rollback checks stay pending in GitHub merge queue.</div>
             </a>
-            <a href="/blog/github-merge-queue-flaky-required-checks-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-flaky-required-checks-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Flaky Required Checks Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Stabilize intermittent required checks before they extend incident rollback windows.</div>
             </a>
-            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Timed Out or Cancelled</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Operational runbook for rollback PR checks that exceed time budgets or get cancelled by queue churn.</div>
             </a>
-            <a href="/blog/github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Required Check Name Mismatch Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Repair required-check naming drift when rollback PR status stays expected but never arrives.</div>
             </a>
-            <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Stale Review Dismissal Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Approval policy runbook for rollback PRs that repeatedly lose approval after queue updates.</div>
             </a>
-            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-emergency-bypass-governance-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Emergency Bypass Governance</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Use dual approval, expiry, and restoration ownership when emergency rollback bypass is unavoidable.</div>
             </a>
-            <a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-deny-extension-vs-restore-baseline-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Deny Extension vs Restore Baseline</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Use an audit-first checklist to deny low-evidence extensions and return to baseline protections.</div>
             </a>
-            <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-appeal-outcome-closure-follow-up-template-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Appeal Outcome Closure Template</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Post-incident closure template to lock ownership and due dates after appeal decisions.</div>
             </a>
-            <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-closure-threshold-alert-routing-playbook-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Threshold Breach Alert Routing Playbook</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Severity-based routing playbook for threshold breaches and owner escalation handoffs.</div>
             </a>
-            <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Escalation Decision Cutoff Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Authority-transfer matrix for recurring ACK timeout breaches and forced decision gates.</div>
             </a>
-            <a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Post-Reopen Monitoring Window Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Post-reopen observation framework for immediate re-freeze decisions on guardrail breach.</div>
             </a>
-            <a href="/blog/bash-scripting-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=bash-scripting-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Bash Scripting Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Write scripts for systemd timers and services</div>
             </a>
-            <a href="/cheatsheets/linux-commands" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=linux-commands" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Linux Cheat Sheet</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Quick reference for Linux commands and systemd</div>
             </a>

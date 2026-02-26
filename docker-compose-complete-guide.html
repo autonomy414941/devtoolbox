@@ -48,17 +48,17 @@
     <header>
         <nav>
             <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
-            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+            <div class="nav-links"><a href="/index.html#tools">Tools</a><a href="/index.html#cheat-sheets">Cheat Sheets</a><a href="/index.html#guides">Blog</a></div>
         </nav>
     </header>
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Docker Compose: The Complete Guide</span></nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/index.html#guides">Blog</a><span class="separator">/</span><span class="current">Docker Compose: The Complete Guide</span></nav>
 
     <section aria-label="Cross property spotlight" style="max-width: 1100px; margin: 1.25rem auto 0; padding: 0 2rem;">
         <div style="background: linear-gradient(120deg, rgba(16, 185, 129, 0.14), rgba(59, 130, 246, 0.14)); border: 1px solid rgba(148, 163, 184, 0.35); border-radius: 12px; padding: 0.95rem 1.15rem; color: #e2e8f0; line-height: 1.6;">
             <strong style="color: #f8fafc;">More practical tools:</strong>
-            Planning dates and schedules? <a href="/datekit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign=crosspromo-top-organic&utm_content=docker-compose-complete-guide" style="color: #f8fafc; text-decoration: underline;">Try DateKit calculators</a>.
-            Managing money goals? <a href="/budgetkit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign=crosspromo-top-organic&utm_content=docker-compose-complete-guide" style="color: #f8fafc; text-decoration: underline;">Open BudgetKit planners</a>.
-            Need deep-work planning? <a href="/focuskit/weekly-focus-planner.html?utm_source=devtoolbox&utm_medium=internal&utm_campaign=focuskit-opportunity-sprint&utm_content=docker-compose-complete-guide" style="color: #f8fafc; text-decoration: underline;">Try FocusKit Weekly Planner</a>.
+            Planning dates and schedules? <a href="https://github.com/autonomy414941/datekit" style="color: #f8fafc; text-decoration: underline;">Try DateKit calculators</a>.
+            Managing money goals? <a href="https://github.com/autonomy414941/budgetkit" style="color: #f8fafc; text-decoration: underline;">Open BudgetKit planners</a>.
+            Need deep-work planning? <a href="https://github.com/autonomy414941/focuskit" style="color: #f8fafc; text-decoration: underline;">Try FocusKit Weekly Planner</a>.
         </div>
     </section>
     <script type="application/ld+json">
@@ -157,18 +157,18 @@
 
         <p>Real-world applications are never a single container. A typical web application needs an application server, a database, a cache, and often a reverse proxy, a background worker, and a message queue. Managing each of these with individual <code>docker run</code> commands &mdash; remembering every port mapping, volume mount, network, and environment variable &mdash; is tedious and error-prone. Docker Compose solves this by letting you define your entire multi-container application in a single YAML file and manage it with simple commands.</p>
 
-        <p>This guide covers Docker Compose from first principles through production deployment. If you are new to Docker itself, start with our <a href="/blog/docker-containers-beginners-guide">Docker Containers for Beginners</a> guide and the <a href="/blog/docker-complete-guide">complete Docker guide</a> first.</p>
+        <p>This guide covers Docker Compose from first principles through production deployment. If you are new to Docker itself, start with our <a href="/index.html?search=docker-containers-beginners-guide">Docker Containers for Beginners</a> guide and the <a href="/index.html?search=docker-complete-guide">complete Docker guide</a> first.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Related:</strong> Validate your Compose files with the <a href="/tools/yaml-validator" style="color: #3b82f6;">YAML Validator</a> and keep our <a href="/cheatsheets/docker-commands" style="color: #3b82f6;">Docker Cheat Sheet</a> open while reading.
+            <strong style="color: #3b82f6;">&#9881; Related:</strong> Validate your Compose files with the <a href="/index.html?search=yaml-validator" style="color: #3b82f6;">YAML Validator</a> and keep our <a href="/index.html?search=docker-commands" style="color: #3b82f6;">Docker Cheat Sheet</a> open while reading.
         </div>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Tool:</strong> Generate a clean <code>docker-compose.yml</code> faster with our <a href="/tools/docker-compose-generator" style="color: #3b82f6;">Docker Compose Generator</a>, then verify it with the <a href="/tools/docker-compose-validator" style="color: #3b82f6;">Compose Validator</a>.
+            <strong style="color: #3b82f6;">&#9881; Tool:</strong> Generate a clean <code>docker-compose.yml</code> faster with our <a href="/index.html?search=docker-compose-generator" style="color: #3b82f6;">Docker Compose Generator</a>, then verify it with the <a href="/index.html?search=docker-compose-validator" style="color: #3b82f6;">Compose Validator</a>.
         </div>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Tip:</strong> When your containers expose a database or admin UI on <code>127.0.0.1</code> (or on a private subnet), use SSH tunneling to access it safely without opening firewall ports. Generate commands with our <a href="/tools/ssh-tunnel-builder" style="color: #3b82f6;">SSH Tunnel Builder</a>.
+            <strong style="color: #3b82f6;">&#9881; Tip:</strong> When your containers expose a database or admin UI on <code>127.0.0.1</code> (or on a private subnet), use SSH tunneling to access it safely without opening firewall ports. Generate commands with our <a href="/index.html?search=ssh-tunnel-builder" style="color: #3b82f6;">SSH Tunnel Builder</a>.
         </div>
 
         <div class="toc">
@@ -329,7 +329,7 @@ secrets:         # Optional: sensitive data
           memory: 256M</code></pre>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Related:</strong> Convert JSON configs to YAML format for Compose with our <a href="/tools/json-to-yaml" style="color: #3b82f6;">JSON to YAML Converter</a>.
+            <strong style="color: #3b82f6;">&#9881; Related:</strong> Convert JSON configs to YAML format for Compose with our <a href="/index.html?search=json-to-yaml" style="color: #3b82f6;">JSON to YAML Converter</a>.
         </div>
 
         <!-- 3. Services, Networks, Volumes -->
@@ -873,7 +873,7 @@ volumes:
   redis-data:</code></pre>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Related:</strong> Working with Kubernetes? Generate K8s YAML manifests with our <a href="/tools/kubernetes-yaml-generator" style="color: #3b82f6;">Kubernetes YAML Generator</a>.
+            <strong style="color: #3b82f6;">&#9881; Related:</strong> Working with Kubernetes? Generate K8s YAML manifests with our <a href="/index.html?search=kubernetes-yaml-generator" style="color: #3b82f6;">Kubernetes YAML Generator</a>.
         </div>
 
         <!-- 11. Debugging and Troubleshooting -->
@@ -989,77 +989,77 @@ docker compose exec api ping -c 3 db</code></pre>
         <p>Start with a simple two-service setup (application plus database), get comfortable with the core commands (<code>up</code>, <code>down</code>, <code>logs</code>, <code>exec</code>), and incrementally add complexity: health checks, custom networks, multiple environments, and resource limits. For single-server deployments, Compose is often all you need.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Related:</strong> Validate Compose YAML with the <a href="/tools/yaml-validator" style="color: #3b82f6;">YAML Validator</a>, convert configs with <a href="/tools/json-to-yaml" style="color: #3b82f6;">JSON to YAML</a>, and generate Kubernetes manifests with the <a href="/tools/kubernetes-yaml-generator" style="color: #3b82f6;">Kubernetes YAML Generator</a>.
+            <strong style="color: #3b82f6;">&#9881; Related:</strong> Validate Compose YAML with the <a href="/index.html?search=yaml-validator" style="color: #3b82f6;">YAML Validator</a>, convert configs with <a href="/index.html?search=json-to-yaml" style="color: #3b82f6;">JSON to YAML</a>, and generate Kubernetes manifests with the <a href="/index.html?search=kubernetes-yaml-generator" style="color: #3b82f6;">Kubernetes YAML Generator</a>.
         </div>
 
         <h2>Learn More</h2>
         <ul>
-            <li><a href="/blog/docker-complete-guide">Docker: The Complete Developer's Guide</a> &mdash; comprehensive Docker guide covering images, Dockerfiles, security, CI/CD, and performance</li>
-            <li><a href="/blog/docker-containers-beginners-guide">Docker Containers for Beginners</a> &mdash; hands-on introduction if you are new to containers</li>
-            <li><a href="/tools/kubernetes-yaml-generator">Kubernetes YAML Generator</a> &mdash; generate K8s manifests when you outgrow single-server Compose</li>
-            <li><a href="/cheatsheets/docker-commands">Docker Cheat Sheet</a> &mdash; quick reference for Docker and Compose commands</li>
-            <li><a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide">Merge Queue Threshold Breach Alert Routing Playbook</a> &mdash; severity-based owner handoff model for routing closure-threshold incidents</li>
-            <li><a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide">Merge Queue Cutoff Window Expiry Enforcement Guide</a> &mdash; default-action ladder for incidents where cutoff decision windows expire without execution proof</li>
-            <li><a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide">Merge Queue Post-Reopen Monitoring Window Guide</a> &mdash; operate post-reopen guardrails and execute immediate re-freeze when hard triggers fire</li>
+            <li><a href="/index.html?search=docker-complete-guide">Docker: The Complete Developer's Guide</a> &mdash; comprehensive Docker guide covering images, Dockerfiles, security, CI/CD, and performance</li>
+            <li><a href="/index.html?search=docker-containers-beginners-guide">Docker Containers for Beginners</a> &mdash; hands-on introduction if you are new to containers</li>
+            <li><a href="/index.html?search=kubernetes-yaml-generator">Kubernetes YAML Generator</a> &mdash; generate K8s manifests when you outgrow single-server Compose</li>
+            <li><a href="/index.html?search=docker-commands">Docker Cheat Sheet</a> &mdash; quick reference for Docker and Compose commands</li>
+            <li><a href="/github-merge-queue-closure-threshold-alert-routing-playbook-guide.html">Merge Queue Threshold Breach Alert Routing Playbook</a> &mdash; severity-based owner handoff model for routing closure-threshold incidents</li>
+            <li><a href="/github-merge-queue-cutoff-window-expiry-enforcement-guide.html">Merge Queue Cutoff Window Expiry Enforcement Guide</a> &mdash; default-action ladder for incidents where cutoff decision windows expire without execution proof</li>
+            <li><a href="/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html">Merge Queue Post-Reopen Monitoring Window Guide</a> &mdash; operate post-reopen guardrails and execute immediate re-freeze when hard triggers fire</li>
         </ul>
     </main>
 
     <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
         <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-            <a href="/blog/docker-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=docker-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker: The Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Images, Dockerfiles, security, CI/CD, and performance optimization</div>
             </a>
-            <a href="/blog/docker-containers-beginners-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=docker-containers-beginners-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker for Beginners</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Practical beginner's guide to Docker containers</div>
             </a>
-            <a href="/tools/kubernetes-yaml-generator" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=kubernetes-yaml-generator" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Kubernetes YAML Generator</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Generate deployment, service, and ingress manifests</div>
             </a>
-            <a href="/cheatsheets/docker-commands" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=docker-commands" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Cheat Sheet</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Essential Docker and Compose commands quick reference</div>
             </a>
-            <a href="/blog/github-merge-queue-checks-keep-restarting-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-checks-keep-restarting-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Keep Restarting</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Rollback requeue-loop playbook for CI churn, flaky checks, and protected branch queues</div>
             </a>
-            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Timed Out or Cancelled</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Incident runbook for timeout and cancellation loops blocking rollback PR required checks</div>
             </a>
-            <a href="/blog/github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Required Check Name Mismatch Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Unblock waiting-for-status rollback PRs by aligning required-check names and workflow contexts.</div>
             </a>
-            <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Stale Review Dismissal Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Fix rollback PR approval loops triggered by stale-review dismissals during queue updates.</div>
             </a>
-            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-emergency-bypass-governance-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Emergency Bypass Governance</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Governance pattern for rollback incidents where queue-safe remediation cannot meet recovery deadlines.</div>
             </a>
-            <a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-deny-extension-vs-restore-baseline-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Deny Extension vs Restore Baseline</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Decision checklist for refusing unsupported extension requests and restoring standard protections.</div>
             </a>
-            <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-appeal-outcome-closure-follow-up-template-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Appeal Outcome Closure Template</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Close denial appeals with UTC checkpoints and owner-assigned post-incident follow-up actions.</div>
             </a>
-            <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-closure-threshold-alert-routing-playbook-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Threshold Breach Alert Routing Playbook</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Route closure-threshold incidents with severity-based ownership and escalation timers.</div>
             </a>
-            <a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-cutoff-window-expiry-enforcement-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Cutoff Window Expiry Enforcement Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Default-action ladder for expired decision windows so merge-queue incidents cannot drift into unowned exceptions.</div>
             </a>
-            <a href="/blog/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-post-reopen-monitoring-window-refreeze-decision-flow-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Post-Reopen Monitoring Window Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Post-reopen control loop with guardrail checks and immediate re-freeze decisions on breach.</div>
             </a>

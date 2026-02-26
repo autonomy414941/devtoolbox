@@ -96,10 +96,10 @@
     <header>
         <nav>
             <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
-            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+            <div class="nav-links"><a href="/index.html#tools">Tools</a><a href="/index.html#cheat-sheets">Cheat Sheets</a><a href="/index.html#guides">Blog</a></div>
         </nav>
     </header>
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">FastAPI Complete Guide</span></nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/index.html#guides">Blog</a><span class="separator">/</span><span class="current">FastAPI Complete Guide</span></nav>
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -190,7 +190,7 @@
         <p>This guide takes you from your first endpoint through production deployment, with working code at every step. You will learn path operations, Pydantic models, dependency injection, JWT authentication, database integration, background tasks, testing, and performance tuning.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Related resources:</strong> Test your API endpoints with the <a href="/tools/api-request-builder" style="color: #3b82f6;">API Request Builder</a>, mock responses with the <a href="/tools/api-mock-builder" style="color: #3b82f6;">API Mock Builder</a>, and learn REST conventions in our <a href="/blog/rest-api-design-complete-guide" style="color: #3b82f6;">REST API Design Guide</a>. For escalation ownership when incident ACK deadlines are missed, use <a href="/blog/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>.
+            <strong style="color: #3b82f6;">&#9881; Related resources:</strong> Test your API endpoints with the <a href="/index.html?search=api-request-builder" style="color: #3b82f6;">API Request Builder</a>, mock responses with the <a href="/index.html?search=api-mock-builder" style="color: #3b82f6;">API Mock Builder</a>, and learn REST conventions in our <a href="/index.html?search=rest-api-design-complete-guide" style="color: #3b82f6;">REST API Design Guide</a>. For escalation ownership when incident ACK deadlines are missed, use <a href="/github-merge-queue-escalation-ack-timeout-remediation-runbook-guide.html" style="color: #3b82f6;">Merge Queue ACK Timeout Remediation Runbook</a>.
         </div>
 
         <div class="toc">
@@ -619,7 +619,7 @@ async def read_users_me(current_user = Depends(get_current_user)):
     return current_user</code></pre>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Test your auth flow:</strong> Use the <a href="/tools/api-request-builder" style="color: #3b82f6;">API Request Builder</a> to send token requests and test protected endpoints. Format JWT payloads with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>.
+            <strong style="color: #3b82f6;">&#9881; Test your auth flow:</strong> Use the <a href="/index.html?search=api-request-builder" style="color: #3b82f6;">API Request Builder</a> to send token requests and test protected endpoints. Format JWT payloads with the <a href="/json-formatter.html" style="color: #3b82f6;">JSON Formatter</a>.
         </div>
 
         <!-- ============================================ -->
@@ -933,7 +933,7 @@ CMD ["gunicorn", "app.main:app", \
         </ul>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Containerize it:</strong> Follow our <a href="/blog/docker-complete-guide" style="color: #3b82f6;">Docker Complete Guide</a> and set up CI/CD with <a href="/blog/github-actions-cicd-complete-guide" style="color: #3b82f6;">GitHub Actions</a>.
+            <strong style="color: #3b82f6;">&#9881; Containerize it:</strong> Follow our <a href="/index.html?search=docker-complete-guide" style="color: #3b82f6;">Docker Complete Guide</a> and set up CI/CD with <a href="/index.html?search=github-actions-cicd-complete-guide" style="color: #3b82f6;">GitHub Actions</a>.
         </div>
 
         <!-- ============================================ -->
@@ -1040,54 +1040,54 @@ async def public_data():
         <p>The patterns covered in this guide &mdash; type-safe models, injectable dependencies, token-based auth, and async database access &mdash; will carry you from prototype to production. FastAPI's documentation is excellent, and its growing community means answers to most questions are a search away.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Essential tools:</strong> Build and test API requests with the <a href="/tools/api-request-builder" style="color: #3b82f6;">API Request Builder</a>, mock endpoints with the <a href="/tools/api-mock-builder" style="color: #3b82f6;">API Mock Builder</a>, and format JSON responses with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>. If your API rollback PR is blocked by required code owner review, use the <a href="/blog/github-merge-queue-codeowners-approval-deadlock-guide" style="color: #3b82f6;">Merge Queue CODEOWNERS Approval Deadlock Guide</a>. If bypass expiry is approaching during incident rollback, follow the <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="color: #3b82f6;">Merge Queue Expiry Extension Reapproval Guide</a>. If a denied extension gets appealed, apply the <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide" style="color: #3b82f6;">Merge Queue Denial Appeal Escalation Path Guide</a>. If rollback incidents recur across API deploys, use the <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide" style="color: #3b82f6;">Merge Queue Closure Quality Metrics Dashboard Guide</a> to define escalation thresholds. If ACK breaches repeat in the same incident window, apply the <a href="/blog/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide" style="color: #3b82f6;">Merge Queue Escalation Decision Cutoff Guide</a> for hard authority-transfer cutoffs. If the cutoff window expires without executable ownership, enforce defaults with the <a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide" style="color: #3b82f6;">Merge Queue Cutoff Window Expiry Enforcement Guide</a>. After defaults are enforced, reopen queue intake only with the <a href="/blog/github-merge-queue-post-expiry-reopen-criteria-guide" style="color: #3b82f6;">Merge Queue Post-Expiry Reopen Criteria Guide</a>.
+            <strong style="color: #3b82f6;">&#9881; Essential tools:</strong> Build and test API requests with the <a href="/index.html?search=api-request-builder" style="color: #3b82f6;">API Request Builder</a>, mock endpoints with the <a href="/index.html?search=api-mock-builder" style="color: #3b82f6;">API Mock Builder</a>, and format JSON responses with the <a href="/json-formatter.html" style="color: #3b82f6;">JSON Formatter</a>. If your API rollback PR is blocked by required code owner review, use the <a href="/index.html?search=github-merge-queue-codeowners-approval-deadlock-guide" style="color: #3b82f6;">Merge Queue CODEOWNERS Approval Deadlock Guide</a>. If bypass expiry is approaching during incident rollback, follow the <a href="/github-merge-queue-expiry-extension-reapproval-guide.html" style="color: #3b82f6;">Merge Queue Expiry Extension Reapproval Guide</a>. If a denied extension gets appealed, apply the <a href="/github-merge-queue-denial-appeal-escalation-path-guide.html" style="color: #3b82f6;">Merge Queue Denial Appeal Escalation Path Guide</a>. If rollback incidents recur across API deploys, use the <a href="/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide.html" style="color: #3b82f6;">Merge Queue Closure Quality Metrics Dashboard Guide</a> to define escalation thresholds. If ACK breaches repeat in the same incident window, apply the <a href="/github-merge-queue-escalation-decision-cutoff-repeated-ack-breaches-guide.html" style="color: #3b82f6;">Merge Queue Escalation Decision Cutoff Guide</a> for hard authority-transfer cutoffs. If the cutoff window expires without executable ownership, enforce defaults with the <a href="/github-merge-queue-cutoff-window-expiry-enforcement-guide.html" style="color: #3b82f6;">Merge Queue Cutoff Window Expiry Enforcement Guide</a>. After defaults are enforced, reopen queue intake only with the <a href="/github-merge-queue-post-expiry-reopen-criteria-guide.html" style="color: #3b82f6;">Merge Queue Post-Expiry Reopen Criteria Guide</a>.
         </div>
 
         <h2>Related Resources</h2>
 
         <section style="margin-top: 1rem;">
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-            <a href="/tools/api-request-builder" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=api-request-builder" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">API Request Builder</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Test your FastAPI endpoints interactively</div>
             </a>
-            <a href="/tools/api-mock-builder" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=api-mock-builder" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">API Mock Builder</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Mock API responses for frontend development</div>
             </a>
-            <a href="/blog/rest-api-design-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=rest-api-design-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">REST API Design Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Best practices for designing RESTful API endpoints</div>
             </a>
-            <a href="/blog/github-merge-queue-codeowners-approval-deadlock-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-codeowners-approval-deadlock-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue CODEOWNERS Deadlock Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Incident runbook for API rollback PRs blocked by required owner approvals.</div>
             </a>
-            <a href="/blog/github-merge-queue-expiry-extension-reapproval-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-expiry-extension-reapproval-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Expiry Extension Reapproval Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Reapprove API rollback bypass windows safely when validation runs outlast original expiry.</div>
             </a>
-            <a href="/blog/github-merge-queue-denial-appeal-escalation-path-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-denial-appeal-escalation-path-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Denial Appeal Escalation Path</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Run appeal escalation with strict timestamps when denied rollback extensions are challenged.</div>
             </a>
-            <a href="/blog/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-closure-quality-metrics-dashboard-thresholds-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Closure Quality Metrics Dashboard</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Measure recurring rollback incident risk with explicit KPI thresholds and trigger rules.</div>
             </a>
-            <a href="/blog/github-merge-queue-post-expiry-reopen-criteria-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-post-expiry-reopen-criteria-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Post-Expiry Reopen Criteria Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Objective reopen gates and owner sign-off policy after expiry defaults are enforced.</div>
             </a>
-            <a href="/blog/python-django-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=python-django-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Django Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Compare FastAPI with Django's batteries-included approach</div>
             </a>
-            <a href="/blog/flask-web-framework-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/flask-web-framework-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Flask Web Framework Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Learn Flask, Python's lightweight micro-framework</div>
             </a>
-            <a href="/blog/nodejs-express-api-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=nodejs-express-api-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Node.js Express API Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Compare FastAPI with Express for API development</div>
             </a>

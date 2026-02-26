@@ -96,10 +96,10 @@
     <header>
         <nav>
             <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
-            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+            <div class="nav-links"><a href="/index.html#tools">Tools</a><a href="/index.html#cheat-sheets">Cheat Sheets</a><a href="/index.html#guides">Blog</a></div>
         </nav>
     </header>
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">CSS :has() Selector Guide</span></nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/index.html#guides">Blog</a><span class="separator">/</span><span class="current">CSS :has() Selector Guide</span></nav>
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -372,7 +372,7 @@ section:has(:is(h1, h2, h3, h4, h5, h6)) {
     }
   }
 }</code></pre>
-        <p>Learn more about nesting syntax in our <a href="/blog/css-nesting-complete-guide">CSS Nesting Complete Guide</a>.</p>
+        <p>Learn more about nesting syntax in our <a href="/index.html?search=css-nesting-complete-guide">CSS Nesting Complete Guide</a>.</p>
 
         <!-- Section 7: Form Styling -->
         <h2 id="form-styling">7. Form Styling with :has()</h2>
@@ -462,7 +462,7 @@ form:has(input:required:valid):not(:has(input:required:invalid)) {
   color: #9ca3af;
   font-style: italic;
 }</code></pre>
-        <p>For more layout techniques, see our <a href="/blog/css-grid-complete-guide">CSS Grid Complete Guide</a>.</p>
+        <p>For more layout techniques, see our <a href="/index.html?search=css-grid-complete-guide">CSS Grid Complete Guide</a>.</p>
 
         <h3>Sidebar layout toggle</h3>
 <pre><code class="language-css">/* If sidebar has content, use two-column layout */
@@ -509,7 +509,7 @@ body {
   background: var(--bg);
   color: var(--text);
 }</code></pre>
-        <p>Combine with <a href="/blog/css-variables-complete-guide">CSS custom properties</a> for a full theming system. You can also pair this with <code>prefers-color-scheme</code> for automatic defaults:</p>
+        <p>Combine with <a href="/index.html?search=css-variables-complete-guide">CSS custom properties</a> for a full theming system. You can also pair this with <code>prefers-color-scheme</code> for automatic defaults:</p>
 <pre><code class="language-css">/* Respect system preference by default */
 @media (prefers-color-scheme: dark) {
   :root:not(:has(#light-mode:checked)) {
@@ -670,8 +670,8 @@ if (container.children.length === 0) {
             <li><strong>Avoid nesting <code>:has()</code> inside <code>:has()</code>.</strong> The spec explicitly disallows <code>:has()</code> within <code>:has()</code>. It will not match.</li>
             <li><strong>Keep selectors readable.</strong> If a <code>:has()</code> selector becomes longer than a single line, consider using custom properties or adding a comment explaining the intent.</li>
             <li><strong>Test dynamically.</strong> The <code>:has()</code> selector responds to DOM changes in real time. Add and remove elements in DevTools to verify behavior.</li>
-            <li><strong>Use our <a href="/tools/css-beautifier">CSS Beautifier</a></strong> to keep complex selectors formatted and readable.</li>
-            <li><strong>Pair with <a href="/blog/css-variables-complete-guide">CSS custom properties</a></strong> for maximum flexibility. Use <code>:has()</code> to set variables and let children inherit them.</li>
+            <li><strong>Use our <a href="/index.html?search=css-beautifier">CSS Beautifier</a></strong> to keep complex selectors formatted and readable.</li>
+            <li><strong>Pair with <a href="/index.html?search=css-variables-complete-guide">CSS custom properties</a></strong> for maximum flexibility. Use <code>:has()</code> to set variables and let children inherit them.</li>
         </ol>
 <pre><code class="language-css">/* Best practice: :has() sets variables, children consume them */
 .card:has(&gt; .badge[data-type="warning"]) {
@@ -689,7 +689,7 @@ if (container.children.length === 0) {
   border-left: 3px solid var(--card-accent, transparent);
 }</code></pre>
 
-        <p>For more CSS selector techniques, explore our <a href="/blog/css-selectors-complete-guide">CSS Selectors Complete Guide</a> and <a href="/blog/css-animations-complete-guide">CSS Animations Complete Guide</a>.</p>
+        <p>For more CSS selector techniques, explore our <a href="/index.html?search=css-selectors-complete-guide">CSS Selectors Complete Guide</a> and <a href="/index.html?search=css-animations-complete-guide">CSS Animations Complete Guide</a>.</p>
 
         <!-- FAQ Section -->
         <h2 id="faq">Frequently Asked Questions</h2>
@@ -725,23 +725,23 @@ if (container.children.length === 0) {
     <section style="max-width: 800px; margin: 2.5rem auto; padding: 0 1rem;">
         <h2 style="margin-bottom: 1rem; font-size: 1.4rem;">Related Resources</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-            <a href="/blog/css-grid-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=css-grid-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Grid Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Master two-dimensional layouts with CSS Grid</div>
             </a>
-            <a href="/blog/css-selectors-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=css-selectors-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Selectors Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Every CSS selector explained with examples</div>
             </a>
-            <a href="/blog/css-animations-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=css-animations-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Animations Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Transitions, keyframes, and animation best practices</div>
             </a>
-            <a href="/blog/css-variables-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=css-variables-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Variables Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Custom properties, theming, and dynamic styles</div>
             </a>
-            <a href="/tools/css-beautifier" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=css-beautifier" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">CSS Beautifier Tool</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Format and clean up your CSS code</div>
             </a>

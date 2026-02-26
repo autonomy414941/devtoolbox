@@ -96,17 +96,17 @@
     <header>
         <nav>
             <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
-            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+            <div class="nav-links"><a href="/index.html#tools">Tools</a><a href="/index.html#cheat-sheets">Cheat Sheets</a><a href="/index.html#guides">Blog</a></div>
         </nav>
     </header>
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Pydantic Complete Guide</span></nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/index.html#guides">Blog</a><span class="separator">/</span><span class="current">Pydantic Complete Guide</span></nav>
 
     <section aria-label="Cross property spotlight" style="max-width: 1100px; margin: 1.25rem auto 0; padding: 0 2rem;">
         <div style="background: linear-gradient(120deg, rgba(16, 185, 129, 0.14), rgba(59, 130, 246, 0.14)); border: 1px solid rgba(148, 163, 184, 0.35); border-radius: 12px; padding: 0.95rem 1.15rem; color: #e2e8f0; line-height: 1.6;">
             <strong style="color: #f8fafc;">More practical tools:</strong>
-            Planning dates and schedules? <a href="/datekit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign=crosspromo-top-organic&utm_content=pydantic-complete-guide" style="color: #f8fafc; text-decoration: underline;">Try DateKit calculators</a>.
-            Managing money goals? <a href="/budgetkit/?utm_source=devtoolbox&utm_medium=internal&utm_campaign=crosspromo-top-organic&utm_content=pydantic-complete-guide" style="color: #f8fafc; text-decoration: underline;">Open BudgetKit planners</a>.
-            Need deep-work planning? <a href="/focuskit/weekly-focus-planner.html?utm_source=devtoolbox&utm_medium=internal&utm_campaign=focuskit-opportunity-sprint&utm_content=pydantic-complete-guide" style="color: #f8fafc; text-decoration: underline;">Try FocusKit Weekly Planner</a>.
+            Planning dates and schedules? <a href="https://github.com/autonomy414941/datekit" style="color: #f8fafc; text-decoration: underline;">Try DateKit calculators</a>.
+            Managing money goals? <a href="https://github.com/autonomy414941/budgetkit" style="color: #f8fafc; text-decoration: underline;">Open BudgetKit planners</a>.
+            Need deep-work planning? <a href="https://github.com/autonomy414941/focuskit" style="color: #f8fafc; text-decoration: underline;">Try FocusKit Weekly Planner</a>.
         </div>
     </section>
     <script type="application/ld+json">
@@ -162,7 +162,7 @@
         <p>This guide covers everything from basic models to advanced patterns: field constraints, custom validators, nested models, serialization, generics, computed fields, settings management, and FastAPI integration. All examples use Pydantic v2 syntax.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Related resources:</strong> Format your data with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>, validate JSON schemas with the <a href="/tools/json-validator" style="color: #3b82f6;">JSON Validator</a>, and learn API design in our <a href="/blog/fastapi-complete-guide" style="color: #3b82f6;">FastAPI Complete Guide</a>.
+            <strong style="color: #3b82f6;">&#9881; Related resources:</strong> Format your data with the <a href="/json-formatter.html" style="color: #3b82f6;">JSON Formatter</a>, validate JSON schemas with the <a href="/index.html?search=json-validator" style="color: #3b82f6;">JSON Validator</a>, and learn API design in our <a href="/fastapi-complete-guide.html" style="color: #3b82f6;">FastAPI Complete Guide</a>.
         </div>
 
         <div class="toc">
@@ -822,62 +822,62 @@ adapter.validate_python("hi")  # "hi"</code></pre>
         <p>Start with <code>BaseModel</code> and <code>Field()</code> for your next project. Add custom validators as your business rules grow. Use <code>pydantic-settings</code> for configuration. The patterns in this guide will keep your data clean from API boundary to database.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Essential tools:</strong> Format your JSON with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>, validate schemas with the <a href="/tools/json-validator" style="color: #3b82f6;">JSON Validator</a>, and test API endpoints with the <a href="/tools/api-request-builder" style="color: #3b82f6;">API Request Builder</a>. For post-incident queue recovery governance, pair your validation pipeline with the <a href="/blog/github-merge-queue-cutoff-window-expiry-enforcement-guide" style="color: #3b82f6;">Merge Queue Cutoff Window Expiry Enforcement Guide</a> and the <a href="/blog/github-merge-queue-post-expiry-reopen-criteria-guide" style="color: #3b82f6;">Merge Queue Post-Expiry Reopen Criteria Guide</a>.
+            <strong style="color: #3b82f6;">&#9881; Essential tools:</strong> Format your JSON with the <a href="/json-formatter.html" style="color: #3b82f6;">JSON Formatter</a>, validate schemas with the <a href="/index.html?search=json-validator" style="color: #3b82f6;">JSON Validator</a>, and test API endpoints with the <a href="/index.html?search=api-request-builder" style="color: #3b82f6;">API Request Builder</a>. For post-incident queue recovery governance, pair your validation pipeline with the <a href="/github-merge-queue-cutoff-window-expiry-enforcement-guide.html" style="color: #3b82f6;">Merge Queue Cutoff Window Expiry Enforcement Guide</a> and the <a href="/github-merge-queue-post-expiry-reopen-criteria-guide.html" style="color: #3b82f6;">Merge Queue Post-Expiry Reopen Criteria Guide</a>.
         </div>
 
         <h2>Related Resources</h2>
 
         <section style="margin-top: 1rem;">
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-            <a href="/blog/fastapi-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/fastapi-complete-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">FastAPI Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Build high-performance Python APIs with FastAPI and Pydantic</div>
             </a>
-            <a href="/blog/python-testing-pytest-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=python-testing-pytest-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Python Testing with Pytest</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Test your Pydantic models and validators thoroughly</div>
             </a>
-            <a href="/blog/sqlalchemy-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=sqlalchemy-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">SQLAlchemy Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Combine Pydantic with SQLAlchemy for database models</div>
             </a>
-            <a href="/blog/typescript-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=typescript-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">TypeScript Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Type safety in JavaScript, similar to Pydantic for Python</div>
             </a>
-            <a href="/blog/github-merge-queue-checks-keep-restarting-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-checks-keep-restarting-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Keep Restarting</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Rollback incident guide to stop requeue loops from flaky checks and queue churn</div>
             </a>
-            <a href="/blog/github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-required-check-timeout-cancelled-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Checks Timed Out or Cancelled</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Classify timeout vs cancellation loops and unblock rollback PR checks safely</div>
             </a>
-            <a href="/blog/github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-required-check-name-mismatch-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Required Check Name Mismatch Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Fix waiting-for-status rollback incidents by synchronizing required-check names with queue runs.</div>
             </a>
-            <a href="/blog/github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=github-merge-queue-stale-review-dismissal-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Stale Review Dismissal Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Handle rollback PR approvals dismissed as stale by queue churn and strict review policy.</div>
             </a>
-            <a href="/blog/github-merge-queue-emergency-bypass-governance-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-emergency-bypass-governance-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Emergency Bypass Governance</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Approval and audit controls for high-risk rollback incidents that need bounded policy exceptions.</div>
             </a>
-            <a href="/blog/github-merge-queue-deny-extension-vs-restore-baseline-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-deny-extension-vs-restore-baseline-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Deny Extension vs Restore Baseline</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Audit-focused criteria for denying low-signal extension requests and restoring defaults.</div>
             </a>
-            <a href="/blog/github-merge-queue-appeal-outcome-closure-follow-up-template-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-appeal-outcome-closure-follow-up-template-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Appeal Outcome Closure Template</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Structured closure template for appeal outcomes with explicit owner and due-date fields.</div>
             </a>
-            <a href="/blog/github-merge-queue-closure-threshold-alert-routing-playbook-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-closure-threshold-alert-routing-playbook-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Threshold Breach Alert Routing Playbook</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Severity-based routing template for closure-threshold incidents, escalations, and owner handoffs.</div>
             </a>
-            <a href="/blog/github-merge-queue-post-expiry-reopen-criteria-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/github-merge-queue-post-expiry-reopen-criteria-guide.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Merge Queue Post-Expiry Reopen Criteria Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Reopen queue intake safely with objective gates after expiry defaults and rollback stabilization.</div>
             </a>

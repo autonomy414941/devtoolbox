@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Formatter - Format, Minify, Validate, and Sort Keys</title>
+    <meta name="description" content="Free JSON formatter and validator. Format, minify, sort keys, and inspect parse errors with line/column details. Runs entirely in your browser.">
+    <meta property="og:title" content="JSON Formatter">
+    <meta property="og:description" content="Format, minify, validate, and sort JSON in your browser.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="theme-color" content="#111827">
+    <style>
+        :root {
+            --bg: #0a0f1f;
+            --bg-soft: #111b35;
+            --panel: #0f172d;
+            --panel-2: #12203f;
+            --text: #eef3ff;
+            --muted: #a4b2d8;
+            --line: rgba(255, 255, 255, 0.12);
+            --accent: #29d3b5;
+            --accent-2: #ffd166;
+            --danger: #ff6b6b;
+            --ok: #52d273;
+            --shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at 10% 0%, rgba(41, 211, 181, 0.2), transparent 30%),
+                radial-gradient(circle at 100% 10%, rgba(255, 209, 102, 0.16), transparent 30%),
+                linear-gradient(145deg, var(--bg), var(--bg-soft));
+        }
+        main {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 28px 18px 42px;
+        }
+        .hero {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 22px;
+            background: linear-gradient(145deg, rgba(18, 32, 63, 0.86), rgba(9, 15, 32, 0.9));
+            box-shadow: var(--shadow);
+        }
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: clamp(1.7rem, 3.8vw, 2.4rem);
+            letter-spacing: -0.02em;
+        }
+        .hero p {
+            margin: 0;
+            max-width: 78ch;
+            color: var(--muted);
+        }
+        .toolbar {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .toolbar-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(41, 211, 181, 0.55);
+            background: var(--panel-2);
+        }
+        .btn.primary {
+            background: linear-gradient(145deg, var(--accent), #1bb99e);
+            color: #061525;
+            border-color: transparent;
+        }
+        .btn.secondary {
+            background: linear-gradient(145deg, var(--accent-2), #ffc342);
+            color: #2f1f00;
+            border-color: transparent;
+        }
+        .inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+        select {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            color: var(--text);
+            padding: 7px 9px;
+        }
+        .grid {
+            margin-top: 14px;
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        .pane {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(13, 22, 42, 0.86);
+            overflow: hidden;
+        }
+        .pane-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--line);
+            font-size: 0.95rem;
+        }
+        .pane-head strong {
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+        textarea {
+            width: 100%;
+            min-height: 370px;
+            border: 0;
+            margin: 0;
+            resize: vertical;
+            padding: 14px;
+            background: transparent;
+            color: var(--text);
+            font: 14px/1.55 "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+        }
+        textarea:focus {
+            outline: 2px solid rgba(41, 211, 181, 0.5);
+            outline-offset: -2px;
+        }
+        .status {
+            margin-top: 12px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: rgba(10, 17, 34, 0.82);
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+        .status.ok {
+            border-color: rgba(82, 210, 115, 0.45);
+            color: #b8f0c7;
+        }
+        .status.error {
+            border-color: rgba(255, 107, 107, 0.45);
+            color: #ffd1d1;
+        }
+        .stats {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 0.85rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .nav {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.92rem;
+        }
+        .nav a {
+            color: #9bd9ff;
+            text-decoration: none;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 720px) {
+            textarea { min-height: 280px; }
+            .hero { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <section class="hero">
+            <h1>JSON Formatter</h1>
+            <p>Format, minify, validate, and sort JSON quickly. No uploads, no server calls, and no tracking scripts.</p>
+            <div class="toolbar">
+                <div class="toolbar-row">
+                    <button class="btn primary" id="formatBtn">Format</button>
+                    <button class="btn" id="minifyBtn">Minify</button>
+                    <button class="btn" id="sortBtn">Sort Keys</button>
+                    <button class="btn secondary" id="sampleBtn">Load Sample</button>
+                    <button class="btn" id="clearBtn">Clear</button>
+                </div>
+                <div class="toolbar-row">
+                    <label class="inline" for="indentSize">Indent</label>
+                    <select id="indentSize">
+                        <option value="2">2 spaces</option>
+                        <option value="4">4 spaces</option>
+                        <option value="tab">Tab</option>
+                    </select>
+                    <button class="btn" id="copyBtn">Copy Output</button>
+                    <button class="btn" id="downloadBtn">Download</button>
+                    <span class="inline" id="sizeLabel">Input: 0 chars</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid">
+            <article class="pane">
+                <div class="pane-head">
+                    <strong>Input JSON</strong>
+                    <span>paste or type</span>
+                </div>
+                <textarea id="input" spellcheck="false" placeholder='{"message":"hello","items":[1,2,3]}'></textarea>
+            </article>
+
+            <article class="pane">
+                <div class="pane-head">
+                    <strong>Output</strong>
+                    <span id="outputMode">formatted</span>
+                </div>
+                <textarea id="output" spellcheck="false" readonly placeholder="Formatted output appears here"></textarea>
+            </article>
+        </section>
+
+        <div class="status" id="status">Ready.</div>
+        <div class="stats" id="stats">
+            <span>Lines: 0</span>
+            <span>Keys: 0</span>
+            <span>Size: 0 bytes</span>
+        </div>
+
+        <nav class="nav" aria-label="Related links">
+            <a href="/index.html">Home</a>
+            <a href="/python-formatter.html">Python Formatter</a>
+            <a href="/regex-cheatsheet.html">Regex Cheat Sheet</a>
+            <a href="/typescript-utility-types-guide.html">TypeScript Utility Types</a>
+        </nav>
+    </main>
+
+    <script>
+        const inputEl = document.getElementById("input");
+        const outputEl = document.getElementById("output");
+        const statusEl = document.getElementById("status");
+        const statsEl = document.getElementById("stats");
+        const modeEl = document.getElementById("outputMode");
+        const sizeLabelEl = document.getElementById("sizeLabel");
+        const indentEl = document.getElementById("indentSize");
+
+        function getIndent() {
+            return indentEl.value === "tab" ? "\t" : Number.parseInt(indentEl.value, 10);
+        }
+
+        function setStatus(message, kind) {
+            statusEl.textContent = message;
+            statusEl.className = "status";
+            if (kind) {
+                statusEl.classList.add(kind);
+            }
+        }
+
+        function formatNumber(n) {
+            return new Intl.NumberFormat("en-US").format(n);
+        }
+
+        function countKeys(value) {
+            if (Array.isArray(value)) {
+                return value.reduce((sum, item) => sum + countKeys(item), 0);
+            }
+            if (value && typeof value === "object") {
+                return Object.keys(value).length + Object.values(value).reduce((sum, item) => sum + countKeys(item), 0);
+            }
+            return 0;
+        }
+
+        function sortKeysDeep(value) {
+            if (Array.isArray(value)) {
+                return value.map(sortKeysDeep);
+            }
+            if (value && typeof value === "object") {
+                const out = {};
+                Object.keys(value)
+                    .sort((a, b) => a.localeCompare(b))
+                    .forEach((key) => {
+                        out[key] = sortKeysDeep(value[key]);
+                    });
+                return out;
+            }
+            return value;
+        }
+
+        function stripCommentsAndTrailingCommas(source) {
+            let out = "";
+            let inString = false;
+            let escaping = false;
+            let inLineComment = false;
+            let inBlockComment = false;
+
+            for (let i = 0; i < source.length; i += 1) {
+                const ch = source[i];
+                const next = source[i + 1] || "";
+
+                if (inLineComment) {
+                    if (ch === "\n") {
+                        inLineComment = false;
+                        out += ch;
+                    }
+                    continue;
+                }
+
+                if (inBlockComment) {
+                    if (ch === "*" && next === "/") {
+                        inBlockComment = false;
+                        i += 1;
+                    }
+                    continue;
+                }
+
+                if (!inString && ch === "/" && next === "/") {
+                    inLineComment = true;
+                    i += 1;
+                    continue;
+                }
+
+                if (!inString && ch === "/" && next === "*") {
+                    inBlockComment = true;
+                    i += 1;
+                    continue;
+                }
+
+                out += ch;
+
+                if (inString) {
+                    if (escaping) {
+                        escaping = false;
+                    } else if (ch === "\\") {
+                        escaping = true;
+                    } else if (ch === '"') {
+                        inString = false;
+                    }
+                } else if (ch === '"') {
+                    inString = true;
+                }
+            }
+
+            let cleaned = "";
+            inString = false;
+            escaping = false;
+            for (let i = 0; i < out.length; i += 1) {
+                const ch = out[i];
+                if (inString) {
+                    cleaned += ch;
+                    if (escaping) {
+                        escaping = false;
+                    } else if (ch === "\\") {
+                        escaping = true;
+                    } else if (ch === '"') {
+                        inString = false;
+                    }
+                    continue;
+                }
+
+                if (ch === '"') {
+                    inString = true;
+                    cleaned += ch;
+                    continue;
+                }
+
+                if (ch === ",") {
+                    let j = i + 1;
+                    while (j < out.length && /\s/.test(out[j])) {
+                        j += 1;
+                    }
+                    if (out[j] === "}" || out[j] === "]") {
+                        continue;
+                    }
+                }
+
+                cleaned += ch;
+            }
+            return cleaned;
+        }
+
+        function parseInput(source) {
+            const trimmed = source.trim();
+            if (!trimmed) {
+                throw new Error("Input is empty.");
+            }
+            try {
+                return JSON.parse(trimmed);
+            } catch (strictErr) {
+                const lenient = stripCommentsAndTrailingCommas(trimmed);
+                try {
+                    return JSON.parse(lenient);
+                } catch (_lenientErr) {
+                    throw strictErr;
+                }
+            }
+        }
+
+        function updateStats(parsed, outputText) {
+            const lineCount = outputText ? outputText.split(/\r?\n/).length : 0;
+            const keyCount = parsed == null ? 0 : countKeys(parsed);
+            const byteCount = new TextEncoder().encode(outputText || "").length;
+            statsEl.innerHTML = [
+                `<span>Lines: ${formatNumber(lineCount)}</span>`,
+                `<span>Keys: ${formatNumber(keyCount)}</span>`,
+                `<span>Size: ${formatNumber(byteCount)} bytes</span>`
+            ].join("");
+        }
+
+        function writeOutput(text, parsed, mode) {
+            outputEl.value = text;
+            modeEl.textContent = mode;
+            updateStats(parsed, text);
+            setStatus("JSON parsed successfully.", "ok");
+        }
+
+        function run(action) {
+            const raw = inputEl.value;
+            sizeLabelEl.textContent = `Input: ${formatNumber(raw.length)} chars`;
+            try {
+                let parsed = parseInput(raw);
+                let text;
+                if (action === "sort") {
+                    parsed = sortKeysDeep(parsed);
+                    text = JSON.stringify(parsed, null, getIndent());
+                    writeOutput(text, parsed, "sorted");
+                    return;
+                }
+                if (action === "minify") {
+                    text = JSON.stringify(parsed);
+                    writeOutput(text, parsed, "minified");
+                    return;
+                }
+                text = JSON.stringify(parsed, null, getIndent());
+                writeOutput(text, parsed, "formatted");
+            } catch (err) {
+                outputEl.value = "";
+                updateStats(null, "");
+                const message = err && err.message ? err.message : "Invalid JSON.";
+                setStatus(`Validation error: ${message}`, "error");
+            }
+        }
+
+        document.getElementById("formatBtn").addEventListener("click", () => run("format"));
+        document.getElementById("minifyBtn").addEventListener("click", () => run("minify"));
+        document.getElementById("sortBtn").addEventListener("click", () => run("sort"));
+
+        document.getElementById("sampleBtn").addEventListener("click", () => {
+            inputEl.value = JSON.stringify({
+                service: "payments-api",
+                env: "prod",
+                limits: {
+                    requestsPerMinute: 240,
+                    burst: 32
+                },
+                features: ["idempotency", "webhooks", "audit-log"],
+                retryPolicy: {
+                    maxRetries: 3,
+                    backoffMs: [200, 500, 1000]
+                },
+                enabled: true
+            }, null, 2);
+            sizeLabelEl.textContent = `Input: ${formatNumber(inputEl.value.length)} chars`;
+            run("format");
+        });
+
+        document.getElementById("clearBtn").addEventListener("click", () => {
+            inputEl.value = "";
+            outputEl.value = "";
+            modeEl.textContent = "formatted";
+            sizeLabelEl.textContent = "Input: 0 chars";
+            updateStats(null, "");
+            setStatus("Cleared.");
+        });
+
+        document.getElementById("copyBtn").addEventListener("click", async () => {
+            if (!outputEl.value) {
+                setStatus("Nothing to copy yet.", "error");
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(outputEl.value);
+                setStatus("Output copied to clipboard.", "ok");
+            } catch (_err) {
+                outputEl.focus();
+                outputEl.select();
+                setStatus("Clipboard access blocked. Selected output instead.");
+            }
+        });
+
+        document.getElementById("downloadBtn").addEventListener("click", () => {
+            if (!outputEl.value) {
+                setStatus("Nothing to download yet.", "error");
+                return;
+            }
+            const blob = new Blob([outputEl.value], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "formatted.json";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            setStatus("Downloaded formatted.json", "ok");
+        });
+
+        inputEl.addEventListener("input", () => {
+            sizeLabelEl.textContent = `Input: ${formatNumber(inputEl.value.length)} chars`;
+        });
+
+        indentEl.addEventListener("change", () => {
+            if (outputEl.value) {
+                run(modeEl.textContent === "minified" ? "minify" : modeEl.textContent === "sorted" ? "sort" : "format");
+            }
+        });
+    </script>
+</body>
+</html>

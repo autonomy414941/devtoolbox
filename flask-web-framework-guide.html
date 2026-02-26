@@ -96,10 +96,10 @@
     <header>
         <nav>
             <a href="/" class="logo"><span class="logo-icon">{ }</span><span>DevToolbox</span></a>
-            <div class="nav-links"><a href="/tools/">Tools</a><a href="/cheatsheets/">Cheat Sheets</a><a href="/blog/">Blog</a></div>
+            <div class="nav-links"><a href="/index.html#tools">Tools</a><a href="/index.html#cheat-sheets">Cheat Sheets</a><a href="/index.html#guides">Blog</a></div>
         </nav>
     </header>
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/blog/">Blog</a><span class="separator">/</span><span class="current">Flask Web Framework: Complete Guide</span></nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">/</span><a href="/index.html#guides">Blog</a><span class="separator">/</span><span class="current">Flask Web Framework: Complete Guide</span></nav>
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -190,7 +190,7 @@
         <p>This guide takes you from installation through production deployment, with working code at every step. Whether you are building a simple API, a full web application, or a microservice, the patterns here will carry you from first route to production.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Related resources:</strong> Debug API responses with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>, learn API testing in our <a href="/blog/api-testing-complete-guide" style="color: #3b82f6;">API Testing Guide</a>, containerize your app with the <a href="/blog/docker-containers-beginners-guide" style="color: #3b82f6;">Docker Guide</a>, and reference our <a href="/cheatsheets/python-string-methods" style="color: #3b82f6;">Python String Methods Cheat Sheet</a>.
+            <strong style="color: #3b82f6;">&#9881; Related resources:</strong> Debug API responses with the <a href="/json-formatter.html" style="color: #3b82f6;">JSON Formatter</a>, learn API testing in our <a href="/index.html?search=api-testing-complete-guide" style="color: #3b82f6;">API Testing Guide</a>, containerize your app with the <a href="/index.html?search=docker-containers-beginners-guide" style="color: #3b82f6;">Docker Guide</a>, and reference our <a href="/index.html?search=python-string-methods" style="color: #3b82f6;">Python String Methods Cheat Sheet</a>.
         </div>
 
         <div class="toc">
@@ -428,7 +428,7 @@ url_for("static", filename="css/style.css")  # "/static/css/style.css"
 {% elif user.is_authenticated %}
     &lt;span&gt;Welcome back&lt;/span&gt;
 {% else %}
-    &lt;a href="/login"&gt;Log in&lt;/a&gt;
+    &lt;a href="/index.html"&gt;Log in&lt;/a&gt;
 {% endif %}
 
 {# Macros: reusable template functions #}
@@ -604,7 +604,7 @@ flask db downgrade</code></pre>
         <!-- ============================================ -->
         <h2 id="rest-api">8. REST API Development</h2>
 
-        <p>Flask is one of the most popular choices for building REST APIs. Use <code>jsonify()</code> for responses and <code>request.get_json()</code> to parse incoming data. Format and debug your API responses with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>.</p>
+        <p>Flask is one of the most popular choices for building REST APIs. Use <code>jsonify()</code> for responses and <code>request.get_json()</code> to parse incoming data. Format and debug your API responses with the <a href="/json-formatter.html" style="color: #3b82f6;">JSON Formatter</a>.</p>
 
 <pre><code class="language-python">from flask import jsonify, request, abort
 
@@ -664,7 +664,7 @@ def internal_error(error):
     db.session.rollback()
     return jsonify({"error": "Internal server error"}), 500</code></pre>
 
-        <p>For comprehensive API testing strategies, see our <a href="/blog/api-testing-complete-guide" style="color: #3b82f6;">API Testing Complete Guide</a>.</p>
+        <p>For comprehensive API testing strategies, see our <a href="/index.html?search=api-testing-complete-guide" style="color: #3b82f6;">API Testing Complete Guide</a>.</p>
 
         <!-- ============================================ -->
         <!-- 9. Authentication & Sessions                 -->
@@ -828,7 +828,7 @@ gunicorn -w 4 -b 0.0.0.0:8000 --access-logfile - --timeout 120 "app:create_app()
 
         <h3>Docker Deployment</h3>
 
-        <p>For Docker fundamentals, see our <a href="/blog/docker-containers-beginners-guide" style="color: #3b82f6;">Docker Containers Guide</a>.</p>
+        <p>For Docker fundamentals, see our <a href="/index.html?search=docker-containers-beginners-guide" style="color: #3b82f6;">Docker Containers Guide</a>.</p>
 
 <pre><code class="language-python"># Dockerfile
 FROM python:3.12-slim
@@ -982,34 +982,34 @@ def test_create_post(client):
         <p>The micro-framework philosophy means you will understand every piece of your stack. That understanding pays off when debugging production issues, optimizing performance, or onboarding new team members. Flask's ecosystem is mature, its documentation is excellent, and its patterns scale from weekend projects to production services handling millions of requests.</p>
 
         <div class="tool-callout" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; line-height: 1.7; color: #d1d5db;">
-            <strong style="color: #3b82f6;">&#9881; Essential tools:</strong> Debug API responses with the <a href="/tools/json-formatter" style="color: #3b82f6;">JSON Formatter</a>, learn testing strategies in our <a href="/blog/api-testing-complete-guide" style="color: #3b82f6;">API Testing Guide</a>, and keep our <a href="/cheatsheets/python-string-methods" style="color: #3b82f6;">Python String Methods Cheat Sheet</a> bookmarked.
+            <strong style="color: #3b82f6;">&#9881; Essential tools:</strong> Debug API responses with the <a href="/json-formatter.html" style="color: #3b82f6;">JSON Formatter</a>, learn testing strategies in our <a href="/index.html?search=api-testing-complete-guide" style="color: #3b82f6;">API Testing Guide</a>, and keep our <a href="/index.html?search=python-string-methods" style="color: #3b82f6;">Python String Methods Cheat Sheet</a> bookmarked.
         </div>
 
         <h2>Related Resources</h2>
 
         <section style="margin-top: 1rem;">
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-            <a href="/blog/api-testing-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=api-testing-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">API Testing Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Test your Flask API endpoints effectively</div>
             </a>
-            <a href="/blog/docker-containers-beginners-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=docker-containers-beginners-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Docker Containers Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Containerize Flask apps for consistent deployments</div>
             </a>
-            <a href="/blog/python-django-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=python-django-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Django Complete Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Compare Flask with Django's batteries-included approach</div>
             </a>
-            <a href="/tools/json-formatter" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/json-formatter.html" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">JSON Formatter</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Format and validate API responses from Flask endpoints</div>
             </a>
-            <a href="/cheatsheets/python-string-methods" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=python-string-methods" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">Python String Methods</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Quick reference for string manipulation in Python</div>
             </a>
-            <a href="/blog/rest-api-design-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
+            <a href="/index.html?search=rest-api-design-complete-guide" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem; text-decoration: none; transition: border-color 0.2s, background 0.2s;">
                 <div style="font-weight: 600; color: #e4e4e7; margin-bottom: 0.25rem;">REST API Design Guide</div>
                 <div style="color: #9ca3af; font-size: 0.9rem;">Best practices for designing RESTful API endpoints</div>
             </a>
@@ -1023,8 +1023,8 @@ def test_create_post(client):
         <div class="footer-content">
             <p>&copy; 2026 DevToolbox. Free developer tools.</p>
             <div class="footer-links">
-                <a href="/about">About</a>
-                <a href="/blog/">Blog</a>
+                <a href="/index.html">About</a>
+                <a href="/index.html#guides">Blog</a>
                 <a href="/feed.xml">RSS</a>
             </div>
         </div>

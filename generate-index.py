@@ -101,7 +101,7 @@ def render_section(title: str, pages: list[Page]) -> str:
     cards = "\n".join(render_card(page) for page in pages)
     section_id = title.lower().replace(" ", "-")
     return (
-        f'<section class="resource-section" data-section="{section_id}">'
+        f'<section id="{section_id}" class="resource-section" data-section="{section_id}">'
         f'<div class="section-header"><h2>{html.escape(title)}</h2>'
         f'<span class="section-count">{len(pages)} items</span></div>'
         f'<div class="grid">{cards}</div>'
@@ -325,6 +325,7 @@ def render_index(pages: list[Page]) -> str:
         const searchInput = document.getElementById("search");
         const cards = Array.from(document.querySelectorAll(".resource-card"));
         const sections = Array.from(document.querySelectorAll(".resource-section"));
+        const params = new URLSearchParams(window.location.search);
 
         function applyFilter() {{
             const term = searchInput.value.trim().toLowerCase();
@@ -337,9 +338,26 @@ def render_index(pages: list[Page]) -> str:
                 const visibleCards = section.querySelectorAll(".resource-card:not(.hidden)").length;
                 section.classList.toggle("hidden", visibleCards === 0);
             }});
+
+            const next = new URLSearchParams(window.location.search);
+            if (term.length > 0) {{
+                next.set("search", term);
+            }} else {{
+                next.delete("search");
+            }}
+            const query = next.toString();
+            const target = query
+                ? `?${{query}}${{window.location.hash}}`
+                : `${{window.location.pathname}}${{window.location.hash}}`;
+            window.history.replaceState(null, "", target);
         }}
 
         searchInput.addEventListener("input", applyFilter);
+        const seed = params.get("search");
+        if (seed) {{
+            searchInput.value = seed;
+            applyFilter();
+        }}
     </script>
 </body>
 </html>
